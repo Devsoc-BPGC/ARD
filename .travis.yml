@@ -1,0 +1,83 @@
+language: android
+
+sudo: required
+
+android:
+  components:
+    - platform-tools
+    - tools
+
+    - build-tools-25.0.2
+    
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    #- addon-google_apis-google-19
+    - extra-android-m2repository
+    - extra-android-support
+    - extra-google-android-support
+
+    - android-21
+    - android-25
+
+    - sys-img-armeabi-v7a-android-21
+
+jdk:
+  - oraclejdk8
+  #- oraclejdk7
+
+os:
+  - linux
+  
+
+git:
+  depth: 10
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+    - $HOME/.android/build-cache
+
+licenses:
+  - android-sdk-license-.+
+  - '.+'
+
+before_install:
+  - sudo apt-get update -qq
+  - sudo apt-get install -qq pastebinit
+  - android list targets
+  - echo ${ANDROID_HOME}
+  - ls ${ANDROID_HOME}/tools/
+  - mkdir "$ANDROID_HOME/licenses" || true
+  - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
+  - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
+
+# Emulator Management: Create, Start and Wait
+before_script:
+  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a  
+  - ${ANDROID_HOME}/tools/emulator -avd test -no-skin -no-audio -no-window -netspeed full -netdelay none &
+  - ls -la
+  - cat /usr/local/bin/android-wait-for-emulator 
+  - android-wait-for-emulator
+  - adb shell input keyevent 82 &
+
+script:
+  - echo "Travis branch is $TRAVIS_BRANCH"
+  - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
+  - ls -la
+  - ./gradlew clean
+  - ./gradlew build connectedCheck
+  - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
+  - pastebinit -i ./app/build/reports/lint-results.xml -f xml -a lint-results-${TRAVIS_BUILD_NUMBER}-xml
+
+after_failure:
+  - echo "Build failure"
+
+#If you don’t want to run a build for a particular commit for any reason,
+# add [ci skip] or [skip ci] to the git commit message.
+#Commits that have [ci skip] or [skip ci] anywhere in the commit messages 
+#are ignored by Travis CI.
