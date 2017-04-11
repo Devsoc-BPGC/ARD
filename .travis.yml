@@ -4,8 +4,9 @@ sudo: required
 
 android:
   components:
-    - platform-tools
     - tools
+    - tools
+    - platform-tools
 
     - build-tools-25.0.2
     
@@ -28,7 +29,6 @@ jdk:
 os:
   - linux
   
-
 git:
   depth: 10
 
@@ -69,13 +69,16 @@ script:
   - echo "Travis branch is $TRAVIS_BRANCH"
   - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
   - ls -la
-  - ./gradlew clean
-  - ./gradlew build connectedCheck
-  - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
-  - pastebinit -i ./app/build/reports/lint-results.xml -f xml -a lint-results-${TRAVIS_BUILD_NUMBER}-xml
+  - ./.ci/validate-codecov.sh
+  - ./gradlew clean build connectedCheck
+  - ./gradlew clean build jacocoTestReport lint
 
 after_failure:
   - echo "Build failure"
+
+after_success:
+  - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
+  - bash <(curl -s https://codecov.io/bash)
 
 #If you don’t want to run a build for a particular commit for any reason,
 # add [ci skip] or [skip ci] to the git commit message.
