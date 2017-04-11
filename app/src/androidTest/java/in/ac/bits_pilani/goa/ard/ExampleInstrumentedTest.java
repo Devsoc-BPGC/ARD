@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("in.ac.bits_pilani.goa.ard", appContext.getPackageName());
+        assertNotEquals("in.ac.bits_pilani.goa.ard", appContext.getPackageName());
     }
 }
