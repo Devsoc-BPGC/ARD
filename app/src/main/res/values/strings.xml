@@ -5,4 +5,14 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
+    <string name="nav_header_main_image_view_content_desc">Nav bar image</string>
+    <string name="nav_header_main_text_view_title">Android Studio</string>
+    <string name="nav_header_main_text_view_subtitle">android.studio@android.com</string>
+    <string name="activity_main_drawer_item_import">Import</string>
+    <string name="activity_main_drawer_item_gallery">Gallery</string>
+    <string name="activity_main_drawer_item_slideshow">Slideshow</string>
+    <string name="activity_main_drawer_item_manage">Manage</string>
+    <string name="activity_main_drawer_item_communicate">Communicate</string>
+    <string name="activity_main_drawer_item_share">Share</string>
+    <string name="seactivity_main_drawer_item_send">Send</string>
 </resources>
