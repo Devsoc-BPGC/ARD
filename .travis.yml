@@ -24,7 +24,6 @@ android:
 
 jdk:
   - oraclejdk8
-  #- oraclejdk7
 
 os:
   - linux
@@ -71,7 +70,7 @@ script:
   - ls -la
   - ./.ci/validate-codecov.sh
   - ./gradlew clean build connectedCheck
-  - ./gradlew clean build jacocoTestReport lint
+  - ./gradlew jacocoTestReport
 
 after_failure:
   - echo "Build failure"
