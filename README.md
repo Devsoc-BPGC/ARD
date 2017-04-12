@@ -3,6 +3,7 @@
 ARD Android Companion
 ===================
 [![Build Status](https://travis-ci.com/kukreja-vikramaditya/ARD.svg?token=PosPSPTbkNM2WxfmyvGE&branch=master)](https://travis-ci.com/kukreja-vikramaditya/ARD)
+[![Dependency Status](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd)
 
 This app runs on Android OS version above and including Lollipop (*API 21*) uptil Nougat (*API 25*).
 
