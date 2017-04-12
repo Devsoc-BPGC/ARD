@@ -4,12 +4,19 @@ ARD Android Companion
 ===================
 [![Build Status](https://travis-ci.com/kukreja-vikramaditya/ARD.svg?token=PosPSPTbkNM2WxfmyvGE&branch=master)](https://travis-ci.com/kukreja-vikramaditya/ARD)
 [![Dependency Status](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd)
+[![codecov](https://codecov.io/gh/kukreja-vikramaditya/ARD/branch/master/graph/badge.svg?token=aoOIeczRVC)](https://codecov.io/gh/kukreja-vikramaditya/ARD)
+
 
 This app runs on Android OS version above and including Lollipop (*API 21*) uptil Nougat (*API 25*).
 
-Project uses [Travis CI](https://www.travis-ci.com) for testing. Travis CI reports can be found <a href="https://travis-ci.com/kukreja-vikramaditya/ARD">here</a>. Support for [Codecov](https://codecov.io/gh) will also be added in the future.
+Project uses the following CIs<br>
+----
+[Travis CI](https://www.travis-ci.com) for testing. Travis CI reports can be found <a href="https://travis-ci.com/kukreja-vikramaditya/ARD">here</a>. <br>
+[Codecov](https://codecov.io/gh) for coverage. Reports [here](https://codecov.io/gh/kukreja-vikramaditya/ARD).<br>
+[VersionEye](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd?child=summary)  to keep track of dependencies.
 
- Project follows the naming convention mentioned <a href="http://jeroenmols.com/blog/2016/03/07/resourcenaming/">here</a> and <a href="https://github.com/ribot/android-guidelines/blob/master/project_and_code_guidelines.md">here</a>. Before starting contributions please make sure you are thorough with this convention. If you have any suggestions that you would like to share or want to report a bug, follow this.
+
+ Project follows the naming convention mentioned <a href="http://jeroenmols.com/blog/2016/03/07/resourcenaming/">here</a> and <a href="https://github.com/ribot/android-guidelines/blob/master/project_and_code_guidelines.md">here</a>. Before starting contributions please make sure you are thorough with this convention. If you have any suggestions that you would like to share or want to report a bug, use the **Issues** tab.
 
 For any issues faced during installations, contact <a href="https://github.com/kukreja-vikramaditya">Vikramaditya</a> @ <a href="">Gitter</a>
 
