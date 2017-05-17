@@ -67,6 +67,7 @@ before_script:
 script:
   - echo "Travis branch is $TRAVIS_BRANCH"
   - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
+  - ./.ci/travis/check_pr.sh
   - ls -la
   - ./.ci/validate-codecov.sh
   - ./gradlew clean build connectedCheck
