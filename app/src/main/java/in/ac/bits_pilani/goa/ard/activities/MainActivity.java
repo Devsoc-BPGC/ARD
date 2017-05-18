@@ -23,7 +23,7 @@ public class MainActivity extends AppCompatActivity
     /**
      * Tag for this activity.
      */
-    private final String TAG = AHC.TAG + AHC.SEPARATOR + "activities" + AHC.SEPARATOR + getClass().getSimpleName();
+    private final String TAG = AHC.TAG + ".activities." + getClass().getSimpleName();
 
     /**
      * Toolbar for MainActivity.
