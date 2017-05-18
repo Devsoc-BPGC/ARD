@@ -1,5 +1,5 @@
 # ARD Android Companion
-[![Build Status](https://travis-ci.com/kukreja-vikramaditya/ARD.svg?token=PosPSPTbkNM2WxfmyvGE&branch=master)](https://travis-ci.com/kukreja-vikramaditya/ARD)
+[![Build Status](https://api.travis-ci.com/MobileApplicationsClub/ARD.svg?token=PosPSPTbkNM2WxfmyvGE&branch=master)](https://travis-ci.com/MobileApplicationsClub/ARD)
 [![Dependency Status](https://www.versioneye.com/user/projects/591dce87db88830056d0632e/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/591dce87db88830056d0632e)
 [![codecov](https://codecov.io/gh/kukreja-vikramaditya/ARD/branch/master/graph/badge.svg?token=aoOIeczRVC)](https://codecov.io/gh/kukreja-vikramaditya/ARD)
 
