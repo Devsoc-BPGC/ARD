@@ -80,6 +80,9 @@ after_success:
   - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
   - bash <(curl -s https://codecov.io/bash)
 
+notifications:
+  slack: macbitsgoa:ll3YNWLieRUgdN3RNSwkOoeW
+
 #If you don’t want to run a build for a particular commit for any reason,
 # add [ci skip] or [skip ci] to the git commit message.
 #Commits that have [ci skip] or [skip ci] anywhere in the commit messages 
