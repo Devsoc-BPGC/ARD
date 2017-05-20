@@ -3,6 +3,7 @@ package in.ac.bits_pilani.goa.ard;
 import android.app.Application;
 import android.content.Context;
 
+import com.google.firebase.database.FirebaseDatabase;
 import in.ac.bits_pilani.goa.ard.utils.AHC;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -18,6 +19,7 @@ public class ARD extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+        FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         Realm.init(this);
         RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
                 .name(AHC.REALM_ARD_DATABASE)

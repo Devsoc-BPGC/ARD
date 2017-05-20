@@ -14,6 +14,7 @@ ext {
     butterknifeVer="8.4.0"
     verCode = 1
     verName = "1.0"
+    firebaseLibVer = "10.2.6"
 }
 
 android {
@@ -56,6 +57,11 @@ dependencies {
 
     compile "com.jakewharton:butterknife:${butterknifeVer}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
+    compile "com.google.firebase:firebase-core:${firebaseLibVer}"
+    compile "com.google.firebase:firebase-database:${firebaseLibVer}"
+    compile "com.google.firebase:firebase-storage:${firebaseLibVer}"
+    compile "com.google.firebase:firebase-auth:${firebaseLibVer}"
+    compile "com.google.firebase:firebase-messaging:${firebaseLibVer}"
 
     testCompile 'junit:junit:4.12'
 
@@ -103,3 +109,4 @@ jacocoAndroidUnitTestReport {
     html.enabled true
     xml.enabled true
 }
+apply plugin: 'com.google.gms.google-services'
