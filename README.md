@@ -1,14 +1,13 @@
 # ARD Android Companion
 [![Build Status](https://api.travis-ci.com/MobileApplicationsClub/ARD.svg?token=PosPSPTbkNM2WxfmyvGE&branch=master)](https://travis-ci.com/MobileApplicationsClub/ARD)
 [![Dependency Status](https://www.versioneye.com/user/projects/591dce87db88830056d0632e/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/591dce87db88830056d0632e)
-[![codecov](https://codecov.io/gh/kukreja-vikramaditya/ARD/branch/master/graph/badge.svg?token=aoOIeczRVC)](https://codecov.io/gh/kukreja-vikramaditya/ARD)
-
+[![codecov](https://codecov.io/gh/MobileApplicationsClub/ARD/branch/master/graph/badge.svg?token=aoOIeczRVC)](https://codecov.io/gh/MobileApplicationsClub/ARD)
 
 This app runs on Android OS version above and including Lollipop (*API 21*) uptil Nougat (*API 25*).
 
 ## Project uses the following CIs
-[Travis CI](https://www.travis-ci.com) for testing. Travis CI reports can be found [here](https://travis-ci.com/kukreja-vikramaditya/ARD)
-[Codecov](https://codecov.io/gh) for coverage. Reports [here](https://codecov.io/gh/kukreja-vikramaditya/ARD).<br>
+[Travis CI](https://www.travis-ci.com) for testing. Travis CI reports can be found [here](https://travis-ci.com/MobileApplicationsClub/ARD)
+[Codecov](https://codecov.io/gh) for coverage. Reports [here](https://codecov.io/gh/MobileApplicationsClub/ARD).<br>
 [VersionEye](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd?child=summary)  to keep track of dependencies.
 
 
