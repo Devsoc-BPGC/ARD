@@ -2,20 +2,22 @@ apply plugin: 'com.android.application'
 apply plugin: 'jacoco-android'
 apply plugin: 'realm-android'
 apply plugin: 'com.jakewharton.butterknife'
-
-
+apply plugin: 'checkstyle'
 
 ext {
+    verCode = 1
+    verName = "1.0"
     compileSdkVer = 25
     minSdkVer = 21
     targetSdkVer = 25
     buildToolsVer = "25.0.2"
     supportLibVer = "25.3.1"
-    butterknifeVer="8.4.0"
-    verCode = 1
-    verName = "1.0"
+    butterknifeVer= "8.4.0"
     firebaseLibVer = "10.2.6"
+    checkstyleVer = '7.7'
 }
+
+def configDir = "${project.rootDir}/config/"
 
 android {
     compileSdkVersion compileSdkVer
@@ -41,6 +43,10 @@ android {
     }
     lintOptions {
         abortOnError true
+        ignoreWarnings false
+        lintConfig file("$configDir/lint/lint.xml")
+        xmlReport true
+        htmlReport true
     }
     testOptions {
         unitTests.returnDefaultValues = true
@@ -109,4 +115,26 @@ jacocoAndroidUnitTestReport {
     html.enabled true
     xml.enabled true
 }
+
+checkstyle {
+    toolVersion = checkstyleVer
+}
+
+check.dependsOn 'checkstyle'
+
+task checkstyle(type: Checkstyle) {
+    configFile file("$configDir/checkstyle/checkstyle.xml")
+    configProperties.checkstyleSuppressionsPath = file("$configDir/checkstyle/suppressions.xml").absolutePath
+
+    source 'src'
+    include '**/*.java'
+    exclude '**/gen/**'
+
+    classpath = files()
+    reports {
+        xml.enabled false
+        html.enabled true
+    }
+}
+
 apply plugin: 'com.google.gms.google-services'

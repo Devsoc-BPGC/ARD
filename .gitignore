@@ -23,6 +23,7 @@ out/
 .gradle
 .gradle/
 build/
+files/
 
 # Signing files
 .signing/

@@ -1,0 +1,290 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+          "-//Puppy Crawl//DTD Check Configuration 1.3//EN"
+          "http://checkstyle.sourceforge.net/dtds/configuration_1_3.dtd">
+
+<!--
+    Checkstyle configuration that checks the Google coding conventions from Google Java Style
+    that can be found at https://google.github.io/styleguide/javaguide.html.
+
+    Checkstyle is very configurable. Be sure to read the documentation at
+    http://checkstyle.sf.net (or in your downloaded distribution).
+
+    To completely disable a check, just comment it out or delete it from the file.
+
+    Authors: Max Vetrenko, Ruslan Diachenko, Roman Ivanov.
+ -->
+
+<module name = "Checker">
+    <property name="charset" value="UTF-8"/>
+
+    <property name="severity" value="warning"/>
+
+    <property name="fileExtensions" value="java, xml"/>
+
+    <module name="FileTabCharacter">
+        <property name="eachLine" value="true"/>
+    </module>
+
+    <module name="NewlineAtEndOfFile"/>
+    <module name="FileLength">
+        <property name="fileExtensions" value="java, xml"/>
+    </module>
+    <module name="TreeWalker">       
+        <!-- Annotation checks -->
+        <module name="AnnotationLocation">
+            <property name="id" value="AnnotationLocationMostCases"/>
+            <property name="tokens" value="CLASS_DEF, INTERFACE_DEF, ENUM_DEF, METHOD_DEF, CTOR_DEF, VARIABLE_DEF, ANNOTATION_DEF, TYPECAST, ANNOTATION_FIELD_DEF"/>
+        </module>
+        <module name="MissingDeprecated">
+            <property name="skipNoJavadoc" value="true"/>
+        </module>
+        <module name="MissingOverride"/>
+        
+        <!-- Block checks -->
+        <module name="AvoidNestedBlocks">
+            <property name="allowInSwitchCase" value="true"/>
+        </module>
+        <module name="EmptyCatchBlock">
+            <property name="exceptionVariableName" value="expected|ignore"/>
+            <property name="commentFormat" value="expected"/>
+        </module>
+        <module name="LeftCurly"/>
+        <module name="NeedBraces">
+            <property name="allowSingleLineStatement" value="false"/>
+            <property name="tokens" value="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE, LITERAL_CASE, LITERAL_DEFAULT, LAMBDA"/>
+            <property name="allowEmptyLoopBody" value="true"/>
+        </module>
+        <module name="RightCurly">
+            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT, LAMBDA"/>
+        </module>
+
+        <!-- Class Design checks -->
+        <module name="InnerTypeLast"/>
+        <module name="InterfaceIsType"/>
+        <module name="OneTopLevelClass"/>
+        <module name="ThrowsCount"/>
+        
+        <!-- Coding checks -->
+        <module name="ArrayTrailingComma"/>
+        <module name="DeclarationOrder">
+            <message key="declaration.order.constructor" value="Constructors should be after instance fields"/>
+            <message key="declaration.order.instance" value="Instance fields come after static field at 2nd position"/>
+            <message key="declaration.order.static" value="Static fields should be placed first"/>
+        </module>
+        <module name="DefaultComesLast">
+            <property name="skipIfLastAndSharedWithCase" value="true"/>
+        </module>
+        <module name="EmptyStatement"/>
+        <module name="ExplicitInitialization"/>
+        <module name="FinalLocalVariable">
+            <property name="tokens" value="VARIABLE_DEF, PARAMETER_DEF"/>
+            <property name="validateEnhancedForLoopVariable" value="true"/>
+        </module>
+        <module name="IllegalCatch"/>
+        <module name="IllegalThrows"/>
+        <module name="InnerAssignment">
+            <property name="tokens" value="ASSIGN,PLUS_ASSIGN,MINUS_ASSIGN"/>
+        </module>
+        <module name="MagicNumber">
+            <property name="ignoreNumbers" value="-1, 0, 1, 2, 3"/>
+            <property name="ignoreFieldDeclaration" value="true"/>
+            <property name="ignoreAnnotation" value="true"/>
+        </module>
+        <module name="MissingCtor"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="MultipleStringLiterals"/>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="NestedForDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="NestedIfDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="NestedTryDepth">
+            <property name="max" value="3"/>
+        </module>
+        <module name="OneStatementPerLine"/>
+        <module name="OverloadMethodsDeclarationOrder"/>
+        <module name="PackageDeclaration"/>
+        <module name="ParameterAssignment"/>
+        <module name="RequireThis"/>
+        <module name="SimplifyBooleanExpression"/>
+        <module name="SimplifyBooleanReturn"/>
+        <module name="StringLiteralEquality"/>
+        <module name="UnnecessaryParentheses"/>
+        <module name="VariableDeclarationUsageDistance"/>
+
+        <!-- Import checks -->
+        <module name="AvoidStarImport"/>
+        <module name="IllegalImport"/>
+        <module name="RedundantImport"/>
+        <module name="UnusedImports"/>
+
+        <!-- Javadoc checks -->
+        <module name="AtclauseOrder"/>
+        <module name="JavadocMethod">
+            <property name="scope" value="package"/>
+            <property name="minLineCount" value="1"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="scope" value="public"/>
+            <property name="minLineCount" value="1"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="scope" value="private"/>
+            <property name="minLineCount" value="1"/>
+        </module>
+        <module name="JavadocMethod">
+            <property name="scope" value="protected"/>
+            <property name="minLineCount" value="1"/>
+        </module>
+        <module name="JavadocParagraph"/>
+        <module name="JavadocStyle">
+            <property name="scope" value="package"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="scope" value="public"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="scope" value="private"/>
+        </module>
+        <module name="JavadocStyle">
+            <property name="scope" value="protected"/>
+        </module>
+        <module name="JavadocVariable">
+            <property name="scope" value="package"/>
+        </module>
+        <module name="JavadocVariable">
+            <property name="scope" value="public"/>
+        </module>
+        <module name="JavadocVariable">
+            <property name="scope" value="private"/>
+        </module>
+        <module name="JavadocVariable">
+            <property name="scope" value="protected"/>
+        </module>
+        <module name="JavadocTagContinuationIndentation">
+            <property name="offset" value="4"/>
+        </module>
+        <module name="JavadocType">
+            <property name="scope" value="package"/>
+            <property name="authorFormat" value="^[A-Z]([a-zA-Z]|\s)*[a-zA-Z]$"/>
+        </module>
+        <module name="NonEmptyAtclauseDescription"/>
+        <module name="SingleLineJavadoc"/>
+        <module name="SummaryJavadocCheck">
+            <property name="period" value="."/>
+        </module>
+        
+        <!-- Metric checks -->
+        <module name="ClassFanOutComplexity"/>
+        <module name="CyclomaticComplexity"/>
+        <module name="NPathComplexity"/>
+
+        <!-- Misc checks -->
+        <module name="ArrayTypeStyle"/>
+        <module name="AvoidEscapedUnicodeCharacters">
+            <property name="allowEscapesForControlCharacters" value="true"/>
+            <property name="allowByTailComment" value="true"/>
+            <property name="allowNonPrintableEscapes" value="true"/>
+        </module>
+        <module name="CommentsIndentation"/>
+        
+        <module name="FinalParameters"/>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <property name="caseIndent" value="4"/>
+            <property name="throwsIndent" value="4"/>
+            <property name="arrayInitIndent" value="4"/>
+            <property name="lineWrappingIndentation" value="8"/>
+            <property name="forceStrictCondition" value="false"/>
+        </module>
+        <module name="OuterTypeFilename"/>
+        <module name="TodoComment"/>
+        <module name="TrailingComment"/>
+        <module name="UpperEll"/>
+
+        <!-- Modifier checks -->
+        <module name="ModifierOrder"/>
+        <module name="RedundantModifier"/>
+
+        <!-- Naming convention check -->
+        <module name="AbbreviationAsWordInName">
+            <property name="ignoreStatic" value="false"/>
+            <property name="allowedAbbreviationLength" value="3"/>
+            <property name="allowedAbbreviations" value="XML, URL, TAG, ARD, AHC, BPGC"/>
+        </module>
+        <module name="AbstractClassName">
+            <property name="format" value="^Abstract.+$"/>
+        </module>
+        <module name="CatchParameterName"/>
+        <module name="ConstantName"/>
+        <module name="LocalFinalVariableName"/>
+        <module name="LocalVariableName">
+            <property name="allowOneCharVarInForLoop" value="true"/>
+        </module>
+        <module name="MemberName">
+            <property name="format" value="(^TAG$|^[a-z][a-zA-Z0-9]*)"/>
+        </module>
+        <module name="MethodName"/>
+        <module name="ParameterName"/>
+        <module name="StaticVariableName"/>
+
+        <!-- Size checks -->
+        <module name="LineLength">
+          <property name="max" value="120"/>
+        </module>
+        <module name="MethodLength"/>
+        <module name="ParameterNumber"/>
+
+        <!-- Whitespace checks -->
+        <module name="EmptyForInitializerPad"/>
+        <module name="EmptyForIteratorPad"/>
+        <module name="EmptyLineSeparator">
+            <property name="allowMultipleEmptyLinesInsideClassMembers" value="false"/>
+            <property name="allowMultipleEmptyLines" value="false"/>
+        </module>
+        <module name="GenericWhitespace"/>
+        <module name="MethodParamPad">
+            <property name="tokens" value="METHOD_DEF, CTOR_DEF"/>
+            <property name="option" value="nospace"/>
+            <property name="allowLineBreaks" value="false"/>
+        </module>
+        <module name="NoLineWrap"/>
+        <module name="NoWhitespaceAfter"/>
+        <module name="NoWhitespaceBefore"/>
+        <module name="OperatorWrap">
+            <property name="tokens" value="QUESTION, COLON, EQUAL, NOT_EQUAL, DIV, PLUS, MINUS, STAR, MOD, SR, BSR, GE, GT, SL, LE, LT, BXOR, BOR, LOR, BAND, LAND, LITERAL_INSTANCEOF, TYPE_EXTENSION_AND, ASSIGN, DIV_ASSIGN, PLUS_ASSIGN, MINUS_ASSIGN, STAR_ASSIGN, MOD_ASSIGN, SR_ASSIGN, BSR_ASSIGN, SL_ASSIGN, BXOR_ASSIGN, BOR_ASSIGN, BAND_ASSIGN, METHOD_REF"/>
+            <property name="option" value="nl"/>
+        </module>
+        <module name="ParenPad">
+            <property name="tokens" value="EXPR, LITERAL_CATCH, LITERAL_DO, LITERAL_FOR, LITERAL_IF, LITERAL_NEW, LITERAL_SWITCH, LITERAL_SYNCHRONIZED, LITERAL_WHILE, QUESTION, RESOURCE_SPECIFICATION, LAMBDA"/>
+            <property name="option" value="nospace"/>
+        </module>
+        <module name="SeparatorWrap">
+            <property name="tokens" value="DOT, AT"/>
+            <property name="option" value="nl"/>
+        </module>
+        <module name="SingleSpaceSeparator">
+            <property name="validateComments" value="false"/>
+        </module>
+        <module name="TypecastParenPad">
+            <property name="option" value="nospace"/>
+        </module>
+        <module name="WhitespaceAfter">
+            <property name="tokens" value="COMMA, TYPECAST, LITERAL_IF, LITERAL_ELSE, LITERAL_WHILE, LITERAL_DO, LITERAL_FOR, DO_WHILE"/>
+        </module>
+        <module name="WhitespaceAround">
+            <property name="allowEmptyConstructors" value="true"/>
+            <property name="allowEmptyMethods" value="true"/>
+            <property name="allowEmptyTypes" value="true"/>
+            <property name="allowEmptyLoops" value="true"/>
+            <property name="allowEmptyLambdas" value="true"/>
+            <property name="allowEmptyCatches" value="true"/>
+        </module>
+
+
+    </module>
+</module>
