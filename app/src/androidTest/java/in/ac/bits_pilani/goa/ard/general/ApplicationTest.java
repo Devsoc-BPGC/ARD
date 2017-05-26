@@ -13,6 +13,7 @@ import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Basic tests for the application.
+ *
  * @author vikramaditya
  */
 
@@ -28,10 +29,10 @@ public class ApplicationTest {
     }
 
     @Test
-    public void testPackageName() throws Exception {
-        String expectedPackageName = "in.ac.bits_pilani.goa.ard.debug";
-        assertArrayEquals("Package name doesn't match",
-                new String[]{expectedPackageName},
+    public void testApplicationID() throws Exception {
+        String expectedApplicationID = "com.macbitsgoa.ard.debug";
+        assertArrayEquals("Application ID doesn't match",
+                new String[]{expectedApplicationID},
                 new String[]{context.getPackageName()});
     }
 

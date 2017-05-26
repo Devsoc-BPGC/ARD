@@ -1,20 +1,30 @@
+apply plugin: 'checkstyle'
 apply plugin: 'com.android.application'
+apply plugin: 'com.jakewharton.butterknife'
 apply plugin: 'jacoco-android'
 apply plugin: 'realm-android'
-apply plugin: 'com.jakewharton.butterknife'
-apply plugin: 'checkstyle'
 
 ext {
+    androidTestVer = "0.5"
+    buildToolsVer = "25.0.2"
+    butterknifeVer = "8.4.0"
+    checkstyleVer = '7.7'
+    compileSdkVer = 25
+    constraintVer = "1.0.0"
+    dexMakerVer = "1.2"
+    espContVer = "2.2.2"
+    espCoreVer = "2.2.2"
+    espIntVer = "2.2.2"
+    espUIAVer = "2.1.2"
+    firebaseVer = "10.2.6"
+    hamcrestVer = "1.3"
+    junitVer = "4.12"
+    minSdkVer = 21
+    mockitoVer = "2.8.9"
+    supportVer = "25.3.1"
+    targetSdkVer = 25
     verCode = 1
     verName = "1.0"
-    compileSdkVer = 25
-    minSdkVer = 21
-    targetSdkVer = 25
-    buildToolsVer = "25.0.2"
-    supportLibVer = "25.3.1"
-    butterknifeVer= "8.4.0"
-    firebaseLibVer = "10.2.6"
-    checkstyleVer = '7.7'
 }
 
 def configDir = "${project.rootDir}/config/"
@@ -23,18 +33,18 @@ android {
     compileSdkVersion compileSdkVer
     buildToolsVersion buildToolsVer
     defaultConfig {
-        applicationId "in.ac.bits_pilani.goa.ard"
+        applicationId "com.macbitsgoa.ard"
         minSdkVersion minSdkVer
         targetSdkVersion targetSdkVer
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         versionCode verCode
         versionName verName
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         debug {
             applicationIdSuffix '.debug'
-            versionNameSuffix '-debug'
             testCoverageEnabled true
+            versionNameSuffix '-debug'
         }
         release {
             minifyEnabled true
@@ -43,10 +53,10 @@ android {
     }
     lintOptions {
         abortOnError true
+        htmlReport true
         ignoreWarnings false
         lintConfig file("$configDir/lint/lint.xml")
         xmlReport true
-        htmlReport true
     }
     testOptions {
         unitTests.returnDefaultValues = true
@@ -56,32 +66,34 @@ android {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile "com.android.support:appcompat-v7:${supportLibVer}"
-    compile "com.android.support:support-v4:${supportLibVer}"
-    compile "com.android.support:design:${supportLibVer}"
-    compile 'com.android.support.constraint:constraint-layout:1.0.0'
+    compile "com.android.support:appcompat-v7:${supportVer}"
+    compile "com.android.support:support-v4:${supportVer}"
+    compile "com.android.support:design:${supportVer}"
+    compile "com.android.support.constraint:constraint-layout:${constraintVer}"
 
     compile "com.jakewharton:butterknife:${butterknifeVer}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
-    compile "com.google.firebase:firebase-core:${firebaseLibVer}"
-    compile "com.google.firebase:firebase-database:${firebaseLibVer}"
-    compile "com.google.firebase:firebase-storage:${firebaseLibVer}"
-    compile "com.google.firebase:firebase-auth:${firebaseLibVer}"
-    compile "com.google.firebase:firebase-messaging:${firebaseLibVer}"
+    compile "com.google.firebase:firebase-core:${firebaseVer}"
+    compile "com.google.firebase:firebase-database:${firebaseVer}"
+    compile "com.google.firebase:firebase-storage:${firebaseVer}"
+    compile "com.google.firebase:firebase-auth:${firebaseVer}"
+    compile "com.google.firebase:firebase-messaging:${firebaseVer}"
 
-    testCompile 'junit:junit:4.12'
+    //Unit test compiles
+    testCompile "junit:junit:${junitVer}"
+    testCompile "org.mockito:mockito-core:${mockitoVer}"
 
     //Android test compiles
-    androidTestCompile "com.google.dexmaker:dexmaker:1.2"
-    androidTestCompile "com.google.dexmaker:dexmaker-mockito:1.2"
-    androidTestCompile 'org.hamcrest:hamcrest-library:1.3'
-    androidTestCompile "org.mockito:mockito-core:1.10.19"
+    androidTestCompile "com.google.dexmaker:dexmaker:${dexMakerVer}"
+    androidTestCompile "com.google.dexmaker:dexmaker-mockito:${dexMakerVer}"
+    androidTestCompile "org.hamcrest:hamcrest-library:${hamcrestVer}"
+    androidTestCompile "org.mockito:mockito-core:${mockitoVer}"
 
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2') {
+    androidTestCompile("com.android.support.test.espresso:espresso-core:${espCoreVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile('com.android.support.test.espresso:espresso-contrib:2.2.2') {
+    androidTestCompile("com.android.support.test.espresso:espresso-contrib:${espContVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'recyclerview-v7'
@@ -89,19 +101,19 @@ dependencies {
         exclude group: 'com.android.support', module: 'design'
     }
 
-    androidTestCompile('com.android.support.test:runner:0.5') {
+    androidTestCompile("com.android.support.test:runner:${androidTestVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile('com.android.support.test:rules:0.5') {
+    androidTestCompile("com.android.support.test:rules:${androidTestVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile('com.android.support.test.espresso:espresso-intents:2.2.2') {
+    androidTestCompile("com.android.support.test.espresso:espresso-intents:${espIntVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile('com.android.support.test.uiautomator:uiautomator-v18:2.1.2', {
+    androidTestCompile("com.android.support.test.uiautomator:uiautomator-v18:${espUIAVer}", {
         exclude group: 'com.android.support', module: 'support-annotations'
 
     })
@@ -132,7 +144,7 @@ task checkstyle(type: Checkstyle) {
 
     classpath = files()
     reports {
-        xml.enabled false
+        xml.enabled true
         html.enabled true
     }
 }
