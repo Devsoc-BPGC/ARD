@@ -10,14 +10,14 @@ android:
 
     - build-tools-25.0.2
     
-    - extra-google-google_play_services
+    #- extra-google-google_play_services
     - extra-google-m2repository
     #- addon-google_apis-google-19
-    - extra-android-m2repository
-    - extra-android-support
-    - extra-google-android-support
+    #- extra-android-m2repository
+    #- extra-android-support
+    #- extra-google-android-support
 
-    - android-21
+    #- android-21
     - android-25
 
     - sys-img-armeabi-v7a-android-21
@@ -27,9 +27,6 @@ jdk:
 
 os:
   - linux
-  
-git:
-  depth: 10
 
 before_cache:
   - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -50,8 +47,6 @@ before_install:
   - sudo apt-get update -qq
   - sudo apt-get install -qq pastebinit
   - android list targets
-  - echo ${ANDROID_HOME}
-  - ls ${ANDROID_HOME}/tools/
   - mkdir "$ANDROID_HOME/licenses" || true
   - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
   - echo -e "\n84831b9409646a918e30573bab4c9c91346d8abd" > "$ANDROID_HOME/licenses/android-sdk-preview-license"
@@ -60,24 +55,21 @@ before_install:
 before_script:
   - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a  
   - ${ANDROID_HOME}/tools/emulator -avd test -no-skin -no-audio -no-window -netspeed full -netdelay none &
-  - ls -la
-  - cat /usr/local/bin/android-wait-for-emulator 
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
 
 script:
   - echo "Travis branch is $TRAVIS_BRANCH"
   - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
-  - ls -la
   - ./.ci/validate-codecov.sh
   - ./gradlew clean build connectedCheck
   - ./gradlew jacocoTestReport
 
 after_failure:
   - echo "Build failure"
+  - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
 
 after_success:
-  - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
   - bash <(curl -s https://codecov.io/bash)
 
 notifications:
