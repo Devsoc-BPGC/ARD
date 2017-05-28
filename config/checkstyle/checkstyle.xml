@@ -18,9 +18,13 @@
 <module name = "Checker">
     <property name="charset" value="UTF-8"/>
 
-    <property name="severity" value="warning"/>
+    <property name="severity" value="error"/>
 
     <property name="fileExtensions" value="java, xml"/>
+
+    <module name="SuppressionFilter">
+        <property name="file" value="${suppressionFile}"/>
+    </module>
 
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
@@ -284,7 +288,6 @@
             <property name="allowEmptyLambdas" value="true"/>
             <property name="allowEmptyCatches" value="true"/>
         </module>
-
 
     </module>
 </module>

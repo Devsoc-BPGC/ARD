@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://checkstyle.sourceforge.net/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+
+    <!-- Disable checking of constructor for android -->
+    <suppress checks="MissingCtor" files="src/main/.+/.*Activity\.java"/>
+    <suppress checks="MissingCtor" files="src/main/.+/AHC\.java"/>
+    <suppress checks="MissingCtor" files="src/main/.+/ARD\.java"/>
+
+</suppressions>

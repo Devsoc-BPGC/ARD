@@ -11,7 +11,7 @@ coverage:
   status:
     project: yes
     patch: yes
-    changes: no
+    changes: yes
 
 parsers:
   gcov:
@@ -25,4 +25,20 @@ comment:
   layout: "header, diff"
   behavior: default
   require_changes: no
-  
+
+ignore:
+  - "app/src/main/.*/AHC\.java"
+
+flags:
+  activities:
+    paths:
+      - app/src/main/.*/activities/
+  utils:
+    paths:
+      - app/src/main/.*utils/
+  androidTest:
+    paths:
+      - app/src/androidTest/
+  tests:
+    paths:
+      - app/src/test/

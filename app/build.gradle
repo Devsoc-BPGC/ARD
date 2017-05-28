@@ -1,13 +1,12 @@
 apply plugin: 'checkstyle'
 apply plugin: 'com.android.application'
-apply plugin: 'com.jakewharton.butterknife'
-apply plugin: 'jacoco-android'
+apply plugin: 'jacoco'
 apply plugin: 'realm-android'
 
 ext {
     androidTestVer = "0.5"
     buildToolsVer = "25.0.2"
-    butterknifeVer = "8.4.0"
+    butterknifeVer = "8.6.0"
     checkstyleVer = '7.7'
     compileSdkVer = 25
     constraintVer = "1.0.0"
@@ -18,6 +17,7 @@ ext {
     espUIAVer = "2.1.2"
     firebaseVer = "10.2.6"
     hamcrestVer = "1.3"
+    jacocoVer = "0.7.9"
     junitVer = "4.12"
     minSdkVer = 21
     mockitoVer = "2.8.9"
@@ -120,27 +120,25 @@ dependencies {
 
 }
 
-jacocoAndroidUnitTestReport {
-    excludes += ['**/AutoValue_*.*',
-                 '**/*JavascriptBridge.class']
-    csv.enabled false
-    html.enabled true
-    xml.enabled true
-}
-
 checkstyle {
     toolVersion = checkstyleVer
+}
+
+jacoco {
+    toolVersion = jacocoVer
 }
 
 check.dependsOn 'checkstyle'
 
 task checkstyle(type: Checkstyle) {
     configFile file("$configDir/checkstyle/checkstyle.xml")
-    configProperties.checkstyleSuppressionsPath = file("$configDir/checkstyle/suppressions.xml").absolutePath
+    configProperties = [ "suppressionFile" : project(':').file("${configDir}/checkstyle/suppressions.xml")]
 
     source 'src'
     include '**/*.java'
     exclude '**/gen/**'
+    exclude '**/test/**/*.java'
+    exclude '**/androidTest/**/*.java'
 
     classpath = files()
     reports {

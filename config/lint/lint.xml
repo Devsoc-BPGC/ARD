@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lint>
+    <!-- Ignore temp folders -->
+    <issue id="all">
+        <ignore regexp="generated" />
+    </issue>
+
+    <!-- Ignore warning of unused resources -->
+    <issue id="UnusedResources">
+        <ignore path="res/values/colors.xml" />
+    </issue>
+</lint>

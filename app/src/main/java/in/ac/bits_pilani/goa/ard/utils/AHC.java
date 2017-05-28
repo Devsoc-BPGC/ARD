@@ -1,15 +1,10 @@
 package in.ac.bits_pilani.goa.ard.utils;
 
 /**
- * Helper class for ARD
- * @author vikramaditya
+ * Helper class for ARD.
+ * @author Vikramaditya Kukreja
  */
 public class AHC {
-
-    @Override
-    public String toString() {
-        return AHC.class.getSimpleName();
-    }
 
     /**
      * Package name of project.
@@ -17,9 +12,14 @@ public class AHC {
     public static final String PACKAGE_NAME = "in.ac.bits_pilani.goa.ard";
 
     /**
+     * Application id of app.
+     */
+    public static final String APPLICATION_ID = "com.macbitsgoa.ard";
+
+    /**
      * Default Log tag for project.
      */
-    public static final String TAG = "ard.bits.goa";
+    public static final String TAG = APPLICATION_ID;
 
     /**
      * Name of Realm database.
@@ -30,4 +30,5 @@ public class AHC {
      * Version of Realm database.
      */
     public static final int REALM_ARD_DATABASE_SCHEMA = 0;
+
 }

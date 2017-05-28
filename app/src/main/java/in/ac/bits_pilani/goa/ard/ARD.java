@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.google.firebase.database.FirebaseDatabase;
+
 import in.ac.bits_pilani.goa.ard.utils.AHC;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
@@ -11,9 +12,8 @@ import io.realm.RealmConfiguration;
 /**
  * Custom class extending the Application class.
  * This is used for setting up libraries.
- * @author vikramaditya
+ * @author Vikramaditya Kukreja
  */
-
 public class ARD extends Application {
 
     @Override
@@ -21,7 +21,7 @@ public class ARD extends Application {
         super.onCreate();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
         Realm.init(this);
-        RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
+        final RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
                 .name(AHC.REALM_ARD_DATABASE)
                 .schemaVersion(AHC.REALM_ARD_DATABASE_SCHEMA)
                 .build();
@@ -29,7 +29,7 @@ public class ARD extends Application {
     }
 
     @Override
-    protected void attachBaseContext(Context base) {
+    protected void attachBaseContext(final Context base) {
         super.attachBaseContext(base);
     }
 }

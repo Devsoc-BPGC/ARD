@@ -19,47 +19,62 @@ import butterknife.ButterKnife;
 import in.ac.bits_pilani.goa.ard.R;
 import in.ac.bits_pilani.goa.ard.utils.AHC;
 
+/**
+ * Main activity of app.
+ * @author Vikramaditya Kukreja
+ */
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    /**
+     * Toolbar for MainActivity.
+     */
+    @BindView(R.id.toolbar_activity_main)
+    Toolbar toolbar;
+
+    /**
+     *  Fab button.
+     */
+    @BindView( R.id.fab)
+    FloatingActionButton fab;
+
+    /**
+     * DrawerLayout for nav drawer.
+     */
+    @BindView( R.id.drawer_layout)
+    DrawerLayout drawer;
+
+    /**
+     * Navigation view in drawer.
+     */
+    @BindView( R.id.nav_view)
+    NavigationView navigationView;
 
     /**
      * Tag for this activity.
      */
     private final String TAG = AHC.TAG + ".activities." + getClass().getSimpleName();
 
-    /**
-     * Toolbar for MainActivity.
-     */
-
-    @BindView( R.id.toolbar_activity_main )   Toolbar toolbar;
-    @BindView( R.id.fab) FloatingActionButton fab;
-    @BindView( R.id.drawer_layout) DrawerLayout drawer;
-    @BindView( R.id.nav_view) NavigationView navigationView;
-
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-
         setSupportActionBar(toolbar);
-
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(final View view) {
                 Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
                         .setAction("Action", null).show();
             }
         });
 
-
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
+                drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
         toggle.syncState();
-
 
         navigationView.setNavigationItemSelectedListener(this);
     }
@@ -86,7 +101,7 @@ public class MainActivity extends AppCompatActivity
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+        final int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
@@ -100,7 +115,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here.
-        int id = item.getItemId();
+        final int id = item.getItemId();
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
@@ -115,7 +130,6 @@ public class MainActivity extends AppCompatActivity
         } else if (id == R.id.nav_send) {
 
         }
-
 
         drawer.closeDrawer(GravityCompat.START);
         return true;
