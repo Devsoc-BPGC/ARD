@@ -39,6 +39,7 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         versionCode verCode
         versionName verName
+        multiDexEnabled true
     }
     buildTypes {
         debug {
@@ -47,8 +48,10 @@ android {
             versionNameSuffix '-debug'
         }
         release {
+            shrinkResources true
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            multiDexKeepFile file("${configDir}/multidex/multidex.txt")
         }
     }
     lintOptions {
