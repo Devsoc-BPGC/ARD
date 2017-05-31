@@ -67,6 +67,7 @@ script:
 after_failure:
   - echo "Build failure"
   - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
+  - pastebinit -i ./app/build/reports/checkstyle/checkstyle.html -f html -a checkstyle-results-${TRAVIS_BUILD_NUMBER}-html
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
