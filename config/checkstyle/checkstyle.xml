@@ -60,7 +60,11 @@
             <property name="allowEmptyLoopBody" value="true"/>
         </module>
         <module name="RightCurly">
-            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_FOR, LITERAL_WHILE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT, LAMBDA"/>
+            <property name="tokens" value="LITERAL_TRY, LITERAL_CATCH, LITERAL_FINALLY, LITERAL_IF, LITERAL_ELSE, LITERAL_DO, STATIC_INIT, INSTANCE_INIT, LAMBDA"/>
+        </module>
+        <module name="RightCurly">
+            <property name="tokens" value="LITERAL_FOR, LITERAL_WHILE"/>
+            <property name="option" value="alone"/>
         </module>
 
         <!-- Class Design checks -->
