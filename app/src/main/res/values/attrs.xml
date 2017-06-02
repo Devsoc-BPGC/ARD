@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <attr name="bottom_nav_background_color" format="color" />
+    <attr name="bottom_nav_active_text_color" format="color" />
+    <attr name="bottom_nav_inactive_text_color" format="color" />
+    <attr name="bottom_nav_highlight_text_color" format="color" />
+    <attr name="bottom_nav_active_icon_color" format="color" />
+    <attr name="bottom_nav_inactive_icon_color" format="color" />
+    <attr name="bottom_nav_highlight_icon_color" format="color" />
+
+</resources>

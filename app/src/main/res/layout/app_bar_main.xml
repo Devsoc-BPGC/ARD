@@ -22,12 +22,15 @@
 
     <include layout="@layout/content_main" />
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
-        android:layout_width="wrap_content"
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_nav_activity_main"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="@dimen/fab_margin"
-        app:srcCompat="@android:drawable/ic_dialog_email" />
+        android:layout_gravity="bottom"
+        android:background="?attr/bottom_nav_background_color"
+        app:elevation="@dimen/bottom_nav_default_elevation"
+        app:itemIconTint="@drawable/icon_csl_bottom_nav"
+        app:itemTextColor="@drawable/text_csl_bottom_nav"
+        app:menu="@menu/menu_activity_main_bottom_nav" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -6,6 +6,20 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Enables translucent nav bar -->
+        <item name="android:windowTranslucentNavigation">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:navigationBarColor">@color/colorPrimary</item>
+
+        <!-- MainActivity bottom navigation view colors -->
+        <item name="bottom_nav_background_color">@color/grey_50</item>
+        <item name="bottom_nav_active_text_color">@color/colorPrimaryDark</item>
+        <item name="bottom_nav_inactive_text_color">@color/colorPrimaryLight</item>
+        <item name="bottom_nav_highlight_text_color">@color/colorPrimaryDark</item>
+        <item name="bottom_nav_active_icon_color">@color/colorPrimaryDark</item>
+        <item name="bottom_nav_inactive_icon_color">@color/colorPrimaryLight</item>
+        <item name="bottom_nav_highlight_icon_color">@color/colorPrimaryDark</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

@@ -2,6 +2,7 @@ package in.ac.bits_pilani.goa.ard.utils;
 
 /**
  * Helper class for ARD.
+ *
  * @author Vikramaditya Kukreja
  */
 public class AHC {
@@ -19,7 +20,7 @@ public class AHC {
     /**
      * Default Log tag for project.
      */
-    public static final String TAG = APPLICATION_ID;
+    public static final String TAG = "MAC_ARD";
 
     /**
      * Name of Realm database.
@@ -30,5 +31,10 @@ public class AHC {
      * Version of Realm database.
      */
     public static final int REALM_ARD_DATABASE_SCHEMA = 0;
+
+    /**
+     * Fragment title key.
+     */
+    public static final String FRAGMENT_TITLE_KEY = "key";
 
 }

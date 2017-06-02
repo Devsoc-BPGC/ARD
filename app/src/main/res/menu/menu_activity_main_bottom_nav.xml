@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/bottom_nav_faq"
+        android:orderInCategory="0"
+        android:icon="@drawable/ic_faq_24dp"
+        android:title="@string/bottom_nav_faq_activity_main" />
+    <item
+        android:id="@+id/bottom_nav_home"
+        android:orderInCategory="1"
+        android:icon="@drawable/ic_home_24dp"
+        android:title="@string/bottom_nav_home_activity_main" />
+    <item
+        android:id="@+id/bottom_nav_chat"
+        android:orderInCategory="2"
+        android:icon="@drawable/ic_chat_24dp"
+        android:title="@string/bottom_nav_chat_activity_main" />
+
+</menu>

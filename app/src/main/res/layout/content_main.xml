@@ -6,7 +6,12 @@
     android:layout_height="match_parent"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
     tools:context="in.ac.bits_pilani.goa.ard.activities.MainActivity"
-    tools:showIn="@layout/app_bar_main"
-    tools:ignore="GradleDependency">
+    tools:ignore="GradleDependency"
+    tools:showIn="@layout/app_bar_main">
+
+    <FrameLayout
+        android:id="@+id/frame_content_main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
 </android.support.constraint.ConstraintLayout>
