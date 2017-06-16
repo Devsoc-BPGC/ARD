@@ -57,17 +57,22 @@ before_script:
   - ${ANDROID_HOME}/tools/emulator -avd test -no-skin -no-audio -no-window -netspeed full -netdelay none &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
+  - mkdir ./app/debug/logcat -p
+  - adb logcat -c
+  - adb logcat > ./app/debug/logcat/logcat &
 
 script:
   - echo "Travis branch is $TRAVIS_BRANCH"
   - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
   - ./.ci/validate-codecov.sh
   - ./gradlew clean build connectedCheck
+  - killall adb
 
 after_failure:
   - echo "Build failure"
   - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
   - pastebinit -i ./app/build/reports/checkstyle/checkstyle.html -f html -a checkstyle-results-${TRAVIS_BUILD_NUMBER}-html
+  - pastebinit -i ./app/debug/logcat/logcat -a logcat-${TRAVIS_BUILD_NUMBER}
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
