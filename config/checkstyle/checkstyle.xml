@@ -99,7 +99,6 @@
             <property name="ignoreFieldDeclaration" value="true"/>
             <property name="ignoreAnnotation" value="true"/>
         </module>
-        <module name="MissingCtor"/>
         <module name="MissingSwitchDefault"/>
         <module name="MultipleStringLiterals"/>
         <module name="MultipleVariableDeclarations"/>
