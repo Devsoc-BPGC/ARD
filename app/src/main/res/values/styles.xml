@@ -20,6 +20,13 @@
         <item name="bottom_nav_active_icon_color">@color/colorPrimaryDark</item>
         <item name="bottom_nav_inactive_icon_color">@color/colorPrimaryLight</item>
         <item name="bottom_nav_highlight_icon_color">@color/colorPrimaryDark</item>
+
+        <!-- Faq Fragment tab layout colors -->
+        <item name="tabLayout_faq_background_color">@color/base</item>
+        <item name="tabLayout_faq_tab_background_color">@color/base</item>
+        <item name="tabLayout_faq_tab_indicator_color">@color/colorAccent</item>
+        <item name="tabLayout_faq_tab_text_color">@color/grey_700</item>
+        <item name="tabLayout_faq_tab_selected_text_color">@color/black</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

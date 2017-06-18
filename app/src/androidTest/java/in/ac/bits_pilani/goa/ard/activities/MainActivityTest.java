@@ -159,6 +159,10 @@ public class MainActivityTest {
         onView(withId(R.id.fragment_faq_layout)).check(matches(isDisplayed()));
         onView(withId(R.id.fragment_home_layout)).check(doesNotExist());
         onView(withId(R.id.fragment_chat_layout)).check(doesNotExist());
+        onView(withId(R.id.tabLayout_fragment_faq)).check(matches(isDisplayed()));
+        onView(withId(R.id.viewPager_fragment_faq)).check(matches(isDisplayed()));
+        onView(withText("General")).check(matches(isDisplayed()));
+
 
         onView(allOf(withId(R.id.bottom_nav_chat),
                 withContentDescription("Chat"), isDisplayed()))

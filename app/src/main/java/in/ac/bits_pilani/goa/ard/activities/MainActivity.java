@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity
 
         fragmentManager = getSupportFragmentManager();
 
-        faqFragment = FaqFragment.newInstance(getString(R.string.bottom_nav_faq_activity_main));
+        faqFragment = FaqFragment.newInstance(null);
         homeFragment = HomeFragment.newInstance(getString(R.string.bottom_nav_home_activity_main));
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
 

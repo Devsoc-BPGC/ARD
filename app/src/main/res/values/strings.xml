@@ -23,4 +23,7 @@
     <string name="bottom_nav_home_activity_main">Home</string>
     <string name="bottom_nav_chat_activity_main">Chat</string>
 
+    <!-- Faq fragment tab layout titles -->
+    <string name="tabLayout_faq_general">General</string>
+
 </resources>

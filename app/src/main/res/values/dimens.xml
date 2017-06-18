@@ -7,4 +7,11 @@
     <dimen name="bottom_nav_default_elevation">8dp</dimen>
     <dimen name="nav_drawer_elevation">16dp</dimen>
     <dimen name="nav_drawer_image_margin">0dp</dimen>
+
+    <!-- Faq Fragment dimens -->
+    <dimen name="tabLayout_fragment_faq_content_margin">0dp</dimen>
+    <dimen name="tabLayout_fragment_faq_content_width">0dp</dimen>
+    <dimen name="viewpager_fragment_faq_content_margin">0dp</dimen>
+    <dimen name="viewpager_fragment_faq_content_height">0dp</dimen>
+    <dimen name="viewpager_fragment_faq_content_width">0dp</dimen>
 </resources>

@@ -5,7 +5,5 @@
     android:layout_height="match_parent"
     tools:context="in.ac.bits_pilani.goa.ard.fragments.FaqFragment">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <include layout="@layout/fragment_faq_content" />
 </FrameLayout>

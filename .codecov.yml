@@ -33,6 +33,15 @@ flags:
   activities:
     paths:
       - app/src/main/.*/activities/
+  adapters:
+    paths:
+      - app/src/main/.*/adapters/
+  fragments:
+    paths:
+      - app/src/main/.*/fragments/
+  interfaces:
+    paths:
+      - app/src/main/.*/interfaces/
   utils:
     paths:
       - app/src/main/.*utils/

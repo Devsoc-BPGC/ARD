@@ -65,7 +65,7 @@ script:
   - echo "Travis branch is $TRAVIS_BRANCH"
   - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
   - ./.ci/validate-codecov.sh
-  - ./gradlew clean build connectedCheck
+  - ./gradlew clean build coverage
   - killall adb
 
 after_failure:
