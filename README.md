@@ -1,15 +1,15 @@
 # ARD Android Companion
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/1fc788215a9b42b3bb6354ae0a1ac7ce)](https://www.codacy.com/app/kukreja-vikramaditya/ARD?utm_source=github.com&utm_medium=referral&utm_content=MobileApplicationsClub/ARD&utm_campaign=badger)
 [![Build Status](https://api.travis-ci.com/MobileApplicationsClub/ARD.svg?token=PosPSPTbkNM2WxfmyvGE&branch=master)](https://travis-ci.com/MobileApplicationsClub/ARD)
-[![Dependency Status](https://www.versioneye.com/user/projects/591dce87db88830056d0632e/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/591dce87db88830056d0632e)
 [![codecov](https://codecov.io/gh/MobileApplicationsClub/ARD/branch/master/graph/badge.svg?token=aoOIeczRVC)](https://codecov.io/gh/MobileApplicationsClub/ARD)
+[![Dependency Status](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5)
 
 This app runs on Android OS version above and including Lollipop (*API 21*) uptil Nougat (*API 25*).
 
 ## Project uses the following CIs
 [Travis CI](https://www.travis-ci.com) for testing. Travis CI reports can be found [here](https://travis-ci.com/MobileApplicationsClub/ARD)
 [Codecov](https://codecov.io/gh) for coverage. Reports [here](https://codecov.io/gh/MobileApplicationsClub/ARD).<br>
-[VersionEye](https://www.versioneye.com/user/projects/58ee25749f10f8002b3777cd?child=summary)  to keep track of dependencies.
+[VersionEye](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5?child=summary)  to keep track of dependencies.
 
 
  Project follows the naming convention mentioned [here](http://jeroenmols.com/blog/2016/03/07/resourcenaming/) and [here.](https://github.com/ribot/android-guidelines/blob/master/project_and_code_guidelines.md) Before starting contributions please make sure you are thorough with this convention. If you have any suggestions that you would like to share or want to report a bug, use the **Issues** tab.
