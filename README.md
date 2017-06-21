@@ -4,6 +4,11 @@
 [![codebeat badge](https://codebeat.co/badges/0ecdbf2c-7c80-48cf-b66e-a3e4c1090546)](https://codebeat.co/projects/github-com-mobileapplicationsclub-ard-master)
 [![codecov](https://codecov.io/gh/MobileApplicationsClub/ARD/branch/master/graph/badge.svg?token=aoOIeczRVC)](https://codecov.io/gh/MobileApplicationsClub/ARD)
 [![Dependency Status](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5/badge.svg?style=flat-square)](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5)
+[![GitHub pull requests](https://img.shields.io/github/issues-pr/MobileApplicationsClub/ARD.svg)](https://github.com/MobileApplicationsClub/ARD/pulls)
+[![label](https://img.shields.io/github/issues-raw/MobileApplicationsClub/ARD/approved.svg)](https://github.com/MobileApplicationsClub/ARD/issues?q=is%3Aopen+is%3Aissue+label%3Aapproved)
+
+[![GitHub contributors](https://img.shields.io/github/contributors/MobileApplicationsClub/ARD.svg)](https://github.com/MobileApplicationsClub/ARD/graphs/contributors)
+[![Slack](https://img.shields.io/badge/Slack-join%20chat-brightgreen.svg)](https://join.slack.com/macbitsgoa/shared_invite/MjAxNDMzNzM0NjEwLTE0OTgwNjc4NDAtMmVmMWQyZjk2MA)
 
 This app runs on Android OS version above and including Lollipop (*API 21*) uptil Nougat (*API 25*).
 
