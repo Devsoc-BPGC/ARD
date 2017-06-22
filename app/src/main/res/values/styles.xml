@@ -27,6 +27,9 @@
         <item name="tabLayout_faq_tab_indicator_color">@color/colorAccent</item>
         <item name="tabLayout_faq_tab_text_color">@color/grey_700</item>
         <item name="tabLayout_faq_tab_selected_text_color">@color/black</item>
+
+        <!-- Custom tab colors -->
+        <item name="customTab_toolbar_color">@color/colorPrimary</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

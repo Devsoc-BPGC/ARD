@@ -41,6 +41,7 @@ android {
         versionCode verCode
         versionName verName
         multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
         debug {
@@ -81,6 +82,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:${supportVer}"
     compile "com.android.support:support-v4:${supportVer}"
     compile "com.android.support:design:${supportVer}"
+    compile "com.android.support:customtabs:${supportVer}"
     compile "com.android.support.constraint:constraint-layout:${constraintVer}"
 
     compile "com.jakewharton:butterknife:${butterknifeVer}"

@@ -14,5 +14,7 @@
     <attr name="tabLayout_faq_tab_indicator_color" format="color" />
     <attr name="tabLayout_faq_tab_text_color" format="color" />
     <attr name="tabLayout_faq_tab_selected_text_color" format="color" />
+    
+    <attr name="customTab_toolbar_color" format="color" />
 
 </resources>
