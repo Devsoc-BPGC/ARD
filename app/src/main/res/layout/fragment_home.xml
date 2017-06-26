@@ -3,7 +3,7 @@
     android:id="@+id/fragment_home_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="in.ac.bits_pilani.goa.ard.fragments.HomeFragment">
+    tools:context="com.macbitsgoa.ard.fragments.HomeFragment">
 
     <View
         android:layout_width="match_parent"

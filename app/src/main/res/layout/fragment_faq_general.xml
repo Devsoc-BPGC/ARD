@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="in.ac.bits_pilani.goa.ard.fragments.FaqGeneralFragment">
+    tools:context="com.macbitsgoa.ard.fragments.FaqGeneralFragment">
 
     <View
         android:layout_width="match_parent"

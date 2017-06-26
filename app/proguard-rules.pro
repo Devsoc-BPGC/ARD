@@ -26,7 +26,7 @@
 # This rule will properly ProGuard all the model classes in
 # the package com.yourcompany.models. Modify to fit the structure
 # of your app.
--keepclassmembers class in.ac.bits_pilani.goa.ard.models.** {
+-keepclassmembers class com.macbitsgoa.ard.models.** {
   *;
 }
 -keepattributes Signature
