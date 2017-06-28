@@ -8,7 +8,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -20,12 +19,6 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
-import java.util.ArrayList;
-
-import butterknife.BindView;
-import butterknife.ButterKnife;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.ChatFragment;
 import com.macbitsgoa.ard.fragments.FaqFragment;
@@ -36,12 +29,17 @@ import com.macbitsgoa.ard.interfaces.HomeFragmentListener;
 import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
 import com.macbitsgoa.ard.utils.AHC;
 
+import java.util.ArrayList;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 /**
  * Main activity of app.
  *
  * @author Vikramaditya Kukreja
  */
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         BottomNavigationView.OnNavigationItemSelectedListener,
         FaqFragmentListener,
@@ -100,11 +98,6 @@ public class MainActivity extends AppCompatActivity
     BottomNavigationView bottomNavigationView;
 
     /**
-     * Tag for this activity.
-     */
-    private final String TAG = AHC.TAG + ".activities." + getClass().getSimpleName();
-
-    /**
      * Fragment manager used to handle the 3 fragments.
      */
     private FragmentManager fragmentManager;
@@ -156,7 +149,7 @@ public class MainActivity extends AppCompatActivity
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
 
-        navDrawerDBRef = FirebaseDatabase.getInstance().getReference(AHC.FDR_NAV_DRAWER);
+        navDrawerDBRef = getRootReference().child(AHC.FDR_NAV_DRAWER);
 
         final View headerView = navigationView.getHeaderView(0);
         final ImageView navDrawerImage = ButterKnife.findById(headerView, R.id.nav_drawer_image);
@@ -233,12 +226,9 @@ public class MainActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         final int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+        //Should we changed once we have more items in overflow menu.
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
 
-        return super.onOptionsItemSelected(item);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -247,19 +237,7 @@ public class MainActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         final int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
-            // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
-
-        } else if (id == R.id.nav_slideshow) {
-
-        } else if (id == R.id.nav_manage) {
-
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
-
-        } else if (id == R.id.bottom_nav_faq) {
+        if (id == R.id.bottom_nav_faq) {
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, faqFragment)
                     .commit();
@@ -269,15 +247,16 @@ public class MainActivity extends AppCompatActivity
                     .replace(R.id.frame_content_main, homeFragment)
                     .commit();
             return true;
-        } else if (id == R.id.bottom_nav_chat) {
+        } else {
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, chatFragment)
                     .commit();
             return true;
         }
 
-        drawer.closeDrawer(GravityCompat.START);
-        return true;
+        //Not required until we have an item in Nav drawer.
+        //drawer.closeDrawer(GravityCompat.START);
+        //return true;
     }
 
     @Override

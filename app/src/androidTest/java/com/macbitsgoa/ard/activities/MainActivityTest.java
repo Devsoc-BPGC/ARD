@@ -2,17 +2,15 @@ package com.macbitsgoa.ard.activities;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
-import android.support.test.espresso.Espresso;
 import android.support.test.espresso.ViewInteraction;
-import android.support.test.espresso.contrib.DrawerActions;
-import android.support.test.espresso.contrib.DrawerMatchers;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+
+import com.macbitsgoa.ard.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -22,21 +20,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.macbitsgoa.ard.R;
-
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu;
 import static android.support.test.espresso.Espresso.pressBack;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.doesNotExist;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.contrib.DrawerActions.close;
+import static android.support.test.espresso.contrib.DrawerActions.open;
+import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static org.hamcrest.Matchers.allOf;
-import static org.junit.Assert.assertArrayEquals;
 
 /**
  * Tests for MainActivity
@@ -56,47 +54,12 @@ public class MainActivityTest {
     }
 
     @Test
-    public void testClassName() throws Exception {
-        final String[] expected = new String[]{
-                "MainActivity",
-        };
-        assertArrayEquals("Class name error", expected,
-                new String[]{activityTestRule.getActivity().getClass().getSimpleName()});
-    }
-
-    @Test
-    public void testParentActivityName() throws Exception {
-        final String[] expected = new String[]{
-                "AppCompatActivity",
-        };
-        assertArrayEquals("Parent class is wrong", expected,
-                new String[]{activityTestRule.getActivity()
-                        .getClass().getSuperclass().getSimpleName()});
-    }
-
-    @Test
-    public void testDrawerOpenClose() throws Exception {
-        onView(withId(R.id.drawer_layout))
-                .perform(DrawerActions.open())
-                .check(matches(DrawerMatchers.isOpen()));
-
-        onView(withId(R.id.drawer_layout))
-                .perform(DrawerActions.close())
-                .check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout))
-                .perform(DrawerActions.open(Gravity.START))
-                .check(matches(DrawerMatchers.isOpen(Gravity.START)));
-
-    }
-
-    @Test
     public void testBackPressOnOpenedDrawer() throws Exception {
         onView(withId(R.id.drawer_layout))
-                .perform(DrawerActions.open(GravityCompat.START));
-        Espresso.pressBack();
+                .perform(open(GravityCompat.START));
+        pressBack();
         onView(withId(R.id.drawer_layout))
-                .check(matches(DrawerMatchers.isClosed(GravityCompat.START)));
+                .check(matches(isClosed(GravityCompat.START)));
     }
 
     @Test
@@ -108,33 +71,9 @@ public class MainActivityTest {
 
     @Test
     public void testDrawerItems() throws Exception {
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
-        onView(withText("Import")).check(matches(isDisplayed())).perform(click());
-        onView(withId(R.id.drawer_layout)).check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
-        onView(withText("Gallery")).check(matches(isDisplayed())).perform(click());
-        onView(withId(R.id.drawer_layout)).check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
-        onView(withText("Slideshow")).check(matches(isDisplayed())).perform(click());
-        onView(withId(R.id.drawer_layout)).check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
-        onView(withText("Manage")).check(matches(isDisplayed())).perform(click());
-        onView(withId(R.id.drawer_layout)).check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
-        onView(withText("Share")).check(matches(isDisplayed())).perform(click());
-        onView(withId(R.id.drawer_layout)).check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
-        onView(withText("Send")).check(matches(isDisplayed())).perform(click());
-        onView(withId(R.id.drawer_layout)).check(matches(DrawerMatchers.isClosed()));
-
-        onView(withId(R.id.drawer_layout)).perform(DrawerActions.open());
+        onView(withId(R.id.drawer_layout)).perform(open());
         onView(withText("null")).check(doesNotExist());
-
+        onView(withId(R.id.drawer_layout)).perform(close());
     }
 
     @Test
