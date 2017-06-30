@@ -48,6 +48,7 @@ android {
             applicationIdSuffix '.debug'
             testCoverageEnabled true
             versionNameSuffix '-debug'
+            signingConfig signingConfigs.debug
         }
         release {
             shrinkResources true
@@ -72,6 +73,14 @@ android {
             jacoco {
                 includeNoLocationClasses = true
             }
+        }
+    }
+    signingConfigs {
+        debug {
+            storeFile file("club-keystore-debug.jks")
+            storePassword "android"
+            keyAlias "debug"
+            keyPassword "android"
         }
     }
 }

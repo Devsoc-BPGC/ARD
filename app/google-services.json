@@ -15,7 +15,23 @@
       },
       "oauth_client": [
         {
-          "client_id": "895100654158-73rojle3pl5pfaaanukk9dpn0tn7dhc4.apps.googleusercontent.com",
+          "client_id": "895100654158-op3n0bg1mgkgr2eunsh8mo2rnao0ujl9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macbitsgoa.ard.debug",
+            "certificate_hash": "0dfaf5a1c97a63f234da1e68a571e89b1413f3c8"
+          }
+        },
+        {
+          "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "895100654158-136bgaosvno98ebaebrdm6cra8ckp0gu.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "895100654158-6d1qp7as39bm723ftcq0bu53cs9ntmdl.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
@@ -29,8 +45,20 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "895100654158-m2kt0frvppqq6p3sj2litp58b81dhgvd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "jainvandit.ARD"
+              }
+            },
+            {
+              "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2
@@ -46,8 +74,24 @@
       },
       "oauth_client": [
         {
-          "client_id": "895100654158-73rojle3pl5pfaaanukk9dpn0tn7dhc4.apps.googleusercontent.com",
+          "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
           "client_type": 3
+        },
+        {
+          "client_id": "895100654158-136bgaosvno98ebaebrdm6cra8ckp0gu.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "895100654158-6d1qp7as39bm723ftcq0bu53cs9ntmdl.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "895100654158-fgn7e3rneggep09mmsdgt6kq1jjd021l.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.macbitsgoa.ard",
+            "certificate_hash": "9b730289a9c6153d33f4d7d014ecec25806b5412"
+          }
         }
       ],
       "api_key": [
@@ -60,8 +104,20 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "895100654158-m2kt0frvppqq6p3sj2litp58b81dhgvd.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "jainvandit.ARD"
+              }
+            },
+            {
+              "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

@@ -85,6 +85,7 @@ obj/
 
 # Keystore files
 *.jks
+!app/club-keystore-debug.jks
 
 # OS-specific files
 .DS_Store
