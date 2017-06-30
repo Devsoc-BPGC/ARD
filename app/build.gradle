@@ -164,7 +164,7 @@ tasks.withType(Test) {
     }
 }
 
-check.dependsOn 'checkstyle'
+clean.dependsOn 'checkstyle'
 
 task checkstyle(type: Checkstyle) {
     configFile file("$configDir/checkstyle/checkstyle.xml")
