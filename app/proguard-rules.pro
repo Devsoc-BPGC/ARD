@@ -31,3 +31,13 @@
 }
 -keepattributes Signature
 -keepattributes *Annotation*
+
+# Glide proguard settings 
+# Uncomment the following if you are creating your own Glide module 
+# For more see https://github.com/bumptech/glide#proguard
+#-keep public class * implements com.bumptech.glide.module.GlideModule
+#-keep public class * extends com.bumptech.glide.AppGlideModule
+-keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
+  **[] $VALUES;
+  public *;
+}
