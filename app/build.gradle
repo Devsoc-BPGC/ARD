@@ -20,7 +20,7 @@ ext {
     jacocoVer = "0.7.9"
     junitVer = "4.12"
     minSdkVer = 21
-    mockitoVer = "2.8.9"
+    mockitoVer = "2.8.47"
     supportVer = "25.4.0"
     targetSdkVer = 25
     verCode = 1
@@ -113,7 +113,6 @@ dependencies {
     androidTestCompile "com.google.dexmaker:dexmaker:${dexMakerVer}"
     androidTestCompile "com.google.dexmaker:dexmaker-mockito:${dexMakerVer}"
     androidTestCompile "org.hamcrest:hamcrest-library:${hamcrestVer}"
-    androidTestCompile "org.mockito:mockito-core:${mockitoVer}"
 
     androidTestCompile("com.android.support.test.espresso:espresso-core:${espCoreVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
