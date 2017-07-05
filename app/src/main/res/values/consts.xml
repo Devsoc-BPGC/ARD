@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Animation duration for fabs in Home fragment -->
+    <integer name="anim_fab_duration">300</integer>
+
+    <!-- Max message length for announcements in Home Ann Fragment -->
+    <integer name="ann_max_char">140</integer>
+
+</resources>

@@ -27,7 +27,9 @@ comment:
   require_changes: no
 
 ignore:
-  - "app/src/main/.*/AHC\.java"
+  - "app/src/main/.*/utils"
+  - "app/src/main/java/com/macbitsgoa/ard/keys"
+  - "io/realm/**/*"
 
 flags:
   activities:
@@ -44,7 +46,16 @@ flags:
       - app/src/main/.*/interfaces/
   utils:
     paths:
-      - app/src/main/.*utils/
+      - app/src/main/.*/utils/
+  models:
+    paths:
+      - app/src/main/.*/models/
+  types:
+    paths:
+      - app/src/main/.*/types/
+  viewholders:
+    paths:
+      - app/src/main/.*/viewholders/
   androidTest:
     paths:
       - app/src/androidTest/

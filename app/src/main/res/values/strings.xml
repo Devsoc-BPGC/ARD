@@ -19,5 +19,19 @@
 
     <!-- Faq fragment tab layout titles -->
     <string name="tabLayout_faq_general">General</string>
+    <string name="title_activity_post">Create</string>
 
+    <!-- Home Fragment strings -->
+    <string name="hint_home_ann_fragment_message">Enter message</string>
+    <string name="info_home_ann_fragment_empty_text">Please enter message!</string>
+    <string name="info_home_ann_fragment_dialog_message">Posting announcement</string>
+    <string name="info_home_ann_fragment_dialog_title">New</string>
+    <string name="info_home_ann_fragment_post_error">Error occurred while posting</string>
+    <string name="info_home_ann_fragment_post_success">Successfully posted!</string>
+
+    <!-- ViewHolder strings -->
+    <!-- AnnItem ViewHolder -->
+    <string name="text_viewHolder_ann_extras_default">Author, Date</string>
+    <string name="text_viewHolder_ann_data_default">Announcements</string>
+    <string name="contentDesc_viewHolder_ann_icon">Announcement viewholder icon</string>
 </resources>

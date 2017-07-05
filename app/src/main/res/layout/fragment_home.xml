@@ -5,7 +5,5 @@
     android:layout_height="match_parent"
     tools:context="com.macbitsgoa.ard.fragments.HomeFragment">
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+    <include layout="@layout/fragment_home_content" />
 </FrameLayout>

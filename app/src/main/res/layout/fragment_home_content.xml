@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.macbitsgoa.ard.fragments.HomeFragment">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/coordinatorLayout_fragment_home"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/margin_home_fragment_coordinatorLayout"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0">
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recyclerView_fragment_home"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_fragment_home_add"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:layout_marginBottom="@dimen/margin_home_fragment_mainFab"
+            android:layout_marginEnd="@dimen/margin_home_fragment_mainFab"
+            app:fabSize="normal"
+            app:layout_behavior="com.macbitsgoa.ard.utils.ScrollAwareFABBehavior"
+            app:srcCompat="@drawable/ic_plus" />
+    </android.support.design.widget.CoordinatorLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_fragment_home_announce"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/marginBottom_home_fragment_announceFab"
+        android:layout_marginEnd="@dimen/marginEnd_home_fragment_subFab"
+        app:backgroundTint="?attr/backgroundTint_home_fragment_announceFab"
+        app:fabSize="mini"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:srcCompat="@drawable/ic_announcements" />
+
+    <View
+        android:id="@+id/view_fragment_home_backdrop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/margin_home_fragment_backdrop"
+        android:alpha=".5"
+        android:background="?attr/background_home_fragment_backdrop"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</android.support.constraint.ConstraintLayout>

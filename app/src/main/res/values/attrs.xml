@@ -17,4 +17,15 @@
     
     <attr name="customTab_toolbar_color" format="color" />
 
+    <!-- Home Section colors -->
+    <attr name="background_home_fragment_backdrop" format="color" />
+    <attr name="backgroundTint_home_fragment_announceFab" format="color" />
+    <attr name="fillColor_post_activity_icon_default" format="color" />
+
+    <!-- ViewHolder colors -->
+    <!-- AnnItemViewHolder -->
+    <attr name="tint_viewHolder_ann_icon" format="color" />
+    <attr name="textColor_viewHolder_ann_data" format="color" />
+    <attr name="textColor_viewHolder_ann_extras" format="color" />
+
 </resources>

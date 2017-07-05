@@ -25,7 +25,6 @@ import com.macbitsgoa.ard.fragments.FaqFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.interfaces.FaqFragmentListener;
-import com.macbitsgoa.ard.interfaces.HomeFragmentListener;
 import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -43,7 +42,6 @@ public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         BottomNavigationView.OnNavigationItemSelectedListener,
         FaqFragmentListener,
-        HomeFragmentListener,
         ChatFragmentListener {
 
     /**
@@ -186,11 +184,12 @@ public class MainActivity extends BaseActivity
         fragmentManager = getSupportFragmentManager();
 
         faqFragment = FaqFragment.newInstance(null);
-        homeFragment = HomeFragment.newInstance(getString(R.string.bottom_nav_home_activity_main));
+        homeFragment = HomeFragment.newInstance(null);
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
 
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
-        fragmentManager.beginTransaction().add(R.id.frame_content_main, homeFragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.frame_content_main, homeFragment,
+                getString(R.string.bottom_nav_home_activity_main)).commit();
     }
 
     /**
@@ -261,11 +260,6 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void updateChatFragment() {
-
-    }
-
-    @Override
-    public void updateHomeFragment() {
 
     }
 

@@ -4,7 +4,12 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.util.TypedValue;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Helper class for ARD.
@@ -67,6 +72,16 @@ public class AHC {
     public static final String FDR_NAV_DRAWER_IMAGE_LIST = "navDrawerImages";
 
     /**
+     * Reference to home fragment node.
+     */
+    public static final String FDR_HOME = "home";
+
+    /**
+     * Animation multiplier for Fragment Home.
+     */
+    public static final float ANIMATION_MULTIPLIER = 1.5f;
+
+    /**
      * Method to get pixel value corresponding to input dp.
      * @param context of calling method.
      * @param dp value to be converted in dp.
@@ -91,5 +106,16 @@ public class AHC {
         drawable.draw(canvas);
 
         return bitmap;
+    }
+
+    /**
+     * Create a string from a Date object and generate a simple format.
+     *
+     * @param date Date object to use.
+     * @return converted string.
+     */
+    public static String getSimpleDate(@NonNull final Date date) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM", Locale.UK);
+        return sdf.format(date);
     }
 }

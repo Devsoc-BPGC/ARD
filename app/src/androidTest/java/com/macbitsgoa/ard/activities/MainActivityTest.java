@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.activities;
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
@@ -29,8 +30,11 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.contrib.DrawerActions.close;
 import static android.support.test.espresso.contrib.DrawerActions.open;
 import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
+import static android.support.test.espresso.matcher.ViewMatchers.Visibility.INVISIBLE;
+import static android.support.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
+import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
@@ -40,6 +44,7 @@ import static org.hamcrest.Matchers.allOf;
  * Tests for MainActivity
  */
 @RunWith(AndroidJUnit4.class)
+@LargeTest
 public class MainActivityTest {
 
     private Context context;
@@ -172,4 +177,29 @@ public class MainActivityTest {
         pressBack();
     }
 
+    @Test
+    public void testFabButtons() throws Exception {
+
+        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
+        onView(withId(R.id.fab_fragment_home_add)).perform(click());
+        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(VISIBLE)));
+        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(VISIBLE)));
+
+        onView(withId(R.id.fab_fragment_home_add)).perform(click());
+        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
+        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
+
+        onView(withId(R.id.fab_fragment_home_add)).perform(click());
+        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(VISIBLE)));
+        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(VISIBLE)));
+
+        onView(withId(R.id.view_fragment_home_backdrop)).perform(click());
+        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
+        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
+
+        onView(withId(R.id.fab_fragment_home_add)).perform(click());
+        onView(withId(R.id.fab_fragment_home_announce)).perform(click());
+        pressBack();
+        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
+    }
 }

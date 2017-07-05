@@ -8,10 +8,50 @@
     <dimen name="nav_drawer_elevation">16dp</dimen>
     <dimen name="nav_drawer_image_margin">0dp</dimen>
 
+    <!-- MainActivity dimes -->
+    <dimen name="margin_content_main_bottom_nav">0dp</dimen>
+    <dimen name="margin_content_main_framelayout">0dp</dimen>
+    <dimen name="margin_home_ann_fragment_message">8dp</dimen>
+    <dimen name="marginStart_home_ann_fragment_counter">16dp</dimen>
+    <dimen name="marginTop_home_ann_fragment_counter">8dp</dimen>
+    <dimen name="textSize_home_ann_fragment_counter">12sp</dimen>
+
     <!-- Faq Fragment dimens -->
     <dimen name="tabLayout_fragment_faq_content_margin">0dp</dimen>
     <dimen name="tabLayout_fragment_faq_content_width">0dp</dimen>
     <dimen name="viewpager_fragment_faq_content_margin">0dp</dimen>
     <dimen name="viewpager_fragment_faq_content_height">0dp</dimen>
     <dimen name="viewpager_fragment_faq_content_width">0dp</dimen>
+
+    <!-- Post Activity fab margin -->
+    <dimen name="margin_home_fragment_fab">16dp</dimen>
+    <dimen name="margin_home_fragment_backdrop">0dp</dimen>
+    <dimen name="margin_home_fragment_coordinatorLayout">8dp</dimen>
+    <dimen name="margin_home_fragment_mainFab">16dp</dimen>
+    <dimen name="marginBottom_home_fragment_announceFab">96dp</dimen>
+    <dimen name="marginEnd_home_fragment_subFab">32dp</dimen>
+
+    <!--ViewHolders dimens -->
+    <!-- AnnItemViewHolder -->
+    <dimen name="cardElevation_viewHolder_ann_card">1dp</dimen>
+    <dimen name="cardCornerRadius_viewHolder_ann_card">1dp</dimen>
+    <dimen name="height_viewHolder_ann_icon">48dp</dimen>
+    <dimen name="marginBottom_viewHolder_ann_card">4dp</dimen>
+    <dimen name="marginBottom_viewHolder_ann_icon">0dp</dimen>
+    <dimen name="marginEnd_viewHolder_ann_card">2dp</dimen>
+    <dimen name="marginEnd_viewHolder_ann_data">16dp</dimen>
+    <dimen name="marginEnd_viewHolder_ann_extras">0dp</dimen>
+    <dimen name="marginStart_viewHolder_ann_card">2dp</dimen>
+    <dimen name="marginStart_viewHolder_ann_data">8dp</dimen>
+    <dimen name="marginStart_viewHolder_ann_extras">0dp</dimen>
+    <dimen name="marginStart_viewHolder_ann_icon">16dp</dimen>
+    <dimen name="marginTop_viewHolder_ann_card">4dp</dimen>
+    <dimen name="marginTop_viewHolder_ann_data">8dp</dimen>
+    <dimen name="marginTop_viewHolder_ann_extras">12dp</dimen>
+    <dimen name="marginTop_viewHolder_ann_icon">8dp</dimen>
+    <dimen name="padding_viewHolder_ann_data">8dp</dimen>
+    <dimen name="padding_viewHolder_ann_extras">2dp</dimen>
+    <dimen name="paddingBottom_viewHolder_ann_constraintLayout">4dp</dimen>
+    <dimen name="textSize_viewHolder_ann_data">16sp</dimen>
+    <dimen name="width_viewHolder_ann_icon">48dp</dimen>
 </resources>

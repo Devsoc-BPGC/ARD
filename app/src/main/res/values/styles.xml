@@ -6,6 +6,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowSoftInputMode">adjustPan|adjustResize</item>
 
         <!-- Enables translucent nav bar -->
         <item name="android:windowTranslucentNavigation">true</item>
@@ -27,6 +28,16 @@
         <item name="tabLayout_faq_tab_indicator_color">@color/colorAccent</item>
         <item name="tabLayout_faq_tab_text_color">@color/grey_700</item>
         <item name="tabLayout_faq_tab_selected_text_color">@color/black</item>
+
+        <!-- Home Fragment colors -->
+        <item name="background_home_fragment_backdrop">@color/grey_500</item>
+        <item name="backgroundTint_home_fragment_announceFab">@color/colorPrimaryLight</item>
+        <item name="fillColor_post_activity_icon_default">@color/white</item>
+
+        <!-- ViewHolder colors -->
+        <item name="textColor_viewHolder_ann_data">@color/grey_700</item>
+        <item name="textColor_viewHolder_ann_extras">@color/grey_500</item>
+        <item name="tint_viewHolder_ann_icon">@color/colorAccent</item>
 
         <!-- Custom tab colors -->
         <item name="customTab_toolbar_color">@color/colorPrimary</item>
