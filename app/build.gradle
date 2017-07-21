@@ -224,6 +224,10 @@ task coverage(type: JacocoReport, dependsOn: ['connectedCheck']) {
             "jacoco/testDebugUnitTest.exec",
             "outputs/code-coverage/connected/*coverage.ec"
     ])
+    doLast {
+        delete "build/reports/coverage/"
+        file("build/reports/jacoco").renameTo(file("build/reports/coverage"))
+    }
 }
 
 apply plugin: 'com.google.gms.google-services'
