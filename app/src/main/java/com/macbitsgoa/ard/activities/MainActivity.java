@@ -1,5 +1,6 @@
 package com.macbitsgoa.ard.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -226,8 +227,13 @@ public class MainActivity extends BaseActivity
         final int id = item.getItemId();
 
         //Should we changed once we have more items in overflow menu.
-        return id == R.id.action_settings || super.onOptionsItemSelected(item);
-
+        if (id == R.id.action_settings) {
+            final Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
+            return true;
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
