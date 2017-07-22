@@ -76,6 +76,7 @@ after_failure:
 
 after_success:
   - bash <(curl -s https://codecov.io/bash)
+  - .ci/travis/apkHost.sh
 
 notifications:
   slack: macbitsgoa:ll3YNWLieRUgdN3RNSwkOoeW
