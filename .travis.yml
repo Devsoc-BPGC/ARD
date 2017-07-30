@@ -46,6 +46,7 @@ before_install:
   - ./.ci/travis/check_pr.sh
   - sudo apt-get update -qq
   - sudo apt-get install -qq pastebinit
+  - sudo apt-get install -qqy jq
   - android list targets
   - mkdir "$ANDROID_HOME/licenses" || true
   - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
