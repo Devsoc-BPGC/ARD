@@ -2,6 +2,7 @@
     <string name="app_name">ARD</string>
 
     <!-- Activity titles -->
+    <string name="title_activity_auth">Authenticate</string>
     <string name="title_activity_post">Create</string>
     <string name="title_activity_settings">Settings</string>
 
@@ -37,4 +38,13 @@
     <string name="text_viewHolder_ann_extras_default">Author, Date</string>
     <string name="text_viewHolder_ann_data_default">Announcements</string>
     <string name="contentDesc_viewHolder_ann_icon">Announcement viewholder icon</string>
+
+    <!-- Strings related to login -->
+    <string name="banner_text_ard">ARD</string>
+    <string name="google_sign_in">Sign in with Google</string>
+    <string name="error_google_sign_in_failed">Google sign in failed</string>
+
+    <!--Firebase related values-->
+    <string name="firebase_web_client_id" translatable="false">895100654158-136bgaosvno98ebaebrdm6cra8ckp0gu.apps.googleusercontent.com</string>
+
 </resources>

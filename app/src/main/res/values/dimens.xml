@@ -54,4 +54,8 @@
     <dimen name="paddingBottom_viewHolder_ann_constraintLayout">4dp</dimen>
     <dimen name="textSize_viewHolder_ann_data">16sp</dimen>
     <dimen name="width_viewHolder_ann_icon">48dp</dimen>
+
+    <!--Auth Dimens-->
+    <dimen name="paddingTop_content_auth_banner">48dp</dimen>
+    <dimen name="padding_content_auth_google">16dp</dimen>
 </resources>

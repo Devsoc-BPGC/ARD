@@ -48,15 +48,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
+              "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
               "client_id": "895100654158-m2kt0frvppqq6p3sj2litp58b81dhgvd.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "jainvandit.ARD"
               }
-            },
-            {
-              "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
-              "client_type": 3
             }
           ]
         },
@@ -107,15 +107,15 @@
           "status": 2,
           "other_platform_oauth_client": [
             {
+              "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
               "client_id": "895100654158-m2kt0frvppqq6p3sj2litp58b81dhgvd.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
                 "bundle_id": "jainvandit.ARD"
               }
-            },
-            {
-              "client_id": "895100654158-jknc5os1p4purqo7p2s2fup7lbi7o2jq.apps.googleusercontent.com",
-              "client_type": 3
             }
           ]
         },

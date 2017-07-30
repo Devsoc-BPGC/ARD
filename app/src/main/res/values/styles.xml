@@ -41,6 +41,9 @@
 
         <!-- Custom tab colors -->
         <item name="customTab_toolbar_color">@color/colorPrimary</item>
+
+        <!--Sign In button colors-->
+        <item name="google_signin_btn_tint">@color/white</item>
     </style>
 
     <style name="AppTheme.NoActionBar">

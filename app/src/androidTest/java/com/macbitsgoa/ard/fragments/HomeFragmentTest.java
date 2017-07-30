@@ -1,5 +1,6 @@
 package com.macbitsgoa.ard.fragments;
 
+import android.content.Intent;
 import android.support.test.espresso.matcher.ViewMatchers;
 import android.support.test.filters.LargeTest;
 import android.support.test.rule.ActivityTestRule;
@@ -8,6 +9,7 @@ import android.util.Log;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.MainActivity;
+import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.types.PostType;
@@ -43,11 +45,13 @@ public class HomeFragmentTest {
 
     @Rule
     public ActivityTestRule<MainActivity> activityTestRule =
-            new ActivityTestRule<>(MainActivity.class);
+            new ActivityTestRule<>(MainActivity.class, false, false);
 
     @Before
     public void init() throws Throwable {
-        activityTestRule.runOnUiThread(new Runnable() {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
+        activityTestRule
+                .runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 final RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()

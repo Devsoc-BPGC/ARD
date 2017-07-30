@@ -35,6 +35,11 @@ public class AHC {
     public static final String TAG = "MAC_ARD";
 
     /**
+     * Separator used when joining strings.
+     */
+    public static final String SEPARATOR = ", ";
+
+    /**
      * Name of Realm database.
      */
     public static final String REALM_ARD_DATABASE = "REALM_ARD_DATABASE";
@@ -80,6 +85,16 @@ public class AHC {
      * Animation multiplier for Fragment Home.
      */
     public static final float ANIMATION_MULTIPLIER = 1.5f;
+
+    /**
+     * Firebase directory of users.
+     */
+    public static final String FDR_USERS = "users";
+
+    /**
+     * SharedPreferences file name for the app.
+     */
+    public static final String SP_APP = "prefs";
 
     /**
      * Method to get pixel value corresponding to input dp.

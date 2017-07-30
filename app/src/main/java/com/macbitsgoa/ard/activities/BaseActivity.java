@@ -1,10 +1,14 @@
 package com.macbitsgoa.ard.activities;
 
+import android.content.SharedPreferences;
+import android.support.annotation.IntRange;
 import android.support.v7.app.AppCompatActivity;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
+import com.macbitsgoa.ard.utils.AHC;
 
 /**
  * Base activity with useful methods.
@@ -12,6 +16,14 @@ import com.macbitsgoa.ard.BuildConfig;
  * @author Vikramaditya Kukreja
  */
 public class BaseActivity extends AppCompatActivity {
+
+    /**
+     * Get {@link SharedPreferences} for the app.
+     * @return app shared pref {@link AHC#SP_APP} in private mode.
+     */
+    public SharedPreferences getDefaultSharedPref() {
+        return getSharedPreferences(AHC.SP_APP, MODE_PRIVATE);
+    }
 
     /*
     /**
@@ -45,13 +57,13 @@ public class BaseActivity extends AppCompatActivity {
         return FirebaseDatabase.getInstance().getReference().getRoot().child(BuildConfig.BUILD_TYPE);
     }
 
-    /*
+
     /**
      * Displays a toast in current activity. In this method the duration
      * supplied is {@link Toast#LENGTH_SHORT} that the toast shows.
      *
      * @param message Message to be displayed.
-     *
+     */
     public void showToast(final String message) {
         showToast(message, Toast.LENGTH_SHORT);
     }
@@ -65,7 +77,7 @@ public class BaseActivity extends AppCompatActivity {
      *
      * @param message   Message that the toast must show.
      * @param toastType Duration for which the toast must be visible.
-     *
+     */
     public void showToast(final String message,
                           @IntRange(from = Toast.LENGTH_SHORT,
                                   to = Toast.LENGTH_LONG) final int toastType) {

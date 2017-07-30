@@ -2,6 +2,8 @@ package com.macbitsgoa.ard.models;
 
 import android.support.annotation.NonNull;
 
+import com.macbitsgoa.ard.utils.AHC;
+
 import java.util.Date;
 
 import io.realm.RealmObject;
@@ -70,8 +72,7 @@ public class AnnItem extends RealmObject {
 
     @Override
     public String toString() {
-        final String separator = ", ";
-        return "Key=" + getKey() + separator + "data=" + data + separator + "author=" + author
-                + separator + "date=" + date;
+        return "Key=" + getKey() + AHC.SEPARATOR + "data=" + data + AHC.SEPARATOR + "author=" + author
+                + AHC.SEPARATOR + "date=" + date;
     }
 }

@@ -1,26 +1,28 @@
 package com.macbitsgoa.ard.utils;
 
-import android.app.Activity;
 import android.app.Instrumentation;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
+import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+
+import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.MainActivity;
+import com.macbitsgoa.ard.keys.AuthActivityKeys;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.activities.MainActivity;
-
+import static android.app.Activity.RESULT_CANCELED;
 import static android.support.test.espresso.intent.Intents.intended;
 import static android.support.test.espresso.intent.Intents.intending;
 import static android.support.test.espresso.intent.Intents.times;
+import static android.support.test.espresso.intent.matcher.IntentMatchers.anyIntent;
 import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAction;
 
 /**
@@ -28,31 +30,31 @@ import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAct
  * @author Rushikesh Jogdand
  */
 @RunWith(AndroidJUnit4.class)
+@SmallTest
 public class BrowserTest {
 
-    private Activity mActivity;
-
     @Rule
-    public IntentsTestRule<MainActivity> activityTestRule = new IntentsTestRule<>(MainActivity.class);
+    public IntentsTestRule<MainActivity> activityTestRule = new IntentsTestRule<>(MainActivity.class, false, false);
 
     @Before
-    public void init() {
-        mActivity = activityTestRule.getActivity();
-        intending(hasAction(Intent.ACTION_VIEW))
-                .respondWith(new Instrumentation.ActivityResult(Activity.RESULT_OK, null));
+    public void setup() {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
     }
 
     @Test
     public void testNoConfig() {
         String url = "example.com";
+        intending(anyIntent()).respondWith(new Instrumentation.ActivityResult(RESULT_CANCELED, null));
         new Browser(activityTestRule.getActivity()).launchUrl(url);
         intended(hasAction(Intent.ACTION_VIEW), times(1));
     }
 
     @Test
     public void testAllConfig () {
-        String url = "http://bits-pilani.ac.in/";
-        Intent mIntent = new Intent(mActivity, MainActivity.class);
+        intending(anyIntent()).respondWith(new Instrumentation.ActivityResult(RESULT_CANCELED, null));
+        final String url = "example.com";
+        final MainActivity mActivity = activityTestRule.getActivity();
+        final Intent mIntent = new Intent();
         PendingIntent mPendingIntent = PendingIntent.getActivity(
                 mActivity,
                 1,
@@ -89,9 +91,8 @@ public class BrowserTest {
 
     @Test
     public void penTest() {
-        new Browser(mActivity).launchUrl("javascript://nasty.kid()");
-        new Browser(mActivity).launchUrl("file://secret.db");
-
+        new Browser(activityTestRule.getActivity()).launchUrl("javascript://nasty.kid()");
+        new Browser(activityTestRule.getActivity()).launchUrl("file://secret.db");
         intended(hasAction(Intent.ACTION_VIEW), times(0));
     }
 }

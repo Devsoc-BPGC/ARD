@@ -1,22 +1,24 @@
 package com.macbitsgoa.ard.activities;
 
-import android.content.Context;
+import android.content.Intent;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.ViewInteraction;
+import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.filters.LargeTest;
-import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.keys.AuthActivityKeys;
 
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,19 +49,13 @@ import static org.hamcrest.Matchers.allOf;
 @LargeTest
 public class MainActivityTest {
 
-    private Context context;
-
     @Rule
-    public ActivityTestRule<MainActivity> activityTestRule =
-            new ActivityTestRule<>(MainActivity.class);
-
-    @Before
-    public void init() {
-        context = InstrumentationRegistry.getTargetContext();
-    }
+    public IntentsTestRule<MainActivity> activityTestRule =
+            new IntentsTestRule<>(MainActivity.class, true, false);
 
     @Test
     public void testBackPressOnOpenedDrawer() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         onView(withId(R.id.drawer_layout))
                 .perform(open(GravityCompat.START));
         pressBack();
@@ -69,13 +65,15 @@ public class MainActivityTest {
 
     @Test
     public void testOptionsMenuItems() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         onView(withText("Settings")).check(doesNotExist());
-        openActionBarOverflowOrOptionsMenu(context);
+        openActionBarOverflowOrOptionsMenu(InstrumentationRegistry.getTargetContext());
         onView(withText("Settings")).check(matches(isDisplayed())).perform(click());
     }
 
     @Test
     public void testDrawerItems() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         onView(withId(R.id.drawer_layout)).perform(open());
         onView(withText("null")).check(doesNotExist());
         onView(withId(R.id.drawer_layout)).perform(close());
@@ -83,11 +81,13 @@ public class MainActivityTest {
 
     @Test
     public void testFragmentFrameIsVisible() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         onView(withId(R.id.frame_content_main)).check(matches(isDisplayed()));
     }
 
     @Test
     public void testBottomNavIsDisplayed() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         onView(withId(R.id.bottom_nav_activity_main)).check(matches(isDisplayed()));
 
         onView(allOf(withId(R.id.bottom_nav_home),
@@ -138,6 +138,7 @@ public class MainActivityTest {
 
     @Test
     public void testDrawerHeader() {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         ViewInteraction appCompatImageButton = onView(
                 allOf(withContentDescription("Open navigation drawer"),
                         withParent(withId(R.id.toolbar_activity_main)),
@@ -179,8 +180,10 @@ public class MainActivityTest {
 
     @Test
     public void testFabButtons() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
 
         onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
+        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
         onView(withId(R.id.fab_fragment_home_add)).perform(click());
         onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(VISIBLE)));
         onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(VISIBLE)));
@@ -201,5 +204,31 @@ public class MainActivityTest {
         onView(withId(R.id.fab_fragment_home_announce)).perform(click());
         pressBack();
         onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
+    }
+
+    @Test
+    public void testFirstLaunchRedirectsToAuth() throws Exception {
+        activityTestRule.launchActivity(null);
+        GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+        int code = api.isGooglePlayServicesAvailable(activityTestRule.getActivity());
+        if (code == ConnectionResult.SUCCESS) {
+            //not necessary here
+        } else {
+            pressBack();
+        }
+        onView(withId(R.id.btn_content_auth_google)).check(matches(isDisplayed()));
+    }
+
+    @Test
+    public void testFirstLaunchRedirectsToAuth2() throws Exception {
+        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, true));
+        GoogleApiAvailability api = GoogleApiAvailability.getInstance();
+        int code = api.isGooglePlayServicesAvailable(activityTestRule.getActivity());
+        if (code == ConnectionResult.SUCCESS) {
+            //not necessary here
+        } else {
+            pressBack();
+        }
+        onView(withId(R.id.btn_content_auth_google)).check(matches(isDisplayed()));
     }
 }

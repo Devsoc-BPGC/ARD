@@ -19,6 +19,7 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.ChatFragment;
@@ -27,6 +28,7 @@ import com.macbitsgoa.ard.fragments.HomeFragment;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.interfaces.FaqFragmentListener;
 import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
+import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
@@ -128,9 +130,14 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        //Check if authorised
+        if (!auth(getIntent())) {
+            startActivity(new Intent(this, AuthActivity.class));
+            finish();
+        }
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         init();
 
         final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
@@ -139,6 +146,18 @@ public class MainActivity extends BaseActivity
         toggle.syncState();
 
         initListeners();
+    }
+
+    /**
+     * Start {@link AuthActivity} if Firebase user object is null.
+     * This also closes the current {@link MainActivity} before launching Auth.
+     *
+     * @param intent Intent object. Should not be null. See <b>MainActivityTest</b>.
+     * @return boolean true if auth is successful, false otherwise.
+     */
+    public boolean auth(@NonNull final Intent intent) {
+        return !intent.getBooleanExtra(AuthActivityKeys.USE_DEFAULT, true)
+                || FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     /**

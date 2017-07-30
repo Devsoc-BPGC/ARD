@@ -9,12 +9,12 @@ android:
     - platform-tools
 
     - build-tools-25.0.2
-    
-    #- extra-google-google_play_services
+
+    - extra-google-google_play_services
     - extra-google-m2repository
-    #- addon-google_apis-google-19
-    #- extra-android-m2repository
-    #- extra-android-support
+    - addon-google_apis-google-21
+    - extra-android-m2repository
+    - extra-android-support
     #- extra-google-android-support
 
     #- android-21
@@ -53,10 +53,13 @@ before_install:
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a  
+  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
   - ${ANDROID_HOME}/tools/emulator -avd test -no-skin -no-audio -no-window -netspeed full -netdelay none &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
+  - adb shell settings put global window_animation_scale 0 &
+  - adb shell settings put global transition_animation_scale 0 &
+  - adb shell settings put global animator_duration_scale 0 &
   - mkdir ./app/debug/logcat -p
   - adb logcat -c
   - adb logcat > ./app/debug/logcat/logcat &
@@ -83,5 +86,5 @@ notifications:
 
 #If you don’t want to run a build for a particular commit for any reason,
 # add [ci skip] or [skip ci] to the git commit message.
-#Commits that have [ci skip] or [skip ci] anywhere in the commit messages 
+#Commits that have [ci skip] or [skip ci] anywhere in the commit messages
 #are ignored by Travis CI.
