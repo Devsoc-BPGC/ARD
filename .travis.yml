@@ -2,25 +2,54 @@ language: android
 
 sudo: required
 
+env:
+  global:
+    - BUILD_TOOLS=25.0.2
+
+matrix:
+  include:
+    - env:
+      - DESC="Basic PR verification"
+      - CMD="./.ci/travis/check_pr.sh;./.ci/validate-codecov.sh"
+      - CMD_AFTER_SUCCESS='echo "PR validation successful"'
+      - CMD_AFTER_FAILURE='echo "PR validation failed"'
+
+    - env:
+      - DESC="API 21"
+      - EMULATOR_API=21
+      - IMAGE=sys-img-armeabi-v7a-android-$EMULATOR_API
+      - CMD="./gradlew clean build coverage;killall adb"
+      - CMD_BEFORE=".ci/travis/startEmulator.sh"
+      - CMD_AFTER_SUCCESS="bash <(curl -s https://codecov.io/bash);.ci/travis/apkHost.sh"
+      - CMD_AFTER_FAILURE=".ci/travis/pastebinit.sh"
+
+    - env:
+      - DESC="API 22"
+      - EMULATOR_API=22
+      - IMAGE=sys-img-armeabi-v7a-android-$EMULATOR_API
+      - CMD="./gradlew clean build coverage;killall adb"
+      - CMD_BEFORE=".ci/travis/startEmulator.sh"
+      - CMD_AFTER_SUCCESS="bash <(curl -s https://codecov.io/bash);.ci/travis/apkHost.sh"
+      - CMD_AFTER_FAILURE=".ci/travis/pastebinit.sh"
+
 android:
   components:
     - tools
     - tools
     - platform-tools
 
-    - build-tools-25.0.2
+    - build-tools-${BUILD_TOOLS}
 
     - extra-google-google_play_services
     - extra-google-m2repository
-    - addon-google_apis-google-21
+    - addon-google_apis-google-$EMULATOR_API
     - extra-android-m2repository
     - extra-android-support
     #- extra-google-android-support
 
-    #- android-21
-    - android-25
+    - android-$EMULATOR_API
 
-    - sys-img-armeabi-v7a-android-21
+    - $IMAGE
 
 jdk:
   - oraclejdk8
@@ -37,16 +66,18 @@ cache:
     - $HOME/.gradle/caches/
     - $HOME/.gradle/wrapper/
     - $HOME/.android/build-cache
+    - ~/.m2
+
+addons:
+  apt:
+    packages:
+      - pastebinit
+      - jq
 
 licenses:
-  - android-sdk-license-.+
   - '.+'
 
 before_install:
-  - ./.ci/travis/check_pr.sh
-  - sudo apt-get update -qq
-  - sudo apt-get install -qq pastebinit
-  - sudo apt-get install -qqy jq
   - android list targets
   - mkdir "$ANDROID_HOME/licenses" || true
   - echo -e "\n8933bad161af4178b1185d1a37fbf41ea5269c55" > "$ANDROID_HOME/licenses/android-sdk-license"
@@ -54,33 +85,16 @@ before_install:
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - echo no | android create avd --force -n test -t android-21 --abi armeabi-v7a
-  - ${ANDROID_HOME}/tools/emulator -avd test -no-skin -no-audio -no-window -netspeed full -netdelay none &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82 &
-  - adb shell settings put global window_animation_scale 0 &
-  - adb shell settings put global transition_animation_scale 0 &
-  - adb shell settings put global animator_duration_scale 0 &
-  - mkdir ./app/debug/logcat -p
-  - adb logcat -c
-  - adb logcat > ./app/debug/logcat/logcat &
+  - eval $CMD_BEFORE
 
 script:
-  - echo "Travis branch is $TRAVIS_BRANCH"
-  - echo "Travis branch is in pull request $TRAVIS_PULL_REQUEST"
-  - ./.ci/validate-codecov.sh
-  - ./gradlew clean build coverage
-  - killall adb
+  - eval $CMD
 
 after_failure:
-  - echo "Build failure"
-  - pastebinit -i ./app/build/reports/lint-results.html -f html -a lint-results-${TRAVIS_BUILD_NUMBER}-html
-  - pastebinit -i ./app/build/reports/checkstyle/checkstyle.html -f html -a checkstyle-results-${TRAVIS_BUILD_NUMBER}-html
-  - pastebinit -i ./app/debug/logcat/logcat -a logcat-${TRAVIS_BUILD_NUMBER}
+  - eval $CMD_AFTER_FAILURE
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash)
-  - .ci/travis/apkHost.sh
+  - eval $CMD_AFTER_SUCCESS
 
 notifications:
   slack: macbitsgoa:ll3YNWLieRUgdN3RNSwkOoeW
