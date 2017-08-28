@@ -61,3 +61,4 @@ if [[ $RESULT == 0 ]]; then
 else
       echo 'PR validation failed.' && false;
 fi
+
