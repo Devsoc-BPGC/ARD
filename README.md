@@ -10,12 +10,14 @@
 [![GitHub contributors](https://img.shields.io/github/contributors/MobileApplicationsClub/ARD.svg)](https://github.com/MobileApplicationsClub/ARD/graphs/contributors)
 [![Slack](https://img.shields.io/badge/Slack-join%20chat-brightgreen.svg)](https://join.slack.com/macbitsgoa/shared_invite/MjAxNDMzNzM0NjEwLTE0OTgwNjc4NDAtMmVmMWQyZjk2MA)
 
-This app runs on Android OS version above and including Lollipop (*API 21*) uptil Nougat (*API 25*).
+This app runs on Android OS version above and including Lollipop (*API 21*).
 
 ## Project uses the following CIs
-[Travis CI](https://www.travis-ci.org) for testing. Travis CI reports can be found [here](https://travis-ci.org/MobileApplicationsClub/ARD)
-[Codecov](https://codecov.io/gh) for coverage. Reports [here](https://codecov.io/gh/MobileApplicationsClub/ARD).<br>
-[VersionEye](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5?child=summary)  to keep track of dependencies.
+[Travis CI](https://www.travis-ci.org) for testing. Travis CI reports can be found [here](https://travis-ci.org/MobileApplicationsClub/ARD).
+
+[Codecov](https://codecov.io/gh) for coverage. Reports [here](https://codecov.io/gh/MobileApplicationsClub/ARD).
+
+[VersionEye](https://www.versioneye.com/user/projects/5949512e6725bd0063d1dac5?child=summary) to keep track of dependencies.
 
 
  Project follows the naming convention mentioned [here](http://jeroenmols.com/blog/2016/03/07/resourcenaming/) and [here.](https://github.com/ribot/android-guidelines/blob/master/project_and_code_guidelines.md) Before starting contributions please make sure you are thorough with this convention. If you have any suggestions that you would like to share or want to report a bug, use the **Issues** tab.
@@ -29,15 +31,15 @@ Project hosted under [Mobile Applications Club](https://github.com/MobileApplica
 ### Requirements
 
 > - Android Studio *2.3* or above
-> - Android SDK *Tools 25.2.4* or above
-> - Android SDK *Platform-tools 25.0.3* or above
-> - Android SDK *Build-tools 25.0.2* or above
+> - Android SDK *Tools 26.0.0* or above
+> - Android SDK *Platform-tools 26.0.2* or above
+> - Android SDK *Build-tools 26.0.0* or above
 > - *Extras* (in SDK Manager)
 
-### Installaltion
+### Installation
 
 1. **Fork** this repository to your account on GitHub
- 
+
 2. Clone to your local storage using *git*. Open a terminal and paste
 
 ```bash
@@ -46,31 +48,25 @@ git clone https://github.com/yourusername/ARD.git
 
 3. Open Android Studio and click ***Open*** > Navigate to ***ARD***  folder > Press ***Select***
 
-4. Create a new branch and name it 
+4. In android studio console execute
 
 ```bash
-git checkout -b my-fix-branch
+git remote add upstream https://github.com/MobileApplicationsClub/ARD
 ```
 
-5. Make your changes and commit them
-```bash
-git add .
-git commit -m "Give commit message"
-```
+### Contributing
+See `.github/CONTRIBUTING.md`.
 
-6. Update your fork
+If you're not proficient with **git**, it'll be better if you follow `.github/git-workflow.md`.
 
-```bash
-git push origin my-fix-branch
-```
-_OR_
+### Build and Test
 
-if you have to rewrite your branch
+While normal (manual) testing, you can run the app using `app` configuration in Android Studio.
 
-```bash
-git push -f origin my-fix-branch
-```
+However, we consider code coverage data to assess PR. Which means you will have to write tests that cover as much portion of your patch as possible. To evaluate the tests and see the coverage stats locally, do following:
 
-Send a PR if not already done so.
+ ```bash
+ ./gradlew clean build coverage
+ ```
 
-
+ If all goes well, reports will be generated at `app/build/reports` directory.

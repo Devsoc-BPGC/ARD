@@ -16,6 +16,6 @@ invalid egs.
 `Issue #123 Forgot colon in commit message` or
 `Issue 123: This is my complete commit message but forgot hash symbol`
 
-5. There is no restriction on PR title format
+5. PR Title: Follow same pattern as commit message
 
 Thanks for reading! You can remove this whole message now and type in your description.
