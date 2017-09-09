@@ -85,16 +85,24 @@ before_install:
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - eval $CMD_BEFORE
+  - |
+      set -e
+           eval $CMD_BEFORE;
 
 script:
-  - eval $CMD
+  - |
+      set -e
+           eval $CMD;
 
 after_failure:
-  - eval $CMD_AFTER_FAILURE
+  - |
+       set -e
+           eval $CMD_AFTER_FAILURE;
 
 after_success:
-  - eval $CMD_AFTER_SUCCESS
+  - |
+       set -e
+           eval $CMD_AFTER_SUCCESS;
 
 notifications:
   slack: macbitsgoa:ll3YNWLieRUgdN3RNSwkOoeW

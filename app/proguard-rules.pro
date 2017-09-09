@@ -35,9 +35,24 @@
 # Glide proguard settings 
 # Uncomment the following if you are creating your own Glide module 
 # For more see https://github.com/bumptech/glide#proguard
-#-keep public class * implements com.bumptech.glide.module.GlideModule
-#-keep public class * extends com.bumptech.glide.AppGlideModule
+-keep public class * implements com.bumptech.glide.module.GlideModule
+-keep public class * extends com.bumptech.glide.AppGlideModule
 -keep public enum com.bumptech.glide.load.resource.bitmap.ImageHeaderParser$** {
   **[] $VALUES;
   public *;
 }
+
+# For Butterknife:
+# Version 8
+-keep class **_ViewBinding { *; }
+
+# Retain generated class which implement Unbinder.
+-keep public class * implements butterknife.Unbinder { public <init>(**, android.view.View); }
+
+# Prevent obfuscation of types which use ButterKnife annotations since the simple name
+# is used to reflectively look up the generated ViewBinding.
+-keep class butterknife.*
+-dontwarn butterknife.internal.**
+
+-keepclasseswithmembernames class * { @butterknife.* <methods>; }
+-keepclasseswithmembernames class * { @butterknife.* <fields>; }

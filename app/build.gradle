@@ -6,7 +6,7 @@ apply plugin: 'realm-android'
 ext {
     androidTestVer = "0.5"
     buildToolsVer = "26.0.0"
-    butterknifeVer = "8.6.0"
+    butterknifeVer = "8.8.1"
     checkstyleVer = '7.7'
     compileSdkVer = 25
     constraintVer = "1.0.2"
@@ -22,7 +22,8 @@ ext {
     jacocoVer = "0.7.9"
     junitVer = "4.12"
     minSdkVer = 21
-    mockitoVer = "2.8.47"
+    mockitoVer = "2.9.0"
+    roboElecVer = "3.4.2"
     rxJavaVer = "1.3.0"
     supportVer = "25.4.0"
     targetSdkVer = 25
@@ -121,6 +122,10 @@ dependencies {
     //Unit test compiles
     testCompile "junit:junit:${junitVer}"
     testCompile "org.mockito:mockito-core:${mockitoVer}"
+    testCompile ("org.robolectric:robolectric:${roboElecVer}") {
+        exclude module: 'commons-logging'
+        exclude module: 'httpclient'
+    }
 
     //Android test compiles
     androidTestCompile "com.google.dexmaker:dexmaker:${dexMakerVer}"

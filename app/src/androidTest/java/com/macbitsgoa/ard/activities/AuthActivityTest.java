@@ -14,6 +14,7 @@ import com.macbitsgoa.ard.R;
 
 import org.hamcrest.Description;
 import org.hamcrest.TypeSafeMatcher;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +48,7 @@ public class AuthActivityTest {
     public IntentsTestRule<AuthActivity> activityTestRule =
             new IntentsTestRule<>(AuthActivity.class);
 
+    @Ignore
     @Test
     public void testGoogleAccountChooserLaunches() throws Exception {
         intending(anyIntent()).respondWith(new Instrumentation.ActivityResult(RESULT_CANCELED, null));
@@ -62,6 +64,7 @@ public class AuthActivityTest {
         }
     }
 
+    @Ignore
     @Test
     public void testOnActivityResultNullResponse() throws Exception {
         intending(anyIntent()).respondWith(new Instrumentation.ActivityResult(RESULT_OK, null));
