@@ -7,6 +7,7 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowSoftInputMode">adjustPan|adjustResize</item>
+        <item name="fillColor_drawable_default">@color/grey_500</item>
 
         <!-- Enables translucent nav bar -->
         <item name="android:windowTranslucentNavigation">true</item>
@@ -33,6 +34,10 @@
         <item name="background_home_fragment_backdrop">@color/grey_500</item>
         <item name="backgroundTint_home_fragment_announceFab">@color/colorPrimaryLight</item>
         <item name="fillColor_post_activity_icon_default">@color/white</item>
+
+        <!-- Post details activity colors -->
+        <item name="fillColor_post_details_activity_share_btn">@color/colorPrimary</item>
+        <item name="bgTint_frame_comment_fab">@color/colorAccent</item>
 
         <!-- ViewHolder colors -->
         <item name="textColor_viewHolder_ann_data">@color/grey_700</item>

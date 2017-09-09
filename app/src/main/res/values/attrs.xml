@@ -24,10 +24,16 @@
     <attr name="backgroundTint_home_fragment_announceFab" format="color" />
     <attr name="fillColor_post_activity_icon_default" format="color" />
 
+    <!-- Post details activity attributes-->
+    <attr name="fillColor_post_details_activity_share_btn" format="color" />
+    <attr name="bgTint_frame_comment_fab" format="color" />
+
     <!-- ViewHolder colors -->
     <!-- AnnItemViewHolder -->
     <attr name="tint_viewHolder_ann_icon" format="color" />
     <attr name="textColor_viewHolder_ann_data" format="color" />
     <attr name="textColor_viewHolder_ann_extras" format="color" />
 
+    <!-- Default misc attrs -->
+    <attr name="fillColor_drawable_default" format="color" />
 </resources>

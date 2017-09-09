@@ -56,7 +56,7 @@
         <module name="LeftCurly"/>
         <module name="NeedBraces">
             <property name="allowSingleLineStatement" value="false"/>
-            <property name="tokens" value="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE, LITERAL_CASE, LITERAL_DEFAULT, LAMBDA"/>
+            <property name="tokens" value="LITERAL_DO, LITERAL_ELSE, LITERAL_FOR, LITERAL_IF, LITERAL_WHILE, LAMBDA"/>
             <property name="allowEmptyLoopBody" value="true"/>
         </module>
         <module name="RightCurly">

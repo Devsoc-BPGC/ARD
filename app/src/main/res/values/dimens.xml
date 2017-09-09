@@ -31,6 +31,32 @@
     <dimen name="marginBottom_home_fragment_announceFab">96dp</dimen>
     <dimen name="marginEnd_home_fragment_subFab">32dp</dimen>
 
+    <!-- Frame share dimens -->
+    <dimen name="height_frame_share_share_btn">36dp</dimen>
+    <dimen name="marginEnd_frame_share_share_btn">8dp</dimen>
+    <dimen name="marginTop_frame_share_share_btn">8dp</dimen>
+    <dimen name="width_frame_share_share_btn">36dp</dimen>
+
+    <!-- Frame comment dimes -->
+    <dimen name="cardCornerRadius_frame_comment_card">24dp</dimen>
+    <dimen name="height_frame_comment_card">48dp</dimen>
+    <dimen name="height_frame_comment_fab">48dp</dimen>
+    <dimen name="marginBottom_frame_comment_card">8dp</dimen>
+    <dimen name="marginBottom_frame_comment_fab">8dp</dimen>
+    <dimen name="marginBottom_frame_comment_message">4dp</dimen>
+    <dimen name="marginEnd_frame_comment_fab">8dp</dimen>
+    <dimen name="marginEnd_frame_comment_card">8dp</dimen>
+    <dimen name="marginEnd_frame_comment_message">8dp</dimen>
+    <dimen name="marginStart_frame_comment_message">8dp</dimen>
+    <dimen name="marginStart_frame_comment_card">8dp</dimen>
+    <dimen name="marginStart_frame_comment_emoji">8dp</dimen>
+    <dimen name="marginTop_frame_comment_card">8dp</dimen>
+    <dimen name="marginTop_frame_comment_message">4dp</dimen>
+    <dimen name="marginTop_frame_comment_fab">8dp</dimen>
+    <dimen name="textSize_frame_comment_message">20sp</dimen>
+    <dimen name="width_frame_comment_emoji">36dp</dimen>
+    <dimen name="width_frame_comment_fab">48dp</dimen>
+
     <!--ViewHolders dimens -->
     <!-- AnnItemViewHolder -->
     <dimen name="cardElevation_viewHolder_ann_card">1dp</dimen>

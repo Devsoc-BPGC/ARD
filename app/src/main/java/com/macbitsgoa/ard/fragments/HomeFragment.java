@@ -20,10 +20,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.PostActivity;
+import com.macbitsgoa.ard.activities.PostDetailsActivity;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.interfaces.HomeFragmentListener;
+import com.macbitsgoa.ard.interfaces.OnItemClickListener;
+import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
+import com.macbitsgoa.ard.keys.AnnItemKeys;
+import com.macbitsgoa.ard.keys.PostKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.types.PostType;
@@ -48,7 +54,7 @@ import io.realm.Sort;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeFragment extends Fragment implements View.OnClickListener {
+public class HomeFragment extends Fragment implements View.OnClickListener, OnItemClickListener {
 
     /**
      * RecyclerView to display Home content.
@@ -95,7 +101,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      * Reference to node {@link AHC#FDR_HOME} to which listener is attached.
      */
     private DatabaseReference dbRef = FirebaseDatabase.getInstance()
-            .getReference().child(AHC.FDR_HOME);
+            .getReference().child(BuildConfig.BUILD_TYPE).child(AHC.FDR_HOME);
 
     /**
      * Handle for Realm instance.
@@ -106,6 +112,11 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      * EventListener for {@link AHC#FDR_HOME} which is required to remove in {@link #onStop()}.
      */
     private ValueEventListener homeEventListener;
+
+    /**
+     * Item touch listener of RecyclerView.
+     */
+    private RecyclerView.OnItemTouchListener onItemTouchListener;
 
     /**
      * Use this factory method to create a new instance of
@@ -146,6 +157,8 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(homeAdapter);
 
+        onItemTouchListener = new RecyclerItemClickListener(getContext(), recyclerView, this);
+        recyclerView.addOnItemTouchListener(onItemTouchListener);
         mainFab.setOnClickListener(this);
         announceFab.setOnClickListener(this);
         backdrop.setOnClickListener(this);
@@ -231,8 +244,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        unbinder.unbind();
+        recyclerView.removeOnItemTouchListener(onItemTouchListener);
         homeAdapter = null;
+        unbinder.unbind();
     }
 
     @Override
@@ -322,7 +336,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
      *
      * @return Animator listener for animator object.
      */
-
     private Animator.AnimatorListener getEndAnimatorListener() {
         return new Animator.AnimatorListener() {
             @Override
@@ -356,5 +369,24 @@ public class HomeFragment extends Fragment implements View.OnClickListener {
                 //No repeating set.
             }
         };
+    }
+
+    @Override
+    public void onItemClick(final View view, final int position) {
+        final Intent intent = new Intent(getContext(), PostDetailsActivity.class);
+        final TypeItem item = homeAdapter.getData().get(position);
+        intent.putExtra(PostKeys.TYPE, item.getType());
+        //switch (item.getType()) {
+        //    case PostType.ANNOUNCEMENT: {
+        intent.putExtra(AnnItemKeys.PRIMARY_KEY, ((AnnItem) item.getData()).getKey());
+        //        break;
+        //    }
+        //}
+        startActivity(intent);
+    }
+
+    @Override
+    public void onLongItemClick(final View view, final int position) {
+        //Not required as of now
     }
 }
