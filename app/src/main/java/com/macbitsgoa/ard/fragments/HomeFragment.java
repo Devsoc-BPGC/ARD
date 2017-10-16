@@ -5,8 +5,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -24,6 +27,7 @@ import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.PostActivity;
 import com.macbitsgoa.ard.activities.PostDetailsActivity;
+import com.macbitsgoa.ard.activities.SearchActivity;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.interfaces.HomeFragmentListener;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
@@ -73,6 +77,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
      */
     @BindView(R.id.fab_fragment_home_announce)
     public FloatingActionButton announceFab;
+
+    @BindView(R.id.cardView_frame_search)
+    public CardView cvfs;
 
     /**
      * A simple {@code View} object which has a custom background to be used when main FAB is
@@ -162,6 +169,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         mainFab.setOnClickListener(this);
         announceFab.setOnClickListener(this);
         backdrop.setOnClickListener(this);
+        cvfs.setOnClickListener(this);
     }
 
     @Override
@@ -254,6 +262,10 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         final int id = v.getId();
         if (id == R.id.fab_fragment_home_add || id == R.id.view_fragment_home_backdrop) {
             animateFab();
+        } else if (id == R.id.cardView_frame_search) {
+            ActivityOptionsCompat options = ActivityOptionsCompat.
+                    makeSceneTransitionAnimation(getActivity(), cvfs, "profile");
+            startActivity(new Intent(getContext(), SearchActivity.class), options.toBundle());
         } else {
             animateFab();
             final Intent intent = new Intent(getContext(), PostActivity.class);

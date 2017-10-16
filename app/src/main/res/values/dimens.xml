@@ -10,7 +10,7 @@
 
     <!-- MainActivity dimes -->
     <dimen name="margin_content_main_bottom_nav">0dp</dimen>
-    <dimen name="margin_content_main_framelayout">0dp</dimen>
+    <dimen name="margin_content_main_framelayout">56dp</dimen>
     <dimen name="margin_home_ann_fragment_message">8dp</dimen>
     <dimen name="marginStart_home_ann_fragment_counter">16dp</dimen>
     <dimen name="marginTop_home_ann_fragment_counter">8dp</dimen>
@@ -26,10 +26,15 @@
     <!-- Post Activity fab margin -->
     <dimen name="margin_home_fragment_fab">16dp</dimen>
     <dimen name="margin_home_fragment_backdrop">0dp</dimen>
-    <dimen name="margin_home_fragment_coordinatorLayout">8dp</dimen>
     <dimen name="margin_home_fragment_mainFab">16dp</dimen>
     <dimen name="marginBottom_home_fragment_announceFab">96dp</dimen>
+    <dimen name="marginBottom_home_fragment_coordinatorLayout">0dp</dimen>
+    <dimen name="marginEnd_home_fragment_coordinatorLayout">0dp</dimen>
     <dimen name="marginEnd_home_fragment_subFab">32dp</dimen>
+    <dimen name="marginEnd_home_fragment_recyclerView">8dp</dimen>
+    <dimen name="marginStart_home_fragment_recyclerView">8dp</dimen>
+    <dimen name="marginStart_home_fragment_coordinatorLayout">0dp</dimen>
+    <dimen name="marginTop_home_fragment_coordinatorLayout">0dp</dimen>
 
     <!-- Frame share dimens -->
     <dimen name="height_frame_share_share_btn">36dp</dimen>
@@ -37,7 +42,7 @@
     <dimen name="marginTop_frame_share_share_btn">8dp</dimen>
     <dimen name="width_frame_share_share_btn">36dp</dimen>
 
-    <!-- Frame comment dimes -->
+    <!-- Frame comment dimens -->
     <dimen name="cardCornerRadius_frame_comment_card">24dp</dimen>
     <dimen name="height_frame_comment_card">48dp</dimen>
     <dimen name="height_frame_comment_fab">48dp</dimen>
@@ -56,6 +61,16 @@
     <dimen name="textSize_frame_comment_message">20sp</dimen>
     <dimen name="width_frame_comment_emoji">36dp</dimen>
     <dimen name="width_frame_comment_fab">48dp</dimen>
+
+    <!-- Frame search dimens -->
+    <dimen name="cardCornerRadius_frame_search">4dp</dimen>
+    <dimen name="cardElevation_frame_search">0dp</dimen>
+    <dimen name="margin_frame_search_card">8dp</dimen>
+    <dimen name="margin_frame_search_voice_icon">8dp</dimen>
+    <dimen name="paddingBottom_frame_search_home">8dp</dimen>
+    <dimen name="paddingEnd_frame_search_home">8dp</dimen>
+    <dimen name="paddingStart_frame_search_home">16dp</dimen>
+    <dimen name="paddingTop_frame_search_home">8dp</dimen>
 
     <!--ViewHolders dimens -->
     <!-- AnnItemViewHolder -->
@@ -84,4 +99,8 @@
     <!--Auth Dimens-->
     <dimen name="paddingTop_content_auth_banner">48dp</dimen>
     <dimen name="padding_content_auth_google">16dp</dimen>
+
+    <!-- Animator -->
+    <dimen name="valueTo_lift_on_touch_translationZ_set">6dp</dimen>
+    <dimen name="valueTo_lift_on_touch_translationZ_reset">0dp</dimen>
 </resources>

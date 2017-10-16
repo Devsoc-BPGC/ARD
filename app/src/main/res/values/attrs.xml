@@ -28,6 +28,12 @@
     <attr name="fillColor_post_details_activity_share_btn" format="color" />
     <attr name="bgTint_frame_comment_fab" format="color" />
 
+    <!-- Frame search colors -->
+    <attr name="bg_frame_search_edittext" format="color" />
+    <attr name="textColor_frame_search_edittext" format="color" />
+    <attr name="textColorHint_frame_search_edittext" format="color" />
+    <attr name="cardBgColor_frame_search" format="color" />
+
     <!-- ViewHolder colors -->
     <!-- AnnItemViewHolder -->
     <attr name="tint_viewHolder_ann_icon" format="color" />

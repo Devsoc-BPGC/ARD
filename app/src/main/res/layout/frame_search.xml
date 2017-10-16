@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardView_frame_search"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="@dimen/margin_frame_search_card"
+    android:transitionName="@string/transitionName_frame_search"
+    app:cardBackgroundColor="?attr/cardBgColor_frame_search"
+    app:cardCornerRadius="@dimen/cardCornerRadius_frame_search"
+    app:cardElevation="@dimen/cardElevation_frame_search">
+
+    <android.support.constraint.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/imgBtn_frame_search_home"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/contentDesc_frame_search_home"
+            android:paddingBottom="@dimen/paddingBottom_frame_search_home"
+            android:paddingEnd="@dimen/paddingEnd_frame_search_home"
+            android:paddingStart="@dimen/paddingStart_frame_search_home"
+            android:paddingTop="@dimen/paddingTop_frame_search_home"
+            android:src="@drawable/ic_search"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/editText_frame_search"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?attr/bg_frame_search_edittext"
+            android:hint="@string/hint_frame_search_edittext"
+            android:textColor="?attr/textColor_frame_search_edittext"
+            android:textColorHint="?attr/textColorHint_frame_search_edittext"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imgBtn_frame_search_voice_search"
+            app:layout_constraintStart_toEndOf="@+id/imgBtn_frame_search_home"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/imgBtn_frame_search_voice_search"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/contentDesc_frame_search_voice_search"
+            android:padding="@dimen/margin_frame_search_voice_icon"
+            android:src="@drawable/ic_voice_search"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+</android.support.v7.widget.CardView>

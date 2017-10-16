@@ -7,18 +7,12 @@ import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.view.GravityCompat;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewParent;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +32,6 @@ import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
 import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
-import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.macbitsgoa.ard.THC.childAtPosition;
 import static org.hamcrest.Matchers.allOf;
@@ -120,12 +113,6 @@ public class MainActivityTest {
     @Test
     public void testDrawerHeader() {
         activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
-        ViewInteraction appCompatImageButton = onView(
-                allOf(withContentDescription("Open navigation drawer"),
-                        withParent(withId(R.id.toolbar_activity_main)),
-                        isDisplayed()));
-        appCompatImageButton.perform(click());
-
         ViewInteraction imageView = onView(
                 allOf(withId(R.id.nav_drawer_image),
                         childAtPosition(

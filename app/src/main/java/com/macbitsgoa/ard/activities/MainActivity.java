@@ -8,9 +8,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
@@ -75,12 +72,6 @@ public class MainActivity extends BaseActivity
     public static final int NAV_DRAWER_BACKGROUND_ANIM_DUR = 50;
 
     /**
-     * Toolbar for MainActivity.
-     */
-    @BindView(R.id.toolbar_activity_main)
-    Toolbar toolbar;
-
-    /**
      * DrawerLayout for nav drawer.
      */
     @BindView(R.id.drawer_layout)
@@ -140,11 +131,6 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         init();
 
-        final ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this,
-                drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.addDrawerListener(toggle);
-        toggle.syncState();
-
         initListeners();
     }
 
@@ -165,7 +151,6 @@ public class MainActivity extends BaseActivity
      */
     private void init() {
         ButterKnife.bind(this);
-        setSupportActionBar(toolbar);
 
         navDrawerDBRef = getRootReference().child(AHC.FDR_NAV_DRAWER);
 
@@ -228,30 +213,6 @@ public class MainActivity extends BaseActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
-        }
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(final Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        final int id = item.getItemId();
-
-        //Should we changed once we have more items in overflow menu.
-        if (id == R.id.action_settings) {
-            final Intent intent = new Intent(this, SettingsActivity.class);
-            startActivity(intent);
-            return true;
-        } else {
-            return super.onOptionsItemSelected(item);
         }
     }
 

@@ -8,6 +8,7 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowSoftInputMode">adjustPan|adjustResize</item>
         <item name="fillColor_drawable_default">@color/grey_500</item>
+        <item name="android:windowContentTransitions">true</item>
 
         <!-- Enables translucent nav bar -->
         <item name="android:windowTranslucentNavigation">true</item>
@@ -38,6 +39,12 @@
         <!-- Post details activity colors -->
         <item name="fillColor_post_details_activity_share_btn">@color/colorPrimary</item>
         <item name="bgTint_frame_comment_fab">@color/colorAccent</item>
+
+        <!-- Frame search colors -->
+        <item name="bg_frame_search_edittext">@color/transparent</item>
+        <item name="textColor_frame_search_edittext">@color/white</item>
+        <item name="textColorHint_frame_search_edittext">@color/white</item>
+        <item name="cardBgColor_frame_search">@color/colorPrimaryLight</item>
 
         <!-- ViewHolder colors -->
         <item name="textColor_viewHolder_ann_data">@color/grey_700</item>

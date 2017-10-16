@@ -93,6 +93,7 @@ android {
             keyPassword "android"
         }
     }
+    buildToolsVersion '26.0.2'
 }
 
 dependencies {
@@ -122,7 +123,7 @@ dependencies {
     //Unit test compiles
     testCompile "junit:junit:${junitVer}"
     testCompile "org.mockito:mockito-core:${mockitoVer}"
-    testCompile ("org.robolectric:robolectric:${roboElecVer}") {
+    testCompile("org.robolectric:robolectric:${roboElecVer}") {
         exclude module: 'commons-logging'
         exclude module: 'httpclient'
     }
@@ -185,7 +186,7 @@ clean.dependsOn 'checkstyle'
 
 task checkstyle(type: Checkstyle) {
     configFile file("$configDir/checkstyle/checkstyle.xml")
-    configProperties = [ "suppressionFile" : project(':').file("${configDir}/checkstyle/suppressions.xml")]
+    configProperties = ["suppressionFile": project(':').file("${configDir}/checkstyle/suppressions.xml")]
 
     source 'src'
     include '**/*.java'

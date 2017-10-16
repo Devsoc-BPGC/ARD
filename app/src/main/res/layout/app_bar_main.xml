@@ -6,20 +6,23 @@
     android:layout_height="match_parent"
     tools:context="com.macbitsgoa.ard.activities.MainActivity">
 
-    <android.support.design.widget.AppBarLayout
+    <FrameLayout
+        android:id="@+id/frame_content_main"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/AppTheme.AppBarOverlay">
+        android:layout_height="match_parent"
+        android:layout_marginBottom="@dimen/margin_content_main_framelayout"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar_activity_main"
-            android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/AppTheme.PopupOverlay" />
-
-    </android.support.design.widget.AppBarLayout>
-
-    <include layout="@layout/content_main" />
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottom_nav_activity_main"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_gravity="bottom"
+        android:layout_margin="@dimen/margin_content_main_bottom_nav"
+        android:background="?attr/bottom_nav_background_color"
+        app:elevation="@dimen/bottom_nav_default_elevation"
+        app:itemIconTint="@drawable/icon_csl_bottom_nav"
+        app:itemTextColor="@drawable/text_csl_bottom_nav"
+        app:menu="@menu/menu_activity_main_bottom_nav" />
 
 </android.support.design.widget.CoordinatorLayout>
