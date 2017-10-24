@@ -103,4 +103,5 @@
     <!-- Animator -->
     <dimen name="valueTo_lift_on_touch_translationZ_set">6dp</dimen>
     <dimen name="valueTo_lift_on_touch_translationZ_reset">0dp</dimen>
+    <dimen name="fab_margin">16dp</dimen>
 </resources>
