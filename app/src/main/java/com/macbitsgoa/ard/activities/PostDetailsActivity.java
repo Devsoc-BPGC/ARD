@@ -42,11 +42,6 @@ public class PostDetailsActivity extends BaseActivity implements View.OnClickLis
     @BindView(R.id.frame_content_post_details_post)
     public FrameLayout frameLayoutPost;
 
-    /**
-     * Realm database to extract data.
-     */
-    private Realm database;
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +50,6 @@ public class PostDetailsActivity extends BaseActivity implements View.OnClickLis
 
         //https://developer.android.com/topic/libraries/support-library/preview/emoji-compat.html
 
-        database = Realm.getDefaultInstance();
         handleIntent();
 
         toolbar.setNavigationOnClickListener(this);
@@ -94,12 +88,6 @@ public class PostDetailsActivity extends BaseActivity implements View.OnClickLis
         //        break;
         //    }
         //}
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        database.close();
     }
 
     @Override

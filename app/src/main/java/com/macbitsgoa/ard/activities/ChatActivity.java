@@ -1,6 +1,6 @@
 package com.macbitsgoa.ard.activities;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
@@ -8,9 +8,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -25,17 +25,14 @@ import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ChatMsgAdapter;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.services.MessagingService;
 
 import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.Realm;
+import io.realm.OrderedCollectionChangeSet;
+import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -43,8 +40,13 @@ public class ChatActivity extends BaseActivity {
 
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-    DatabaseReference readRef = getRootReference().child("chats").child(user.getUid());
     DatabaseReference writeRef = getRootReference().child("chats");
+    DatabaseReference onlineStatus = getRootReference().child("online");
+    DatabaseReference myStatus = onlineStatus.child(user.getUid());
+    DatabaseReference theirStatus;
+    DatabaseReference readStatus = writeRef;
+
+    String sessionId;
 
     @BindView(R.id.recyclerView_activity_chat)
     RecyclerView chatsRV;
@@ -55,18 +57,29 @@ public class ChatActivity extends BaseActivity {
     @BindView(R.id.tv_frame_chat_toolbar_title)
     TextView title;
 
+    @BindView(R.id.tv_frame_chat_toolbar_subtitle)
+    TextView subtitle;
+
     @BindView(R.id.editText_frame_comment_message)
     EditText message;
 
     @BindView(R.id.fab_frame_comment_send)
     FloatingActionButton sendFab;
 
-    ValueEventListener messagesListener;
+    @BindView(R.id.rl_activity_chat_icon)
+    RelativeLayout rlIcons;
+
+    @BindView(R.id.rl_activity_chat_updates)
+    RelativeLayout rlUpdates;
+
+    @BindView(R.id.tv_activity_chat_number)
+    TextView updateNumber;
 
     private String senderId = null;
 
-    Realm database;
     ChatMsgAdapter chatMsgAdapter;
+
+    MessagingService messagingService;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,15 +87,23 @@ public class ChatActivity extends BaseActivity {
         setContentView(R.layout.activity_chat);
 
         if (!getIntent().hasExtra("senderId")) {
+            /*
+            This activity was somehow launched without the sender id and therefore should be
+            finished.
+             */
             finish();
         } else {
             senderId = getIntent().getStringExtra("senderId");
-            readRef = readRef.child("0").child(senderId);
+            theirStatus = onlineStatus.child(senderId);
             writeRef = writeRef.child(senderId).child("0").child(user.getUid());
+            readStatus = writeRef.child("messageStatus");
         }
 
         ButterKnife.bind(this);
 
+        /*
+          Setup up UI window
+         */
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.green_900));
         getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.green_900));
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -94,129 +115,153 @@ public class ChatActivity extends BaseActivity {
                 .into(icon);
 
         chatsRV.setHasFixedSize(true);
-        chatsRV.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true));
-        database = Realm.getDefaultInstance();
-        RealmResults<MessageItem> messages = database.where(MessageItem.class)
+        final LinearLayoutManager llm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true);
+        llm.findFirstCompletelyVisibleItemPosition();
+        chatsRV.setLayoutManager(llm);
+
+        updateCounts();
+
+        final RealmResults<MessageItem> messages = database.where(MessageItem.class)
                 .equalTo("senderId", senderId)
-                .findAllSorted("messageTime", Sort.DESCENDING);
+                .findAllSorted("messageRcvdTime", Sort.DESCENDING);
+        messages.addChangeListener(new OrderedRealmCollectionChangeListener<RealmResults<MessageItem>>() {
+            @Override
+            public void onChange(RealmResults<MessageItem> messageItems, OrderedCollectionChangeSet changeSet) {
+                // `null`  means the async query returns the first time.
+                if (changeSet == null||true) {
+                    chatMsgAdapter.notifyDataSetChanged();
+                    return;
+                }
+
+                OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+                for (OrderedCollectionChangeSet.Range range : modifications) {
+                   // chatMsgAdapter.notifyItemRangeChanged(range.startIndex, range.length);
+                }
+
+                if (llm.findFirstCompletelyVisibleItemPosition() == 0) {
+                    chatsRV.scrollToPosition(0);
+                    rlIcons.setVisibility(View.GONE);
+                    updateNumber.setText("0");
+                    rlUpdates.setVisibility(View.GONE);
+                }
+
+            }
+        });
+
+
         chatMsgAdapter = new ChatMsgAdapter(messages);
         chatsRV.setAdapter(chatMsgAdapter);
-        messagesListener = returnMessageListener();
-    }
+        chatsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                super.onScrollStateChanged(recyclerView, newState);
+                if (newState == RecyclerView.SCROLL_STATE_SETTLING || newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    int pos = llm.findFirstCompletelyVisibleItemPosition();
+                    if (pos > 5) rlIcons.setVisibility(View.VISIBLE);
+                    else {
+                        rlIcons.setVisibility(View.GONE);
+                        rlUpdates.setVisibility(View.GONE);
+                    }
+                }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        readRef.addValueEventListener(messagesListener);
-    }
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
+                    int pos = llm.findFirstCompletelyVisibleItemPosition();
+                    if (pos > 5) rlIcons.setVisibility(View.VISIBLE);
+                    else {
+                        rlIcons.setVisibility(View.GONE);
+                        rlUpdates.setVisibility(View.GONE);
+                    }
+                }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        readRef.removeEventListener(messagesListener);
-    }
+            }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        database.close();
-    }
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+            }
+        });
+        ;
 
-    public void hideKeyboardFrom(View view) {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-    }
-
-    @Override
-    public void onClick(View v) {
-        super.onClick(v);
-        int viewId = v.getId();
-        if (viewId == R.id.ll_frame_chat_toolbar_icons) {
-            onBackPressed();
-        } else if (viewId == R.id.fab_frame_comment_send) {
-            hideKeyboardFrom(v);
-            String messageData = message.getText().toString().trim();
-            if (messageData.length() == 0) return;
-            Date messageTime = Calendar.getInstance().getTime();
-            String messageId = "" + messageTime.getTime() + messageTime.hashCode() + messageData.hashCode();
-
-            String latestMessage = messageData.substring(0, messageData.length() % 50);
-
-            message.getText().clear();
-
-            //Add new message
-            Map<String, Object> messageMap = new HashMap<>();
-            messageMap.put("data", messageData);
-            messageMap.put("date", messageTime);
-
-            //Update latest sender information
-            Map<String, Object> senderMap = new HashMap<>();
-            senderMap.put("id", user.getUid());
-            senderMap.put("name", user.getDisplayName());
-            senderMap.put("latest", latestMessage);
-            senderMap.put("photoUrl", user.getPhotoUrl().toString());
-            senderMap.put("date", messageTime);
-
-            writeRef.child("sender").setValue(senderMap);
-            writeRef.child("messages").child(messageId).setValue(messageMap);
-
-            database.beginTransaction();
-            MessageItem mi = database.createObject(MessageItem.class);
-            mi.setRcvd(false);
-            mi.setMessageTime(messageTime);
-            mi.setMessageId(messageId);
-            mi.setMessageData(messageData);
-            mi.setSenderId(senderId);
-            database.commitTransaction();
-
-            chatMsgAdapter.notifyItemInserted(0);
-            chatsRV.smoothScrollToPosition(0);
-        }
-    }
-
-    public ValueEventListener returnMessageListener() {
-        return new ValueEventListener() {
+        theirStatus.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ChatsItem ci = database.where(ChatsItem.class)
-                        .equalTo("id", senderId)
-                        .findFirst();
-                Queue<DataSnapshot> shots = new LinkedList<>();
-                for (DataSnapshot childShot : dataSnapshot.child("messages").getChildren()) {
-                    shots.add(childShot);
+                if (dataSnapshot.getValue() == null) {
+                    subtitle.setVisibility(View.GONE);
+                } else {
+                    subtitle.setVisibility(View.VISIBLE);
                 }
-                while (!shots.isEmpty()) {
-                    DataSnapshot childShot = shots.poll();
-
-                    String messageData = childShot.child("data").getValue(String.class);
-                    Date messageTime = childShot.child("date").getValue(Date.class);
-                    String messageId = childShot.getKey();
-                    MessageItem mi = null;
-                    database.beginTransaction();
-                    if (mi == null)
-                        mi = database.createObject(MessageItem.class);
-                    mi.setSenderId(senderId);
-                    mi.setMessageData(messageData);
-                    mi.setMessageId(messageId);
-                    mi.setRcvd(true);
-                    mi.setMessageTime(messageTime);
-                    database.commitTransaction();
-
-                    database.beginTransaction();
-                    ci.setLatest(messageData);
-                    ci.setUpdate(messageTime);
-                    database.commitTransaction();
-                    chatMsgAdapter.notifyItemInserted(0);
-
-                    readRef.child("messages").child(messageId).removeValue();
-                }
-                //update latest sender info
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        };
+        });
     }
+
+    private void updateCounts() {
+        //Remove any unread count if present
+        final ChatsItem chat = database.where(ChatsItem.class)
+                .equalTo("id", senderId).findFirst();
+        if (chat == null) {
+            finish();
+        } else {
+            database.beginTransaction();
+            chat.setUnreadCount(0);
+            database.commitTransaction();
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        sessionId = Calendar.getInstance().getTime().toString();
+        myStatus = onlineStatus.child(user.getUid()).child(sessionId);
+        myStatus.setValue(true);
+        myStatus.onDisconnect().removeValue();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        myStatus.removeValue();
+    }
+
+    //TODO fix read status
+    @Override
+    public void onClick(View v) {
+        super.onClick(v);
+        int viewId = v.getId();
+        if (viewId == R.id.ll_frame_chat_toolbar_icons) {
+            onBackPressed();
+        } else if (viewId == R.id.fab_activity_chat_scroll) {
+            chatsRV.scrollToPosition(0);
+            rlIcons.setVisibility(View.GONE);
+            rlUpdates.setVisibility(View.GONE);
+        } else if (viewId == R.id.fab_frame_comment_send) {
+
+            //Get user message from edittext
+            final String messageData = message.getText().toString().trim();
+            //If length of EditText is 0, do nothing
+            if (messageData.length() == 0) return;
+
+            if (messagingService == null || !MessagingService.isInstanceRunning()) {
+                startService(new Intent(this, MessagingService.class));
+                messagingService = MessagingService.getInstance();
+            }
+            messagingService.sendMessage(messageData, senderId);
+
+            //Clear EditText after extracting it's value
+            message.getText().clear();
+
+            chatMsgAdapter.notifyItemInserted(0);
+            chatsRV.scrollToPosition(0);
+
+            rlUpdates.setVisibility(View.GONE);
+            rlIcons.setVisibility(View.GONE);
+        }
+    }
+
 }

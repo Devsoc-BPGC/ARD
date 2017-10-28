@@ -88,6 +88,8 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.macbitsgoa.ard.activities.MainActivity" />
         </activity>
+
+        <service android:name=".services.MessagingService" />
     </application>
 
 </manifest>

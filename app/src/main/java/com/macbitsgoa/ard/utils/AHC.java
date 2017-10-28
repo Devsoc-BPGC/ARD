@@ -7,9 +7,14 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
 import android.util.TypedValue;
 
+import com.macbitsgoa.ard.BuildConfig;
+
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import javax.annotation.Nonnull;
 
 /**
  * Helper class for ARD.
@@ -47,7 +52,7 @@ public class AHC {
     /**
      * Version of Realm database.
      */
-    public static final int REALM_ARD_DATABASE_SCHEMA = 0;
+    public static final int REALM_ARD_DATABASE_SCHEMA = BuildConfig.VERSION_CODE;
 
     /**
      * Fragment title key.
@@ -82,6 +87,11 @@ public class AHC {
     public static final String FDR_HOME = "home";
 
     /**
+     * Reference to home fragment node.
+     */
+    public static final String FDR_CHAT = "chats";
+
+    /**
      * Animation multiplier for Fragment Home.
      */
     public static final float ANIMATION_MULTIPLIER = 1.5f;
@@ -98,8 +108,9 @@ public class AHC {
 
     /**
      * Method to get pixel value corresponding to input dp.
+     *
      * @param context of calling method.
-     * @param dp value to be converted in dp.
+     * @param dp      value to be converted in dp.
      * @return converted value in pixels.
      */
     public static float dpToPx(final Context context, final float dp) {
@@ -108,9 +119,10 @@ public class AHC {
 
     /**
      * Method to get bitmap from vector drawable.
+     *
      * @param drawable Input {@link android.graphics.drawable.Drawable}
-     * @param width The width of resultant bitmap in pixels.
-     * @param height The height of resultant bitmap in pixels.
+     * @param width    The width of resultant bitmap in pixels.
+     * @param height   The height of resultant bitmap in pixels.
      * @return converted bitmap.
      */
     public static Bitmap getBitmapFromDrawable(final Drawable drawable, final int width, final int height) {
@@ -133,4 +145,28 @@ public class AHC {
         final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM", Locale.UK);
         return sdf.format(date);
     }
+
+    /**
+     * Create a string from a Date object and generate a simple format.
+     *
+     * @param date Date object to use.
+     * @return converted string.
+     */
+    public static String getSimpleDayAndTime(@NonNull final Date date) {
+        return getSimpleTime(date);
+    }
+
+    public static String getSimpleDay(@Nonnull final Date date) {
+        long diff = Math.abs(date.getTime() - Calendar.getInstance().getTime().getTime());
+        if (diff / (1000 * 60 * 60 * 24) < 1)
+            return getSimpleTime(date);
+        final SimpleDateFormat sdf = new SimpleDateFormat("E", Locale.UK);
+        return sdf.format(date);
+    }
+
+    public static String getSimpleTime(@Nonnull final Date date) {
+        final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.UK);
+        return sdf.format(date);
+    }
+
 }

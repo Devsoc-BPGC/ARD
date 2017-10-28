@@ -27,6 +27,7 @@ import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.interfaces.FaqFragmentListener;
 import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
+import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
@@ -131,7 +132,7 @@ public class MainActivity extends BaseActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         init();
-
+        startService(new Intent(this, MessagingService.class));
         initListeners();
     }
 

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="?selectableItemBackground"
@@ -63,14 +62,26 @@
 
     <ImageView
         android:id="@+id/imageView_cf_chats_icon"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
         android:layout_marginEnd="8dp"
-        android:src="@color/green_500"
-        android:visibility="invisible"
+        android:src="@drawable/ic_circle"
         app:layout_constraintBottom_toBottomOf="@+id/textView_vh_cf_chats_latest"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@+id/textView_vh_cf_chats_latest" />
+
+    <TextView
+        android:id="@+id/tv_cf_chats_icon_text"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:gravity="center"
+        android:text="0"
+        android:textSize="12sp"
+        android:textColor="@color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/imageView_cf_chats_icon"
+        app:layout_constraintEnd_toEndOf="@+id/imageView_cf_chats_icon"
+        app:layout_constraintStart_toStartOf="@+id/imageView_cf_chats_icon"
+        app:layout_constraintTop_toTopOf="@+id/imageView_cf_chats_icon" />
 
     <View
         android:layout_width="0dp"

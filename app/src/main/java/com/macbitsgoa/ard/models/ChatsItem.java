@@ -13,6 +13,7 @@ public class ChatsItem extends RealmObject {
     private String latest;
     private String photoUrl;
     private Date update;
+    private int unreadCount;
 
     public ChatsItem() {
         this.id = null;
@@ -20,14 +21,16 @@ public class ChatsItem extends RealmObject {
         this.latest = "now";
         this.photoUrl = "";
         this.update = Calendar.getInstance().getTime();
+        this.unreadCount = 0;
     }
 
-    public ChatsItem(String id, String name, String latest, String photoUrl, Date update) {
+    public ChatsItem(String id, String name, String latest, String photoUrl, Date update, int unreadCount) {
         this.id = id;
         this.name = name;
         this.latest = latest;
         this.photoUrl = photoUrl;
         this.update = update;
+        this.unreadCount = unreadCount;
     }
 
     public String getId() {
@@ -70,13 +73,23 @@ public class ChatsItem extends RealmObject {
         this.update = update;
     }
 
+    public int getUnreadCount() {
+        return unreadCount;
+    }
+
+    public void setUnreadCount(int unreadCount) {
+        this.unreadCount = unreadCount;
+    }
+
     @Override
     public String toString() {
         return "ChatsItem{" +
-                "name='" + name + '\'' +
+                "id='" + id + '\'' +
+                ", name='" + name + '\'' +
                 ", latest='" + latest + '\'' +
                 ", photoUrl='" + photoUrl + '\'' +
                 ", update=" + update +
+                ", unreadCount=" + unreadCount +
                 '}';
     }
 }

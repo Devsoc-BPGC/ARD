@@ -7,19 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.ChatsItem;
+import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.ChatsViewHolder;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import io.realm.RealmResults;
-
-/**
- * Created by vikramaditya on 21/10/17.
- */
 
 public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
 
@@ -43,11 +41,22 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
         holder.item = chats.get(position);
         Glide.with(context)
                 .load(holder.item.getPhotoUrl())
-                .apply(RequestOptions.circleCropTransform())
+                .apply(RequestOptions
+                        .circleCropTransform()
+                        .error(R.drawable.ic_contact))
+                .transition(DrawableTransitionOptions.withCrossFade(300))
                 .into(holder.image);
-        holder.time.setText(holder.item.getUpdate().toString().substring(0, 4));
+        holder.time.setText(AHC.getSimpleDay(holder.item.getUpdate()));
         holder.name.setText(holder.item.getName());
         holder.latest.setText(holder.item.getLatest());
+        if (holder.item.getUnreadCount() == 0) {
+            holder.update.setVisibility(View.INVISIBLE);
+            holder.updateIcon.setVisibility(View.INVISIBLE);
+        } else {
+            holder.update.setVisibility(View.VISIBLE);
+            holder.updateIcon.setVisibility(View.VISIBLE);
+            holder.update.setText(Integer.toString(holder.item.getUnreadCount()));
+        }
     }
 
     @Override

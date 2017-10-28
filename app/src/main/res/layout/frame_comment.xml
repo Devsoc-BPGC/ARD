@@ -24,12 +24,11 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
-            <ImageButton
+            <ImageView
                 android:id="@+id/imageButton_frame_comment_emoji"
                 android:layout_width="@dimen/width_frame_comment_emoji"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/marginStart_frame_comment_emoji"
-                android:background="?selectableItemBackgroundBorderless"
                 android:contentDescription="@string/contentDesc_frame_comment_emoji_button"
                 android:src="@drawable/ic_smiley" />
 
@@ -42,8 +41,8 @@
                 android:layout_marginStart="@dimen/marginStart_frame_comment_message"
                 android:layout_marginTop="@dimen/marginTop_frame_comment_message"
                 android:background="@color/transparent"
-                android:inputType="textWebEmailAddress"
                 android:hint="@string/hint_frame_comment_message"
+                android:inputType="textWebEmailAddress"
                 android:textColorHint="@color/grey_500"
                 android:textSize="@dimen/textSize_frame_comment_message" />
         </LinearLayout>
