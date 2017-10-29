@@ -60,5 +60,6 @@
     <string name="firebase_web_client_id" translatable="false">895100654158-136bgaosvno98ebaebrdm6cra8ckp0gu.apps.googleusercontent.com</string>
     <string name="hint_frame_comment_message">Type a message</string>
     <string name="title_activity_chat">Chat</string>
+    <string name="title_activity_new_chat">New</string>
 
 </resources>

@@ -1,28 +1,29 @@
 package com.macbitsgoa.ard.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.NewChatActivity;
 import com.macbitsgoa.ard.adapters.ChatsAdapter;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
+import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
-import java.util.LinkedList;
-import java.util.Queue;
 
-import io.realm.RealmChangeListener;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -39,13 +40,12 @@ import io.realm.Sort;
 public class ChatFragment extends BaseFragment {
 
     /**
-     * Used to communicate with activity.
+     * Used to communicate with {@link com.macbitsgoa.ard.activities.MainActivity}. to notify it
+     * of updates.
      */
     private ChatFragmentListener mListener;
 
     private RecyclerView recyclerView;
-
-    private RealmResults<ChatsItem> chats;
 
     private ChatsAdapter chatsAdapter;
 
@@ -74,8 +74,12 @@ public class ChatFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
         recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_fragment_chat);
+        FloatingActionButton newChatFab = (FloatingActionButton) view.findViewById(R.id.fab_fragment_chat);
+
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        newChatFab.setOnClickListener(this);
         return view;
     }
 
@@ -95,20 +99,21 @@ public class ChatFragment extends BaseFragment {
         super.onStart();
 
         String sessionId = Calendar.getInstance().getTime().toString();
-        myStatus = getRootReference().child("online").child(getUser().getUid()).child(sessionId);
+        myStatus = getRootReference()
+                .child(ChatItemKeys.ONLINE)
+                .child(getUser().getUid())
+                .child(sessionId);
         myStatus.setValue(true);
         myStatus.onDisconnect().removeValue();
 
-        chats = database.where(ChatsItem.class).findAllSorted("update", Sort.DESCENDING);
-        //deleteEmptyChats();
+        RealmResults<ChatsItem> chats = database.where(ChatsItem.class)
+                .findAllSorted("update", Sort.DESCENDING);
+
+        deleteEmptyChats();
         chatsAdapter = new ChatsAdapter(chats, getContext());
 
-        chats.addChangeListener(new RealmChangeListener<RealmResults<ChatsItem>>() {
-            @Override
-            public void onChange(final RealmResults<ChatsItem> results) {
-                chatsAdapter.notifyDataSetChanged();
-                //deleteEmptyChats();
-            }
+        chats.addChangeListener(results -> {
+            chatsAdapter.notifyDataSetChanged();
         });
 
         recyclerView.setAdapter(chatsAdapter);
@@ -118,21 +123,21 @@ public class ChatFragment extends BaseFragment {
      * If any chat item has zero messages then don't include it in this RV
      */
     private void deleteEmptyChats() {
-        if (chats != null || !chats.isLoaded() || chats.size() == 0) return;
-        final Queue<ChatsItem> queue = new LinkedList<>(chats);
-        while (!queue.isEmpty()) {
-            ChatsItem ci = queue.poll();
-            if (database
-                    .where(MessageItem.class)
-                    .equalTo("senderId", ci.getId())
-                    .findAll()
-                    .size() == 0) {
-                database.beginTransaction();
-                ci.deleteFromRealm();
-                database.commitTransaction();
+        database.executeTransactionAsync(r -> {
+            RealmList<ChatsItem> allChats = new RealmList<>();
+            allChats.addAll(r.where(ChatsItem.class).findAll());
+            for (ChatsItem cItem : allChats) {
+                if (r.where(MessageItem.class).equalTo("senderId", cItem.getId())
+                        .findAll().isEmpty())
+                    cItem.deleteFromRealm();
             }
-        }
+
+        }, () -> {
+            if (chatsAdapter != null)
+                chatsAdapter.notifyDataSetChanged();
+        });
     }
+
 
     @Override
     public void onStop() {
@@ -144,5 +149,11 @@ public class ChatFragment extends BaseFragment {
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    @Override
+    public void onClick(View v) {
+        //Only fab  is registered
+        startActivity(new Intent(getContext(), NewChatActivity.class));
     }
 }

@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.fragments;
 
 import android.support.v4.app.Fragment;
+import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -16,7 +17,7 @@ import io.realm.Realm;
  * Created by vikramaditya on 26/10/17.
  */
 
-public class BaseFragment extends Fragment {
+public class BaseFragment extends Fragment implements View.OnClickListener {
 
     protected Realm database;
 
@@ -39,5 +40,10 @@ public class BaseFragment extends Fragment {
     public void onStop() {
         super.onStop();
         database.close();
+    }
+
+    @Override
+    public void onClick(View v) {
+
     }
 }

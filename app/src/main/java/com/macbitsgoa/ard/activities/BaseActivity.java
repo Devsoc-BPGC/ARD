@@ -18,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
@@ -50,6 +51,7 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
         if (FirebaseAuth.getInstance().getCurrentUser() == null && !(this instanceof AuthActivity)) {
             startActivity(new Intent(this, AuthActivity.class));
         }
+        AHC.setNextAlarm(this);
         database = Realm.getDefaultInstance();
     }
 
@@ -57,6 +59,7 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         database.close();
+        AHC.setNextAlarm(this);
     }
 
     /**
@@ -88,6 +91,16 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
      */
     public DatabaseReference getRootReference() {
         return FirebaseDatabase.getInstance().getReference().getRoot().child(BuildConfig.BUILD_TYPE);
+    }
+
+    /**
+     * Get current Firebase user
+     *
+     * @return Firebase user. May be null
+     */
+    @Nullable
+    public FirebaseUser getUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
     }
 
 

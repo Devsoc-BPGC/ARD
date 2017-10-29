@@ -105,8 +105,8 @@ public class AuthHelperGoogleTest {
         assertTrue(authActivity.updateUserInfo(firebaseAuth, databaseReference));
 
         verify(databaseReference, times(1)).child("123");
-        verify(databaseReference.child(UserItemKeys.FDR_USERS_NAME), times(1)).setValue("name");
-        verify(databaseReference.child(UserItemKeys.FDR_USERS_EMAIL), times(1)).setValue("email@domain.com");
+        verify(databaseReference.child(UserItemKeys.NAME), times(1)).setValue("name");
+        verify(databaseReference.child(UserItemKeys.EMAIL), times(1)).setValue("email@domain.com");
     }
 
     @Test
@@ -116,9 +116,9 @@ public class AuthHelperGoogleTest {
         assertTrue(authActivity.updateUserInfo(firebaseAuth, databaseReference));
 
         verify(databaseReference, times(1)).child("123");
-        verify(databaseReference.child(UserItemKeys.FDR_USERS_NAME), times(1)).setValue("name");
-        verify(databaseReference.child(UserItemKeys.FDR_USERS_EMAIL), times(1)).setValue("email@domain.com");
-        verify(databaseReference.child(UserItemKeys.FDR_USERS_PHOTO_URL), times(1)).setValue("");
+        verify(databaseReference.child(UserItemKeys.NAME), times(1)).setValue("name");
+        verify(databaseReference.child(UserItemKeys.EMAIL), times(1)).setValue("email@domain.com");
+        verify(databaseReference.child(UserItemKeys.PHOTO_URL), times(1)).setValue("");
     }
 
     @Test

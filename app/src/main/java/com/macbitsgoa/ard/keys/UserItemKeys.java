@@ -12,15 +12,20 @@ public class UserItemKeys {
     /**
      * Field {@link UserItem#name} (Name of UserItem).
      */
-    public static final String FDR_USERS_NAME = "name";
+    public static final String NAME = "name";
 
     /**
      * Field {@link UserItem#email} (email id of user).
      */
-    public static final String FDR_USERS_EMAIL = "email";
+    public static final String EMAIL = "email";
 
     /**
      * Field {@link UserItem#photoUrl} (photo url of user).
      */
-    public static final String FDR_USERS_PHOTO_URL = "photoUrl";
+    public static final String PHOTO_URL = "photoUrl";
+
+    /**
+     * Field {@link UserItem#photoUrl} (photo url of user).
+     */
+    public static final String DESC = "desc";
 }

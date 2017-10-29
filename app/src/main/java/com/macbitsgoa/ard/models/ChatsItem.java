@@ -1,5 +1,7 @@
 package com.macbitsgoa.ard.models;
 
+import android.support.annotation.Nullable;
+
 import java.util.Calendar;
 import java.util.Date;
 
@@ -12,6 +14,8 @@ public class ChatsItem extends RealmObject {
     private String name;
     private String latest;
     private String photoUrl;
+
+    @Nullable
     private Date update;
     private int unreadCount;
 

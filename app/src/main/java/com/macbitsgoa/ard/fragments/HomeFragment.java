@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.constraint.ConstraintLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
@@ -228,9 +227,9 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
                 for (final DataSnapshot childSnapshot : dataSnapshot.getChildren()) {
                     final AnnItem annItem = childSnapshot.getValue(AnnItem.class);
                     annItem.setKey(childSnapshot.getKey());
-                    database.beginTransaction();
-                    database.copyToRealmOrUpdate(annItem);
-                    database.commitTransaction();
+                    database.executeTransactionAsync(r -> {
+                        r.copyToRealmOrUpdate(annItem);
+                    });
                 }
                 setupData(generateList());
             }

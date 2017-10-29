@@ -178,9 +178,9 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
             photoUrl = uri.toString();
         }
         final DatabaseReference userDb = parentRef.child(uid);
-        userDb.child(UserItemKeys.FDR_USERS_NAME).setValue(name);
-        userDb.child(UserItemKeys.FDR_USERS_EMAIL).setValue(email);
-        userDb.child(UserItemKeys.FDR_USERS_PHOTO_URL).setValue(photoUrl);
+        userDb.child(UserItemKeys.NAME).setValue(name);
+        userDb.child(UserItemKeys.EMAIL).setValue(email);
+        userDb.child(UserItemKeys.PHOTO_URL).setValue(photoUrl);
         return true;
     }
 }

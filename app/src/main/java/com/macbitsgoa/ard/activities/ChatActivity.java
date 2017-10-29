@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -23,16 +24,19 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ChatMsgAdapter;
+import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
+import com.macbitsgoa.ard.services.NotifyService;
+import com.macbitsgoa.ard.services.SendService;
+import com.macbitsgoa.ard.types.MessageStatusType;
 
 import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedCollectionChangeSet;
-import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -81,29 +85,44 @@ public class ChatActivity extends BaseActivity {
 
     MessagingService messagingService;
 
+    NotificationManagerCompat nmc;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        if (!getIntent().hasExtra("senderId")) {
-            /*
-            This activity was somehow launched without the sender id and therefore should be
-            finished.
-             */
-            finish();
-        } else {
-            senderId = getIntent().getStringExtra("senderId");
-            theirStatus = onlineStatus.child(senderId);
-            writeRef = writeRef.child(senderId).child("0").child(user.getUid());
-            readStatus = writeRef.child("messageStatus");
-        }
+        senderId = getIntent().getStringExtra("senderId");
+        if (senderId == null || user == null) return;
+        theirStatus = onlineStatus.child(senderId);
+        writeRef = writeRef.child(senderId).child(ChatItemKeys.PRIVATE_MESSAGES).child(user.getUid());
+        readStatus = writeRef.child(ChatItemKeys.MESSAGE_STATUS);
 
         ButterKnife.bind(this);
+        setupUI();
+        nmc = NotificationManagerCompat.from(this);
+        startService(new Intent(this, MessagingService.class));
+        theirStatus.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null) {
+                    subtitle.setVisibility(View.GONE);
+                } else {
+                    subtitle.setVisibility(View.VISIBLE);
+                }
+            }
 
-        /*
-          Setup up UI window
-         */
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    /**
+     * Setup ui window and toolbar.
+     */
+    private void setupUI() {
         getWindow().setStatusBarColor(ContextCompat.getColor(this, R.color.green_900));
         getWindow().setNavigationBarColor(ContextCompat.getColor(this, R.color.green_900));
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
@@ -113,45 +132,95 @@ public class ChatActivity extends BaseActivity {
                 .load(getIntent().getStringExtra("photoUrl"))
                 .apply(RequestOptions.circleCropTransform())
                 .into(icon);
+    }
 
-        chatsRV.setHasFixedSize(true);
+    /**
+     * Update unread message count.
+     * //TODO fix counts maybe?
+     */
+    private void updateCounts() {
+        //Remove any unread count if present
+        database.executeTransactionAsync(r -> {
+            ChatsItem chat = r.where(ChatsItem.class)
+                    .equalTo("id", senderId).findFirst();
+            if (chat == null) {
+                chat = r.createObject(ChatsItem.class, senderId);
+                chat.setLatest("");
+                chat.setUpdate(null);
+                chat.setName(getIntent().getStringExtra("title"));
+                chat.setPhotoUrl(getIntent().getStringExtra("photoUrl"));
+            }
+            chat.setUnreadCount(0);
+
+            RealmResults<MessageItem> unreadMessages = r.where(MessageItem.class)
+                    .equalTo("messageRcvd", true)
+                    .lessThanOrEqualTo("messageStatus", MessageStatusType.MSG_RCVD)
+                    .findAll();
+            for (MessageItem mi : unreadMessages) {
+                mi.setMessageStatus(MessageStatusType.MSG_READ);
+                Intent notifyIntent = new Intent(ChatActivity.this, NotifyService.class);
+                notifyIntent.putExtra("receiverId", mi.getSenderId());
+                notifyIntent.putExtra("messageId", mi.getMessageId());
+                startService(notifyIntent);
+            }
+        });
+    }
+
+    RealmResults<MessageItem> messages;
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        sessionId = Calendar.getInstance().getTime().toString();
+        myStatus = onlineStatus.child(user.getUid()).child(sessionId);
+        myStatus.setValue(true);
+        myStatus.onDisconnect().removeValue();
+
         final LinearLayoutManager llm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true);
-        llm.findFirstCompletelyVisibleItemPosition();
         chatsRV.setLayoutManager(llm);
+        chatsRV.setHasFixedSize(true);
 
         updateCounts();
 
-        final RealmResults<MessageItem> messages = database.where(MessageItem.class)
+        messages = database
+                .where(MessageItem.class)
                 .equalTo("senderId", senderId)
                 .findAllSorted("messageRcvdTime", Sort.DESCENDING);
-        messages.addChangeListener(new OrderedRealmCollectionChangeListener<RealmResults<MessageItem>>() {
-            @Override
-            public void onChange(RealmResults<MessageItem> messageItems, OrderedCollectionChangeSet changeSet) {
-                // `null`  means the async query returns the first time.
-                if (changeSet == null||true) {
-                    chatMsgAdapter.notifyDataSetChanged();
-                    return;
-                }
+        messages.addChangeListener((messageItems, changeSet) -> {
+            // `null`  means the async query returns the first time.
+            if (changeSet == null) {
+                chatMsgAdapter.notifyDataSetChanged();
+                return;
+            }
 
-                OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
-                for (OrderedCollectionChangeSet.Range range : modifications) {
-                   // chatMsgAdapter.notifyItemRangeChanged(range.startIndex, range.length);
-                }
+            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+            for (OrderedCollectionChangeSet.Range range : modifications) {
+                //chatMsgAdapter.notifyItemRangeChanged(range.startIndex, range.length);
+            }
+            OrderedCollectionChangeSet.Range[] additions = changeSet.getInsertionRanges();
+            for (OrderedCollectionChangeSet.Range range : modifications) {
+                //chatMsgAdapter.notifyItemRangeInserted(range.startIndex, range.length);
+            }
+            chatMsgAdapter.notifyDataSetChanged();
+            //Cancel any ongoing notification from this user
+            nmc.cancel(senderId.hashCode());
 
-                if (llm.findFirstCompletelyVisibleItemPosition() == 0) {
-                    chatsRV.scrollToPosition(0);
-                    rlIcons.setVisibility(View.GONE);
-                    updateNumber.setText("0");
-                    rlUpdates.setVisibility(View.GONE);
-                }
+            //TODO update read status of new messages somewhere
 
+
+            if (llm.findFirstCompletelyVisibleItemPosition() < 5) {
+                chatsRV.scrollToPosition(0);
+                rlIcons.setVisibility(View.GONE);
+                updateNumber.setText("0");
+                rlUpdates.setVisibility(View.GONE);
             }
         });
 
-
         chatMsgAdapter = new ChatMsgAdapter(messages);
         chatsRV.setAdapter(chatMsgAdapter);
-        chatsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
+
+        //TODO improve this
+          /*  chatsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -182,51 +251,20 @@ public class ChatActivity extends BaseActivity {
                 super.onScrolled(recyclerView, dx, dy);
             }
         });
-        ;
-
-        theirStatus.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() == null) {
-                    subtitle.setVisibility(View.GONE);
-                } else {
-                    subtitle.setVisibility(View.VISIBLE);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    private void updateCounts() {
-        //Remove any unread count if present
-        final ChatsItem chat = database.where(ChatsItem.class)
-                .equalTo("id", senderId).findFirst();
-        if (chat == null) {
-            finish();
-        } else {
-            database.beginTransaction();
-            chat.setUnreadCount(0);
-            database.commitTransaction();
-        }
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        sessionId = Calendar.getInstance().getTime().toString();
-        myStatus = onlineStatus.child(user.getUid()).child(sessionId);
-        myStatus.setValue(true);
-        myStatus.onDisconnect().removeValue();
+    */
     }
 
     @Override
     protected void onStop() {
         super.onStop();
+        messages.removeAllChangeListeners();
         myStatus.removeValue();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        nmc.cancel(senderId.hashCode());
     }
 
     //TODO fix read status
@@ -241,27 +279,24 @@ public class ChatActivity extends BaseActivity {
             rlIcons.setVisibility(View.GONE);
             rlUpdates.setVisibility(View.GONE);
         } else if (viewId == R.id.fab_frame_comment_send) {
-
             //Get user message from edittext
             final String messageData = message.getText().toString().trim();
             //If length of EditText is 0, do nothing
             if (messageData.length() == 0) return;
 
-            if (messagingService == null || !MessagingService.isInstanceRunning()) {
-                startService(new Intent(this, MessagingService.class));
-                messagingService = MessagingService.getInstance();
-            }
-            messagingService.sendMessage(messageData, senderId);
+            Intent mIntent = new Intent(this, SendService.class);
+            mIntent.putExtra("messageData", messageData);
+            mIntent.putExtra("receiverId", senderId);
+            startService(mIntent);
+            updateCounts();
 
             //Clear EditText after extracting it's value
             message.getText().clear();
 
-            chatMsgAdapter.notifyItemInserted(0);
             chatsRV.scrollToPosition(0);
 
             rlUpdates.setVisibility(View.GONE);
             rlIcons.setVisibility(View.GONE);
         }
     }
-
 }

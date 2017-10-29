@@ -32,7 +32,7 @@ public class MessageItem extends RealmObject {
     }
 
     public MessageItem(int messageStatus, boolean messageRcvd, String messageId, String messageData,
-                       String senderId, Date messageTime, Date messageRcvdTime) {
+                       String senderId, Date messageTime, Date messageRcvdTime, boolean messageRead) {
         this.messageStatus = messageStatus;
         this.messageRcvd = messageRcvd;
         this.messageId = messageId;

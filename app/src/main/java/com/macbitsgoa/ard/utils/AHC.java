@@ -1,13 +1,19 @@
 package com.macbitsgoa.ard.utils;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Log;
 import android.util.TypedValue;
 
 import com.macbitsgoa.ard.BuildConfig;
+import com.macbitsgoa.ard.services.MessagingService;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -102,9 +108,24 @@ public class AHC {
     public static final String FDR_USERS = "users";
 
     /**
+     * Firebase directory of users.
+     */
+    public static final String FDR_ADMINS = "admins";
+
+    /**
      * SharedPreferences file name for the app.
      */
     public static final String SP_APP = "prefs";
+
+    /**
+     * Unique code for Alarm receiver.
+     */
+    public static final int ALARM_RECEIVER_REQUEST_CODE = 49;
+
+    /**
+     * Action for alarm receiver.
+     */
+    public static final String ALARM_RECEIVER_ACTION_UPDATE = "ard.action.alarm";
 
     /**
      * Method to get pixel value corresponding to input dp.
@@ -152,11 +173,12 @@ public class AHC {
      * @param date Date object to use.
      * @return converted string.
      */
-    public static String getSimpleDayAndTime(@NonNull final Date date) {
+    public static String getSimpleDayAndTime(@Nullable final Date date) {
         return getSimpleTime(date);
     }
 
-    public static String getSimpleDay(@Nonnull final Date date) {
+    public static String getSimpleDay(@Nullable final Date date) {
+        if (date == null) return "";
         long diff = Math.abs(date.getTime() - Calendar.getInstance().getTime().getTime());
         if (diff / (1000 * 60 * 60 * 24) < 1)
             return getSimpleTime(date);
@@ -165,8 +187,31 @@ public class AHC {
     }
 
     public static String getSimpleTime(@Nonnull final Date date) {
+        if (date == null) return "";
         final SimpleDateFormat sdf = new SimpleDateFormat("hh:mm a", Locale.UK);
         return sdf.format(date);
     }
+
+    /**
+     * Setup alarm after delay.
+     */
+    public static void setNextAlarm(final Context context) {
+         /*
+        Set alarm for service start.
+         */
+        Log.e("TAG", "setting next alarm");
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 1);
+        //Create a new PendingIntent and add it to the AlarmManager
+        final Intent intent = new Intent(context, MessagingService.class);
+        PendingIntent pi = PendingIntent.getService(
+                context,
+                AHC.ALARM_RECEIVER_REQUEST_CODE,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        final AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+    }
+
 
 }
