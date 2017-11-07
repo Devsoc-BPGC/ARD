@@ -93,6 +93,11 @@ public class AHC {
     public static final String FDR_HOME = "home";
 
     /**
+     * Reference to extra informations.
+     */
+    public static final String FDR_EXTRAS = "extra";
+
+    /**
      * Reference to home fragment node.
      */
     public static final String FDR_CHAT = "chats";

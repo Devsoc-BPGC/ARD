@@ -32,15 +32,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PostActivity"
-            android:label="@string/title_activity_post"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.macbitsgoa.ard.activities.MainActivity" />
-        </activity>
-        <activity
             android:name=".activities.SettingsActivity"
             android:label="@string/title_activity_settings"
             android:parentActivityName=".activities.MainActivity"

@@ -24,15 +24,17 @@
         <android.support.design.widget.AppBarLayout
             android:layout_width="match_parent"
             android:layout_height="250dp"
+            app:expanded="false"
             android:theme="@style/AppTheme.AppBarOverlay">
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:minHeight="64dp"
-                app:layout_scrollFlags="scroll|exitUntilCollapsed">
+                app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
 
                 <android.support.v4.view.ViewPager
+                    android:id="@+id/vp_fragment_home_slideshow"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     app:layout_collapseMode="parallax"
@@ -42,6 +44,7 @@
                     android:id="@+id/search_view_fragment_home"
                     android:layout_width="match_parent"
                     android:layout_height="?actionBarSize"
+                    android:alpha="0.95"
                     app:layout_collapseMode="pin"
                     app:search_clear_on_close="true"
                     app:search_hide_on_keyboard_close="true"
@@ -61,40 +64,6 @@
             android:layout_marginStart="@dimen/marginStart_home_fragment_recyclerView"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_fragment_home_add"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:layout_marginBottom="@dimen/margin_home_fragment_mainFab"
-            android:layout_marginEnd="@dimen/margin_home_fragment_mainFab"
-            app:fabSize="normal"
-            app:layout_behavior="com.macbitsgoa.ard.utils.ScrollAwareFABBehavior"
-            app:srcCompat="@drawable/ic_plus" />
     </android.support.design.widget.CoordinatorLayout>
 
-    <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab_fragment_home_announce"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/marginBottom_home_fragment_announceFab"
-        android:layout_marginEnd="@dimen/marginEnd_home_fragment_subFab"
-        app:backgroundTint="?attr/backgroundTint_home_fragment_announceFab"
-        app:fabSize="mini"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:srcCompat="@drawable/ic_announcements" />
-
-    <View
-        android:id="@+id/view_fragment_home_backdrop"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="@dimen/margin_home_fragment_backdrop"
-        android:alpha=".5"
-        android:background="?attr/background_home_fragment_backdrop"
-        android:visibility="invisible"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 </android.support.constraint.ConstraintLayout>

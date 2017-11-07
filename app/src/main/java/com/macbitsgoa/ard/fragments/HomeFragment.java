@@ -1,39 +1,33 @@
 package com.macbitsgoa.ard.fragments;
 
-import android.animation.Animator;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.CardView;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewAnimationUtils;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.macbitsgoa.ard.BuildConfig;
+import com.lapism.searchview.SearchView;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.activities.PostActivity;
 import com.macbitsgoa.ard.activities.PostDetailsActivity;
-import com.macbitsgoa.ard.activities.SearchActivity;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
+import com.macbitsgoa.ard.adapters.SlideshowAdapter;
 import com.macbitsgoa.ard.interfaces.HomeFragmentListener;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.PostKeys;
 import com.macbitsgoa.ard.models.AnnItem;
+import com.macbitsgoa.ard.models.SlideshowItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
@@ -45,6 +39,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.realm.Realm;
+import io.realm.RealmResults;
 import io.realm.Sort;
 
 /**
@@ -57,38 +52,13 @@ import io.realm.Sort;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeFragment extends Fragment implements View.OnClickListener, OnItemClickListener {
+public class HomeFragment extends BaseFragment implements OnItemClickListener {
 
     /**
      * RecyclerView to display Home content.
      */
     @BindView(R.id.recyclerView_fragment_home)
     public RecyclerView recyclerView;
-
-    /**
-     * Main FAB for fragment. Has multiple sub mini FABs.
-     */
-    @BindView(R.id.fab_fragment_home_add)
-    public FloatingActionButton mainFab;
-
-    /**
-     * Sub mini FAB for general upload.
-     */
-    @BindView(R.id.fab_fragment_home_announce)
-    public FloatingActionButton announceFab;
-
-    /**
-     * A simple {@code View} object which has a custom background to be used when main FAB is
-     * clicked.
-     */
-    @BindView(R.id.view_fragment_home_backdrop)
-    public View backdrop;
-
-    /**
-     * Status boolean to maintain current status of {@link HomeFragment#mainFab}
-     * in {@link HomeFragment}.
-     */
-    public boolean isFabOpen;
 
     /**
      * HomeAdapter object.
@@ -101,15 +71,26 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
     private Unbinder unbinder;
 
     /**
-     * Reference to node {@link AHC#FDR_HOME} to which listener is attached.
+     * ViewPager for image slideshow
      */
-    private DatabaseReference dbRef = FirebaseDatabase.getInstance()
-            .getReference().child(BuildConfig.BUILD_TYPE).child(AHC.FDR_HOME);
+    @BindView(R.id.vp_fragment_home_slideshow)
+    public ViewPager viewPagerSlideShow;
+
+    private SlideshowAdapter slideshowAdapter;
 
     /**
-     * Handle for Realm instance.
+     * Reference to node {@link AHC#FDR_HOME} to which listener is attached.
      */
-    private Realm database;
+    private DatabaseReference dbRef = getRootReference().child(AHC.FDR_HOME);
+
+    /**
+     * Reference to slide show image data.
+     */
+    private DatabaseReference slideShowRef = getRootReference().child(AHC.FDR_EXTRAS).child(AHC.FDR_HOME).child("slideshow");
+    private ValueEventListener slideShowEventListener;
+
+    @BindView(R.id.search_view_fragment_home)
+    SearchView searchView;
 
     /**
      * EventListener for {@link AHC#FDR_HOME} which is required to remove in {@link #onStop()}.
@@ -150,20 +131,13 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
      * View updates and listeners can be done here.
      */
     private void init() {
-        backdrop.setVisibility(View.INVISIBLE);
-        announceFab.setVisibility(View.INVISIBLE);
-
         homeAdapter = new HomeAdapter();
-
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(homeAdapter);
 
         onItemTouchListener = new RecyclerItemClickListener(getContext(), recyclerView, this);
         recyclerView.addOnItemTouchListener(onItemTouchListener);
-        mainFab.setOnClickListener(this);
-        announceFab.setOnClickListener(this);
-        backdrop.setOnClickListener(this);
     }
 
     @Override
@@ -171,9 +145,19 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         super.onStart();
         database = Realm.getDefaultInstance();
 
+        searchView.clearFocus();
+
         setupData(generateList());
 
+        RealmResults<SlideshowItem> slideshowItems = database.where(SlideshowItem.class)
+                .findAllSorted("photoDate", Sort.DESCENDING);
+        slideshowAdapter = new SlideshowAdapter(slideshowItems);
+        slideshowItems.addChangeListener(newSlideshowItems -> slideshowAdapter.notifyDataSetChanged());
+        viewPagerSlideShow.setAdapter(slideshowAdapter);
+
         homeEventListener = getValueEventListener();
+        slideShowEventListener = getSlideShowEventListener();
+        slideShowRef.addValueEventListener(slideShowEventListener);
         dbRef.addValueEventListener(homeEventListener);
     }
 
@@ -209,6 +193,30 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         return list;
     }
 
+    private ValueEventListener getSlideShowEventListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getChildrenCount() <= 0) return;
+
+                database.executeTransaction(r -> {
+                    database.delete(SlideshowItem.class);
+                });
+                for (DataSnapshot childShot :
+                        dataSnapshot.getChildren()) {
+                    database.executeTransaction(r -> {
+                        r.insert(childShot.getValue(SlideshowItem.class));
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+    }
+
     /**
      * Returns the valueEventListener for the node {@link AHC#FDR_HOME}.
      *
@@ -240,6 +248,7 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
     public void onStop() {
         super.onStop();
         database.close();
+        slideShowRef.removeEventListener(slideShowEventListener);
         dbRef.removeEventListener(homeEventListener);
     }
 
@@ -249,128 +258,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         recyclerView.removeOnItemTouchListener(onItemTouchListener);
         homeAdapter = null;
         unbinder.unbind();
-    }
-
-    @Override
-    public void onClick(final View v) {
-        final int id = v.getId();
-        if (id == R.id.fab_fragment_home_add || id == R.id.view_fragment_home_backdrop) {
-            animateFab();
-        } else {
-            animateFab();
-            final Intent intent = new Intent(getContext(), PostActivity.class);
-            startActivity(intent);
-        }
-    }
-
-    /**
-     * Method to animate main fab and invisible ones.
-     */
-    public void animateFab() {
-        final Animator startAnimator = ViewAnimationUtils.createCircularReveal(backdrop,
-                (int) mainFab.getX() + mainFab.getWidth() / 2,
-                (int) mainFab.getY() + mainFab.getHeight() / 2,
-                0,
-                (float) Math.hypot(backdrop.getHeight(), backdrop.getWidth()));
-        final Animator endAnimator = ViewAnimationUtils.createCircularReveal(backdrop,
-                (int) mainFab.getX() + mainFab.getWidth() / 2,
-                (int) mainFab.getY() + mainFab.getHeight() / 2,
-                (float) Math.hypot(backdrop.getHeight(), backdrop.getWidth()),
-                0);
-        startAnimator.setDuration((long) AHC.ANIMATION_MULTIPLIER * getResources()
-                .getInteger(R.integer.anim_fab_duration));
-        endAnimator.setDuration((long) AHC.ANIMATION_MULTIPLIER * getResources()
-                .getInteger(R.integer.anim_fab_duration));
-
-        if (isFabOpen) {
-            startAnimator.removeAllListeners();
-            endAnimator.addListener(getEndAnimatorListener());
-            endAnimator.start();
-        } else {
-            endAnimator.removeAllListeners();
-            startAnimator.addListener(getStartAnimatorListener());
-            startAnimator.start();
-        }
-    }
-
-    /**
-     * Returns listener for start animation of backdrop.
-     *
-     * @return Animator listener for animator object.
-     */
-    private Animator.AnimatorListener getStartAnimatorListener() {
-        return new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(final Animator animation) {
-                mainFab.startAnimation(AnimationUtils.loadAnimation(getContext(),
-                        R.anim.rotate_clock));
-                announceFab.startAnimation(AnimationUtils.loadAnimation(getContext(),
-                        R.anim.fab_open));
-                backdrop.setVisibility(View.VISIBLE);
-                announceFab.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                announceFab.setClickable(true);
-                backdrop.setClickable(true);
-                isFabOpen = true;
-
-                //To keep coverage at 100%
-                onAnimationRepeat(animation);
-                onAnimationCancel(animation);
-            }
-
-            @Override
-            public void onAnimationCancel(final Animator animation) {
-                //nothing is cancelled.
-            }
-
-            @Override
-            public void onAnimationRepeat(final Animator animation) {
-                //No repeating set.
-            }
-        };
-    }
-
-    /**
-     * Returns listener for end animation for backdrop.
-     *
-     * @return Animator listener for animator object.
-     */
-    private Animator.AnimatorListener getEndAnimatorListener() {
-        return new Animator.AnimatorListener() {
-            @Override
-            public void onAnimationStart(final Animator animation) {
-                announceFab.startAnimation(AnimationUtils.loadAnimation(getContext(),
-                        R.anim.fab_close));
-                mainFab.startAnimation(AnimationUtils.loadAnimation(getContext(),
-                        R.anim.rotate_anticlock));
-            }
-
-            @Override
-            public void onAnimationEnd(final Animator animation) {
-                announceFab.setVisibility(View.INVISIBLE);
-                backdrop.setVisibility(View.INVISIBLE);
-                announceFab.setClickable(false);
-                backdrop.setClickable(false);
-                isFabOpen = false;
-
-                //To keep coverage at 100%
-                onAnimationRepeat(animation);
-                onAnimationCancel(animation);
-            }
-
-            @Override
-            public void onAnimationCancel(final Animator animation) {
-                //Nothing is cancelled.
-            }
-
-            @Override
-            public void onAnimationRepeat(final Animator animation) {
-                //No repeating set.
-            }
-        };
     }
 
     @Override
