@@ -42,9 +42,9 @@
 
         <!-- Frame search colors -->
         <item name="bg_frame_search_edittext">@color/transparent</item>
-        <item name="textColor_frame_search_edittext">@color/white</item>
-        <item name="textColorHint_frame_search_edittext">@color/white</item>
-        <item name="cardBgColor_frame_search">@color/colorPrimaryLight</item>
+        <item name="textColor_frame_search_edittext">@color/grey_700</item>
+        <item name="textColorHint_frame_search_edittext">@color/grey_500</item>
+        <item name="cardBgColor_frame_search">@color/white</item>
 
         <!-- ViewHolder colors -->
         <item name="textColor_viewHolder_ann_data">@color/grey_700</item>

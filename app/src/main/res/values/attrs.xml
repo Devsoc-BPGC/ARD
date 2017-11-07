@@ -15,8 +15,8 @@
     <attr name="tabLayout_faq_tab_text_color" format="color" />
     <attr name="tabLayout_faq_tab_selected_text_color" format="color" />
 
-    <attr name="google_signin_btn_tint" format="color"/>
-    
+    <attr name="google_signin_btn_tint" format="color" />
+
     <attr name="customTab_toolbar_color" format="color" />
 
     <!-- Home Section colors -->

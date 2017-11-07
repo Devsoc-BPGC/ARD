@@ -77,9 +77,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
     @BindView(R.id.fab_fragment_home_announce)
     public FloatingActionButton announceFab;
 
-    @BindView(R.id.cardView_frame_search)
-    public CardView cvfs;
-
     /**
      * A simple {@code View} object which has a custom background to be used when main FAB is
      * clicked.
@@ -142,7 +139,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
                              final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_home, container, false);
-
         unbinder = ButterKnife.bind(this, view);
 
         init();
@@ -168,7 +164,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         mainFab.setOnClickListener(this);
         announceFab.setOnClickListener(this);
         backdrop.setOnClickListener(this);
-        cvfs.setOnClickListener(this);
     }
 
     @Override
@@ -261,10 +256,6 @@ public class HomeFragment extends Fragment implements View.OnClickListener, OnIt
         final int id = v.getId();
         if (id == R.id.fab_fragment_home_add || id == R.id.view_fragment_home_backdrop) {
             animateFab();
-        } else if (id == R.id.cardView_frame_search) {
-            ActivityOptionsCompat options = ActivityOptionsCompat.
-                    makeSceneTransitionAnimation(getActivity(), cvfs, "profile");
-            startActivity(new Intent(getContext(), SearchActivity.class), options.toBundle());
         } else {
             animateFab();
             final Intent intent = new Intent(getContext(), PostActivity.class);

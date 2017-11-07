@@ -18,7 +18,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             // Set the alarm here.
             Log.d("BootBroadcastReceiver", "Starting MessagingService");
-            context.startActivity(new Intent(context, MessagingService.class));
+            context.startService(new Intent(context, MessagingService.class));
         }
     }
 }

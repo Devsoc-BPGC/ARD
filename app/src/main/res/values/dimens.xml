@@ -101,7 +101,7 @@
     <dimen name="padding_content_auth_google">16dp</dimen>
 
     <!-- Animator -->
-    <dimen name="valueTo_lift_on_touch_translationZ_set">6dp</dimen>
+    <dimen name="valueTo_lift_on_touch_translationZ_set">8dp</dimen>
     <dimen name="valueTo_lift_on_touch_translationZ_reset">0dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 </resources>

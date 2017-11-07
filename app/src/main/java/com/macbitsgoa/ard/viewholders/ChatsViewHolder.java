@@ -38,15 +38,12 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder {
     public ChatsViewHolder(View itemView, final Context context) {
         super(itemView);
         ButterKnife.bind(this, itemView);
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(context, ChatActivity.class);
-                intent.putExtra("title", item.getName());
-                intent.putExtra("senderId", item.getId());
-                intent.putExtra("photoUrl", item.getPhotoUrl());
-                context.startActivity(intent);
-            }
+        itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(context, ChatActivity.class);
+            intent.putExtra("title", item.getName());
+            intent.putExtra("senderId", item.getId());
+            intent.putExtra("photoUrl", item.getPhotoUrl());
+            context.startActivity(intent);
         });
     }
 }
