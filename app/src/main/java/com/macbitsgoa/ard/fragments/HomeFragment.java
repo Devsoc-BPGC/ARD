@@ -145,7 +145,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
         super.onStart();
         database = Realm.getDefaultInstance();
 
-        searchView.clearFocus();
+        searchView.hideKeyboard();
 
         setupData(generateList());
 
