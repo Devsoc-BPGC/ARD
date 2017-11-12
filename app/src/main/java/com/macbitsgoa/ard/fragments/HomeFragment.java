@@ -2,12 +2,14 @@ package com.macbitsgoa.ard.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -34,12 +36,13 @@ import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
 import io.realm.Realm;
-import io.realm.RealmResults;
 import io.realm.Sort;
 
 /**
@@ -59,6 +62,8 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
      */
     @BindView(R.id.recyclerView_fragment_home)
     public RecyclerView recyclerView;
+
+    private Timer timer;
 
     /**
      * HomeAdapter object.
@@ -148,17 +153,54 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
         searchView.hideKeyboard();
 
         setupData(generateList());
-
-        RealmResults<SlideshowItem> slideshowItems = database.where(SlideshowItem.class)
-                .findAllSorted("photoDate", Sort.DESCENDING);
-        slideshowAdapter = new SlideshowAdapter(slideshowItems);
-        slideshowItems.addChangeListener(newSlideshowItems -> slideshowAdapter.notifyDataSetChanged());
-        viewPagerSlideShow.setAdapter(slideshowAdapter);
+        setupSlideshow();
 
         homeEventListener = getValueEventListener();
+        dbRef.addValueEventListener(homeEventListener);
+    }
+
+    private void setupSlideshow() {
+        slideshowAdapter = new SlideshowAdapter();
+
+        final Handler handler = new Handler();
+        final Runnable update = () -> {
+            int newPos = viewPagerSlideShow.getCurrentItem() + 1;
+            newPos %= slideshowAdapter.getCount();
+            viewPagerSlideShow.setCurrentItem(newPos, true);
+        };
+
+        viewPagerSlideShow.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                Log.e("TAG", "scrolled");
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                Log.e("TAG", "select");
+
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                Log.e("TAG", "state");
+
+            }
+        });
+        //TODO if user scrolls an image, timer should be restarted
+        timer = new Timer(); // This will create a new Thread
+        timer.schedule(new TimerTask() { // task to be scheduled
+
+            @Override
+            public void run() {
+                handler.post(update);
+            }
+        }, 10000, 25000);
+
+
+        viewPagerSlideShow.setAdapter(slideshowAdapter);
         slideShowEventListener = getSlideShowEventListener();
         slideShowRef.addValueEventListener(slideShowEventListener);
-        dbRef.addValueEventListener(homeEventListener);
     }
 
     /**
@@ -247,7 +289,9 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
     @Override
     public void onStop() {
         super.onStop();
+        slideshowAdapter.close();
         database.close();
+        timer.cancel();
         slideShowRef.removeEventListener(slideShowEventListener);
         dbRef.removeEventListener(homeEventListener);
     }

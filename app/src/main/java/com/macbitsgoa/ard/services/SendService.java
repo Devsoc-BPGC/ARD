@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.services;
 
 import android.content.Intent;
+import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -17,8 +18,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nonnull;
-
 import io.realm.Realm;
 
 /**
@@ -29,26 +28,32 @@ import io.realm.Realm;
 
 public class SendService extends BaseIntentService {
 
-    ValueEventListener sendListener;
+    public static final String TAG = SendService.class.getSimpleName();
+
+    private ValueEventListener sendListener;
 
     public SendService() {
         super(SendService.class.getSimpleName());
     }
 
     @Override
-    protected void onHandleIntent(@Nonnull Intent intent) {
+    protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
+        if (intent == null) return;
         final String messageData = intent.getStringExtra("messageData");
         final String receiverId = intent.getStringExtra("receiverId");
         if (messageData == null || receiverId == null) return;
 
-        Realm database = Realm.getDefaultInstance();
-        DatabaseReference sendMessageRef = getRootReference()
+        notifyStatus(receiverId);
+
+
+        final Realm database = Realm.getDefaultInstance();
+        final DatabaseReference sendMessageRef = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(receiverId)
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
-        DatabaseReference sentMessageStatusRef = getRootReference()
+        final DatabaseReference sentMessageStatusRef = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(getUser().getUid())
                 .child(ChatItemKeys.SENT_STATUS);
@@ -58,6 +63,7 @@ public class SendService extends BaseIntentService {
         final String messageId = "" + messageTime.getTime()
                 + messageTime.hashCode()
                 + messageData.hashCode();
+        Log.e(TAG, "Sending message with id " + messageId);
         final String latestMessage = messageData.substring(0, messageData.length() % 50);
 
         //Add new message
@@ -100,25 +106,45 @@ public class SendService extends BaseIntentService {
             }
         });
         sendListener = getSentMsgStatusVEL();
-        sentMessageStatusRef.addListenerForSingleValueEvent(sendListener);
+        sentMessageStatusRef.addValueEventListener(sendListener);
 
+        Log.e(TAG, "Calling notify service");
+        notifyStatus(receiverId);
         //sentMessageStatusRef.removeEventListener(sendListener);
         database.close();
     }
 
+    /**
+     * Start {@link NotifyService} to update read status for received messages which have been
+     * read but not updated.
+     *
+     * @param receiverId User id of receiver.
+     */
+    private void notifyStatus(final String receiverId) {
+        //Update any message read status of this receiver user
+        final Intent notifyIntent = new Intent(this, NotifyService.class);
+        notifyIntent.putExtra("receiverId", receiverId);
+        startService(notifyIntent);
+    }
+
+    /**
+     * Handle onDataSnapshot for {@link #sendListener}.
+     *
+     * @return ValueEventListener object for hadnling ref updates.
+     */
     public ValueEventListener getSentMsgStatusVEL() {
         return new ValueEventListener() {
             Realm database;
 
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 database = Realm.getDefaultInstance();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    String key = child.getKey();
-                    MessageItem mi = database
+                for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    final String key = child.getKey();
+                    final MessageItem mi = database
                             .where(MessageItem.class)
                             .equalTo("messageId", key)
-                            .lessThan("messageStatus", MessageStatusType.MSG_SENT)
+                            .lessThanOrEqualTo("messageStatus", MessageStatusType.MSG_SENT)
                             .findFirst();
                     if (mi != null) {
                         database.beginTransaction();
@@ -131,22 +157,8 @@ public class SendService extends BaseIntentService {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(final DatabaseError databaseError) {
                 if (database != null && !database.isClosed()) database.close();
-            }
-        };
-    }
-
-    public ValueEventListener getSentStatusVEL() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
             }
         };
     }

@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.services;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 /**
@@ -12,13 +13,22 @@ import android.util.Log;
  */
 
 public class BootBroadcastReceiver extends BroadcastReceiver {
+    /**
+     * TAG for class.
+     */
+    public static final String TAG = BootBroadcastReceiver.class.getSimpleName();
+
     @Override
-    public void onReceive(Context context, Intent intent) {
+    public void onReceive(final Context context, final Intent intent) {
         if (intent == null) return;
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
             // Set the alarm here.
-            Log.d("BootBroadcastReceiver", "Starting MessagingService");
-            context.startService(new Intent(context, MessagingService.class));
+            Log.e(TAG, "Starting services");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(new Intent(context, MessagingService.class));
+            } else {
+                context.startService(new Intent(context, MessagingService.class));
+            }
         }
     }
 }

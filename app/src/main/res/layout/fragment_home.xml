@@ -45,6 +45,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="?actionBarSize"
                     android:alpha="0.95"
+                    app:search_shadow="false"
                     app:layout_collapseMode="pin"
                     app:search_clear_on_close="true"
                     app:search_hide_on_keyboard_close="true"

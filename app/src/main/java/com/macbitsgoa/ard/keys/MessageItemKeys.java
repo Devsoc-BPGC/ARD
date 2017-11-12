@@ -5,6 +5,10 @@ package com.macbitsgoa.ard.keys;
  */
 
 public class MessageItemKeys {
-    public static final String DATA = "data";
-    public static final String DATE = "date";
+    public static final String FDR_DATA = "data";
+    public static final String FDR_DATE = "date";
+    public static final String MESSAGE_STATUS = "messageStatus";
+    public static final String MESSAGE_RECEIVED = "messageRcvd";
+    public static final String SENDER_ID = "senderId";
+    public static final String MESSAGE_ID = "messageId";
 }

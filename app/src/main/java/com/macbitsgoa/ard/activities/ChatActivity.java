@@ -1,12 +1,16 @@
 package com.macbitsgoa.ard.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
@@ -30,7 +34,7 @@ import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendService;
-import com.macbitsgoa.ard.types.MessageStatusType;
+import com.macbitsgoa.ard.utils.Actions;
 
 import java.util.Calendar;
 
@@ -41,6 +45,16 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 
 public class ChatActivity extends BaseActivity {
+
+    //----------------------------------------------------------------------------------------------
+
+    /**
+     * TAG for class.
+     */
+    public static final String TAG = ChatActivity.class.getSimpleName();
+
+
+    //----------------------------------------------------------------------------------------------
 
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -81,14 +95,16 @@ public class ChatActivity extends BaseActivity {
 
     private String senderId = null;
 
-    ChatMsgAdapter chatMsgAdapter;
+    RealmResults<MessageItem> messages;
 
-    MessagingService messagingService;
+    ChatMsgAdapter chatMsgAdapter;
 
     NotificationManagerCompat nmc;
 
+    BroadcastReceiver newMessageReceiver;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
@@ -101,10 +117,38 @@ public class ChatActivity extends BaseActivity {
         ButterKnife.bind(this);
         setupUI();
         nmc = NotificationManagerCompat.from(this);
+
         startService(new Intent(this, MessagingService.class));
+        notifyOfReadStatus();
+        //Create the receiver to update read status
+        newMessageReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(final Context context, final Intent intent) {
+                Log.e(TAG, "received action " + intent.getAction());
+                if (intent == null
+                        || intent.getAction() == null
+                        || intent.getStringExtra("senderId") == null
+                        || !intent.getStringExtra("senderId").equals(senderId)) {
+                    return;
+                }
+                switch (intent.getAction()) {
+                    case Actions.NOTIFICATION_ACTION:
+                        //Cancel ongoing notifications for this user
+                        Log.e(TAG, "Cancelling notification " + senderId.hashCode());
+                        nmc.cancel(senderId.hashCode());
+                        break;
+                    case Actions.NEW_MESSAGE_ARRIVED:
+                        //Fire up intent to notify
+                        notifyOfReadStatus();
+                        break;
+                    default:
+                }
+            }
+        };
+
         theirStatus.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null) {
                     subtitle.setVisibility(View.GONE);
                 } else {
@@ -151,22 +195,15 @@ public class ChatActivity extends BaseActivity {
                 chat.setPhotoUrl(getIntent().getStringExtra("photoUrl"));
             }
             chat.setUnreadCount(0);
-
-            RealmResults<MessageItem> unreadMessages = r.where(MessageItem.class)
-                    .equalTo("messageRcvd", true)
-                    .lessThanOrEqualTo("messageStatus", MessageStatusType.MSG_RCVD)
-                    .findAll();
-            for (MessageItem mi : unreadMessages) {
-                mi.setMessageStatus(MessageStatusType.MSG_READ);
-                Intent notifyIntent = new Intent(ChatActivity.this, NotifyService.class);
-                notifyIntent.putExtra("receiverId", mi.getSenderId());
-                notifyIntent.putExtra("messageId", mi.getMessageId());
-                startService(notifyIntent);
-            }
+            notifyOfReadStatus();
         });
     }
 
-    RealmResults<MessageItem> messages;
+    private void notifyOfReadStatus() {
+        final Intent notifyIntent = new Intent(ChatActivity.this, NotifyService.class);
+        notifyIntent.putExtra("receiverId", senderId);
+        startService(notifyIntent);
+    }
 
     @Override
     protected void onStart() {
@@ -219,6 +256,11 @@ public class ChatActivity extends BaseActivity {
         chatMsgAdapter = new ChatMsgAdapter(messages);
         chatsRV.setAdapter(chatMsgAdapter);
 
+        final IntentFilter intf = new IntentFilter();
+        intf.addAction(Actions.NOTIFICATION_ACTION);
+        intf.addAction(Actions.NEW_MESSAGE_ARRIVED);
+        registerReceiver(newMessageReceiver, intf);
+
         //TODO improve this
           /*  chatsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
@@ -257,6 +299,7 @@ public class ChatActivity extends BaseActivity {
     @Override
     protected void onStop() {
         super.onStop();
+        unregisterReceiver(newMessageReceiver);
         messages.removeAllChangeListeners();
         myStatus.removeValue();
     }
@@ -269,9 +312,9 @@ public class ChatActivity extends BaseActivity {
 
     //TODO fix read status
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
         super.onClick(v);
-        int viewId = v.getId();
+        final int viewId = v.getId();
         if (viewId == R.id.ll_frame_chat_toolbar_icons) {
             onBackPressed();
         } else if (viewId == R.id.fab_activity_chat_scroll) {
@@ -284,7 +327,7 @@ public class ChatActivity extends BaseActivity {
             //If length of EditText is 0, do nothing
             if (messageData.length() == 0) return;
 
-            Intent mIntent = new Intent(this, SendService.class);
+            final Intent mIntent = new Intent(this, SendService.class);
             mIntent.putExtra("messageData", messageData);
             mIntent.putExtra("receiverId", senderId);
             startService(mIntent);

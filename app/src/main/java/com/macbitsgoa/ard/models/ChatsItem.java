@@ -28,7 +28,8 @@ public class ChatsItem extends RealmObject {
         this.unreadCount = 0;
     }
 
-    public ChatsItem(String id, String name, String latest, String photoUrl, Date update, int unreadCount) {
+    public ChatsItem(final String id, final String name, final String latest, final String photoUrl,
+                     @Nullable final Date update, final int unreadCount) {
         this.id = id;
         this.name = name;
         this.latest = latest;
@@ -41,7 +42,7 @@ public class ChatsItem extends RealmObject {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(final String id) {
         this.id = id;
     }
 
@@ -49,7 +50,7 @@ public class ChatsItem extends RealmObject {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(final String name) {
         this.name = name;
     }
 
@@ -57,7 +58,7 @@ public class ChatsItem extends RealmObject {
         return latest;
     }
 
-    public void setLatest(String latest) {
+    public void setLatest(final String latest) {
         this.latest = latest;
     }
 
@@ -65,7 +66,7 @@ public class ChatsItem extends RealmObject {
         return photoUrl;
     }
 
-    public void setPhotoUrl(String photoUrl) {
+    public void setPhotoUrl(final String photoUrl) {
         this.photoUrl = photoUrl;
     }
 
@@ -73,7 +74,7 @@ public class ChatsItem extends RealmObject {
         return update;
     }
 
-    public void setUpdate(Date update) {
+    public void setUpdate(final Date update) {
         this.update = update;
     }
 
@@ -81,19 +82,19 @@ public class ChatsItem extends RealmObject {
         return unreadCount;
     }
 
-    public void setUnreadCount(int unreadCount) {
+    public void setUnreadCount(final int unreadCount) {
         this.unreadCount = unreadCount;
     }
 
     @Override
     public String toString() {
-        return "ChatsItem{" +
-                "id='" + id + '\'' +
-                ", name='" + name + '\'' +
-                ", latest='" + latest + '\'' +
-                ", photoUrl='" + photoUrl + '\'' +
-                ", update=" + update +
-                ", unreadCount=" + unreadCount +
-                '}';
+        return "ChatsItem{"
+                + "id='" + id + '\''
+                + ", name='" + name + '\''
+                + ", latest='" + latest + '\''
+                + ", photoUrl='" + photoUrl + '\''
+                + ", update=" + update
+                + ", unreadCount=" + unreadCount
+                + '}';
     }
 }
