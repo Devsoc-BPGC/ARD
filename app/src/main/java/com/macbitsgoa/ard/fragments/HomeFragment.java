@@ -57,6 +57,8 @@ import io.realm.Sort;
  */
 public class HomeFragment extends BaseFragment implements OnItemClickListener {
 
+    public static final String TAG = HomeFragment.class.getSimpleName();
+
     /**
      * RecyclerView to display Home content.
      */
@@ -121,7 +123,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+    public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_home, container, false);
@@ -164,6 +166,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
 
         final Handler handler = new Handler();
         final Runnable update = () -> {
+            if (viewPagerSlideShow == null || slideshowAdapter == null) return;
             int newPos = viewPagerSlideShow.getCurrentItem() + 1;
             newPos %= slideshowAdapter.getCount();
             viewPagerSlideShow.setCurrentItem(newPos, true);
@@ -171,19 +174,20 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
 
         viewPagerSlideShow.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
-            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                Log.e("TAG", "scrolled");
+            public void onPageScrolled(final int position, final float positionOffset,
+                                       final int positionOffsetPixels) {
+                Log.e(TAG, "scrolled");
             }
 
             @Override
-            public void onPageSelected(int position) {
-                Log.e("TAG", "select");
+            public void onPageSelected(final int position) {
+                Log.e(TAG, "select");
 
             }
 
             @Override
-            public void onPageScrollStateChanged(int state) {
-                Log.e("TAG", "state");
+            public void onPageScrollStateChanged(final int state) {
+                Log.e(TAG, "state");
 
             }
         });
@@ -238,13 +242,13 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
     private ValueEventListener getSlideShowEventListener() {
         return new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getChildrenCount() <= 0) return;
 
                 database.executeTransaction(r -> {
                     database.delete(SlideshowItem.class);
                 });
-                for (DataSnapshot childShot :
+                for (final DataSnapshot childShot :
                         dataSnapshot.getChildren()) {
                     database.executeTransaction(r -> {
                         r.insert(childShot.getValue(SlideshowItem.class));
@@ -253,7 +257,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(final DatabaseError databaseError) {
 
             }
         };

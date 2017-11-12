@@ -87,7 +87,7 @@ public class SendService extends BaseIntentService {
         sentMessageStatusRef.setValue(sentStatusMap);
 
         database.executeTransaction(r -> {
-            final MessageItem mi = database.createObject(MessageItem.class, messageId);
+            final MessageItem mi = r.createObject(MessageItem.class, messageId);
             mi.setMessageRcvd(false);
             mi.setMessageTime(messageTime);
             mi.setMessageRcvdTime(Calendar.getInstance().getTime());
@@ -95,7 +95,6 @@ public class SendService extends BaseIntentService {
             mi.setSenderId(receiverId);
             mi.setMessageStatus(MessageStatusType.MSG_WAIT);
         });
-
 
         database.executeTransaction(r -> {
             if (receiverId == null) return;
@@ -151,7 +150,8 @@ public class SendService extends BaseIntentService {
                         mi.setMessageStatus(MessageStatusType.MSG_SENT);
                         database.commitTransaction();
                     }
-                    child.getRef().removeValue();
+                    //TODO still buggy
+                    //child.getRef().removeValue();
                 }
                 database.close();
             }

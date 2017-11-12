@@ -29,11 +29,13 @@ import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ChatMsgAdapter;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendService;
+import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.Actions;
 
 import java.util.Calendar;
@@ -41,6 +43,7 @@ import java.util.Calendar;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedCollectionChangeSet;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -65,6 +68,7 @@ public class ChatActivity extends BaseActivity {
     DatabaseReference readStatus = writeRef;
 
     String sessionId;
+    public static boolean visible = false;
 
     @BindView(R.id.recyclerView_activity_chat)
     RecyclerView chatsRV;
@@ -93,7 +97,7 @@ public class ChatActivity extends BaseActivity {
     @BindView(R.id.tv_activity_chat_number)
     TextView updateNumber;
 
-    private String senderId = null;
+    public static String senderId = null;
 
     RealmResults<MessageItem> messages;
 
@@ -108,7 +112,7 @@ public class ChatActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat);
 
-        senderId = getIntent().getStringExtra("senderId");
+        senderId = getIntent().getStringExtra(MessageItemKeys.SENDER_ID);
         if (senderId == null || user == null) return;
         theirStatus = onlineStatus.child(senderId);
         writeRef = writeRef.child(senderId).child(ChatItemKeys.PRIVATE_MESSAGES).child(user.getUid());
@@ -127,8 +131,8 @@ public class ChatActivity extends BaseActivity {
                 Log.e(TAG, "received action " + intent.getAction());
                 if (intent == null
                         || intent.getAction() == null
-                        || intent.getStringExtra("senderId") == null
-                        || !intent.getStringExtra("senderId").equals(senderId)) {
+                        || intent.getStringExtra(MessageItemKeys.SENDER_ID) == null
+                        || !intent.getStringExtra(MessageItemKeys.SENDER_ID).equals(senderId)) {
                     return;
                 }
                 switch (intent.getAction()) {
@@ -208,6 +212,7 @@ public class ChatActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
+        visible = true;
         sessionId = Calendar.getInstance().getTime().toString();
         myStatus = onlineStatus.child(user.getUid()).child(sessionId);
         myStatus.setValue(true);
@@ -221,7 +226,7 @@ public class ChatActivity extends BaseActivity {
 
         messages = database
                 .where(MessageItem.class)
-                .equalTo("senderId", senderId)
+                .equalTo(MessageItemKeys.SENDER_ID, senderId)
                 .findAllSorted("messageRcvdTime", Sort.DESCENDING);
         messages.addChangeListener((messageItems, changeSet) -> {
             // `null`  means the async query returns the first time.
@@ -298,6 +303,7 @@ public class ChatActivity extends BaseActivity {
 
     @Override
     protected void onStop() {
+        visible = false;
         super.onStop();
         unregisterReceiver(newMessageReceiver);
         messages.removeAllChangeListeners();
@@ -328,7 +334,7 @@ public class ChatActivity extends BaseActivity {
             if (messageData.length() == 0) return;
 
             final Intent mIntent = new Intent(this, SendService.class);
-            mIntent.putExtra("messageData", messageData);
+            mIntent.putExtra(MessageItemKeys.MESSAGE_DATA, messageData);
             mIntent.putExtra("receiverId", senderId);
             startService(mIntent);
             updateCounts();

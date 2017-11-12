@@ -107,8 +107,6 @@ public class MessagingService extends BaseIntentService {
                             .child(getUser().getUid())
                             .child(ChatItemKeys.MESSAGE_STATUS);
 
-                    int newMessageCount = 0;
-
                     while (!newMessagesQ.isEmpty()) {
                         final DataSnapshot newMessageDS = newMessagesQ.poll();
                         final String messageId = newMessageDS.getKey();
@@ -119,8 +117,8 @@ public class MessagingService extends BaseIntentService {
                             continue;
 
                         MessageItem mi = database.where(MessageItem.class)
-                                .equalTo("messageId", messageId)
-                                .equalTo("senderId", senderId)
+                                .equalTo(MessageItemKeys.MESSAGE_ID, messageId)
+                                .equalTo(MessageItemKeys.SENDER_ID, senderId)
                                 .findFirst();
                         database.beginTransaction();
                         if (mi == null) {
@@ -134,13 +132,12 @@ public class MessagingService extends BaseIntentService {
                         mi.setMessageStatus(MessageStatusType.MSG_RCVD);
                         database.commitTransaction();
 
-                        newMessageCount++;
                         msgStatusWriteRef
                                 .child(messageId)
                                 .setValue(MessageStatusType.MSG_RCVD);
                         newMessageDS.getRef().removeValue();
                         final Intent broadcastIntent = new Intent(Actions.NEW_MESSAGE_ARRIVED);
-                        broadcastIntent.putExtra("senderId", senderId);
+                        broadcastIntent.putExtra(MessageItemKeys.SENDER_ID, senderId);
                         sendBroadcast(broadcastIntent);
                     }
 
@@ -167,10 +164,17 @@ public class MessagingService extends BaseIntentService {
                         //newChatDS.child(ChatItemKeys.MESSAGE_STATUS).child(messageStatusDS.getKey()).getRef().removeValue();
                     }
 
+                    final int newMessageCount = database
+                            .where(MessageItem.class)
+                            .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                            .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
+                            .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
+                            .findAll().size();
+
+                    database.beginTransaction();
                     ChatsItem ci = database.where(ChatsItem.class)
                             .equalTo("id", senderId)
                             .findFirst();
-                    database.beginTransaction();
                     if (ci == null) {
                         ci = database.createObject(ChatsItem.class, senderId);
                     } else {
@@ -181,9 +185,20 @@ public class MessagingService extends BaseIntentService {
                     }
                     ci.setName(name);
                     ci.setPhotoUrl(photoUrl);
-                    Log.e("TAG", "old value " + ci.getUnreadCount() + " " + newMessageCount);
-                    ci.setUnreadCount(ci.getUnreadCount() + newMessageCount);
+                    ci.setUnreadCount(newMessageCount);
                     database.commitTransaction();
+
+                    //no new messages from this chat but it is still
+                    //lingering in database
+                    if (database.where(MessageItem.class)
+                            .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                            .findAll().isEmpty())
+                        database.executeTransaction(r -> {
+                            r.where(ChatsItem.class)
+                                    .equalTo("id", senderId)
+                                    .findFirst()
+                                    .deleteFromRealm();
+                        });
 
                     //dataSnapshot.child(senderId).child(ChatItemKeys.MESSAGES).getRef().removeValue();
                     //dataSnapshot.child(senderId).child(ChatItemKeys.MESSAGE_STATUS).getRef().removeValue();

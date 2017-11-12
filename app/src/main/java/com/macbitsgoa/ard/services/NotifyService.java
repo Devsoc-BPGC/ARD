@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
+import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
@@ -62,11 +63,18 @@ public class NotifyService extends BaseIntentService {
                 final MessageItem mItem = r
                         .where(MessageItem.class)
                         .equalTo(MessageItemKeys.MESSAGE_ID, mi.getMessageId())
-                        .equalTo(MessageItemKeys.SENDER_ID, receiverId)
                         .findFirst();
                 mItem.setMessageStatus(MessageStatusType.MSG_READ);
             });
         }
+        database.executeTransaction(r -> {
+            final ChatsItem ci = r
+                    .where(ChatsItem.class)
+                    .equalTo("id", receiverId)
+                    .findFirst();
+            Log.e(TAG, "Chat item count set to 0");
+            ci.setUnreadCount(0);
+        });
         database.close();
     }
 }

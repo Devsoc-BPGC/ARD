@@ -26,8 +26,8 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
     }
 
     @Override
-    public ChatMsgViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+    public ChatMsgViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View view = null;
         if (viewType == RECEIVER)
             view = inflater.inflate(R.layout.vh_activity_chat_chatmsg_receiver, parent, false);
@@ -37,7 +37,7 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(ChatMsgViewHolder holder, int position) {
+    public void onBindViewHolder(final ChatMsgViewHolder holder, final int position) {
         holder.time.setText(AHC.getSimpleDayAndTime(messages.get(position).getMessageTime()));
         holder.message.setText(messages.get(position).getMessageData());
         if (holder.getItemViewType() == RECEIVER) {
@@ -62,7 +62,7 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public int getItemViewType(final int position) {
         return messages.get(position).isMessageRcvd() ? SENDER : RECEIVER;
     }
 

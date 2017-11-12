@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.fragments;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -17,8 +18,10 @@ import com.macbitsgoa.ard.activities.NewChatActivity;
 import com.macbitsgoa.ard.adapters.ChatsAdapter;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
@@ -67,14 +70,14 @@ public class ChatFragment extends BaseFragment {
     }
 
     @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+    public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         mListener.updateChatFragment();
-        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+        final View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
-        recyclerView = (RecyclerView) view.findViewById(R.id.recyclerView_fragment_chat);
-        FloatingActionButton newChatFab = (FloatingActionButton) view.findViewById(R.id.fab_fragment_chat);
+        recyclerView = view.findViewById(R.id.recyclerView_fragment_chat);
+        final FloatingActionButton newChatFab = view.findViewById(R.id.fab_fragment_chat);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -98,7 +101,7 @@ public class ChatFragment extends BaseFragment {
     public void onStart() {
         super.onStart();
 
-        String sessionId = Calendar.getInstance().getTime().toString();
+        final String sessionId = Calendar.getInstance().getTime().toString();
         myStatus = getRootReference()
                 .child(ChatItemKeys.ONLINE)
                 .child(getUser().getUid())
@@ -106,10 +109,11 @@ public class ChatFragment extends BaseFragment {
         myStatus.setValue(true);
         myStatus.onDisconnect().removeValue();
 
-        RealmResults<ChatsItem> chats = database.where(ChatsItem.class)
+        final RealmResults<ChatsItem> chats = database.where(ChatsItem.class)
                 .findAllSorted("update", Sort.DESCENDING);
 
         deleteEmptyChats();
+
         chatsAdapter = new ChatsAdapter(chats, getContext());
 
         chats.addChangeListener(results -> {
@@ -124,20 +128,18 @@ public class ChatFragment extends BaseFragment {
      */
     private void deleteEmptyChats() {
         database.executeTransactionAsync(r -> {
-            RealmList<ChatsItem> allChats = new RealmList<>();
+            final RealmList<ChatsItem> allChats = new RealmList<>();
             allChats.addAll(r.where(ChatsItem.class).findAll());
-            for (ChatsItem cItem : allChats) {
-                if (r.where(MessageItem.class).equalTo("senderId", cItem.getId())
+            for (final ChatsItem cItem : allChats) {
+                if (r.where(MessageItem.class).equalTo(MessageItemKeys.SENDER_ID, cItem.getId())
                         .findAll().isEmpty())
                     cItem.deleteFromRealm();
             }
-
         }, () -> {
             if (chatsAdapter != null)
                 chatsAdapter.notifyDataSetChanged();
         });
     }
-
 
     @Override
     public void onStop() {

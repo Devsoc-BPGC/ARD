@@ -19,11 +19,11 @@ import com.macbitsgoa.ard.utils.AHC;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class NewChatActivity extends BaseActivity {
 
+    //----------------------------------------------------------------------------------------------
     @BindView(R.id.pb_activity_new_chat)
     ProgressBar progressBar;
 
@@ -33,52 +33,40 @@ public class NewChatActivity extends BaseActivity {
     @BindView(R.id.toolbar_activity_new_chat)
     Toolbar toolbar;
 
-    final DatabaseReference adminsRef = getRootReference().child(AHC.FDR_ADMINS);
-    final DatabaseReference usersRef = getRootReference().child(AHC.FDR_USERS);
+    //----------------------------------------------------------------------------------------------
+    private final DatabaseReference adminsRef = getRootReference().child(AHC.FDR_ADMINS);
+    private final DatabaseReference usersRef = getRootReference().child(AHC.FDR_USERS);
 
-    NewChatAdapter adapter;
+    private NewChatAdapter adapter;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_new_chat);
         ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                onBackPressed();
-            }
-        });
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        RealmResults<UserItem> adminsList = database.where(UserItem.class)
+        final RealmResults<UserItem> adminsList = database.where(UserItem.class)
                 .equalTo("admin", true)
                 .notEqualTo("uid", getUser().getUid())
                 .findAllSorted("name");
-        RealmResults<UserItem> usersList = database.where(UserItem.class)
+        final RealmResults<UserItem> usersList = database.where(UserItem.class)
                 .equalTo("admin", false)
                 .notEqualTo("uid", getUser().getUid())
                 .findAllSorted("name");
 
-        adminsList.addChangeListener(new RealmChangeListener<RealmResults<UserItem>>() {
-            @Override
-            public void onChange(RealmResults<UserItem> userItems) {
-                adapter.notifyDataSetChanged();
-                if (adapter.getItemCount() > 0) {
-                    progressBar.setIndeterminate(false);
-                    progressBar.setProgress(100);
-                }
-            }
+        adminsList.addChangeListener(userItems -> {
+            adapter.notifyDataSetChanged();
+            progressBar.setVisibility(View.GONE);
         });
-        usersList.addChangeListener(new RealmChangeListener<RealmResults<UserItem>>() {
-            @Override
-            public void onChange(RealmResults<UserItem> userItems) {
-                adapter.notifyDataSetChanged();
-                if (adapter.getItemCount() > 0) {
-                    progressBar.setIndeterminate(false);
-                    progressBar.setProgress(100);
-                }
+        usersList.addChangeListener(userItems -> {
+            adapter.notifyDataSetChanged();
+            if (adapter.getItemCount() > 0) {
+                progressBar.setIndeterminate(false);
+                progressBar.setProgress(100);
+                progressBar.setVisibility(View.GONE);
             }
         });
         adapter = new NewChatAdapter(adminsList, usersList, this);
@@ -90,13 +78,13 @@ public class NewChatActivity extends BaseActivity {
 
         adminsRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    String uid = child.getKey();
-                    String name = child.child(UserItemKeys.NAME).getValue(String.class);
-                    String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
-                    String photoUrl = child.child(UserItemKeys.PHOTO_URL).getValue(String.class);
-                    String desc = child.child(UserItemKeys.DESC).getValue(String.class);
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    final String uid = child.getKey();
+                    final String name = child.child(UserItemKeys.NAME).getValue(String.class);
+                    final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
+                    final String photoUrl = child.child(UserItemKeys.PHOTO_URL).getValue(String.class);
+                    final String desc = child.child(UserItemKeys.DESC).getValue(String.class);
                     UserItem ui = database.where(UserItem.class).equalTo("uid", uid).findFirst();
                     database.beginTransaction();
                     if (ui == null) {
@@ -112,18 +100,18 @@ public class NewChatActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(final DatabaseError databaseError) {
 
             }
         });
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    String uid = child.getKey();
-                    String name = child.child(UserItemKeys.NAME).getValue(String.class);
-                    String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
-                    String photoUrl = child.child(UserItemKeys.PHOTO_URL).getValue(String.class);
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    final String uid = child.getKey();
+                    final String name = child.child(UserItemKeys.NAME).getValue(String.class);
+                    final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
+                    final String photoUrl = child.child(UserItemKeys.PHOTO_URL).getValue(String.class);
                     UserItem ui = database.where(UserItem.class).equalTo("uid", uid).findFirst();
                     database.beginTransaction();
                     if (ui == null) {
@@ -138,7 +126,7 @@ public class NewChatActivity extends BaseActivity {
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(final DatabaseError databaseError) {
 
             }
         });

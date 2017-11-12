@@ -24,20 +24,22 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
     private RealmResults<ChatsItem> chats;
     private Context context;
 
-    public ChatsAdapter(@Nullable final RealmResults<ChatsItem> chats, @Nonnull Context context) {
+    public ChatsAdapter(@Nullable final RealmResults<ChatsItem> chats,
+                        @Nonnull final Context context) {
         this.chats = chats;
         this.context = context;
     }
 
     @Override
-    public ChatsViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+    public ChatsViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = inflater.inflate(R.layout.vh_chat_fragment_chats, parent, false);
+        final View view = inflater.inflate(R.layout.vh_chat_fragment_chats,
+                parent, false);
         return new ChatsViewHolder(view, context);
     }
 
     @Override
-    public void onBindViewHolder(ChatsViewHolder holder, int position) {
+    public void onBindViewHolder(final ChatsViewHolder holder, final int position) {
         holder.item = chats.get(position);
         Glide.with(context)
                 .load(holder.item.getPhotoUrl())
@@ -55,7 +57,8 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
         } else {
             holder.update.setVisibility(View.VISIBLE);
             holder.updateIcon.setVisibility(View.VISIBLE);
-            holder.update.setText(Integer.toString(holder.item.getUnreadCount()));
+            final int updateCount = holder.item.getUnreadCount();
+            holder.update.setText(updateCount > 99 ? "99+" : "" + updateCount);
         }
     }
 

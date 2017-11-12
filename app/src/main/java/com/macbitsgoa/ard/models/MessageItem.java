@@ -16,14 +16,20 @@ public class MessageItem extends RealmObject {
     @PrimaryKey
     @Required
     private String messageId;
+
     private int messageStatus;
+
     private boolean messageRcvd;
+
     @Required
     private String messageData;
+
     @Required
     private String senderId;
+
     @Required
     private Date messageTime;
+
     @Required
     private Date messageRcvdTime;
 
@@ -31,8 +37,9 @@ public class MessageItem extends RealmObject {
 
     }
 
-    public MessageItem(int messageStatus, boolean messageRcvd, String messageId, String messageData,
-                       String senderId, Date messageTime, Date messageRcvdTime, boolean messageRead) {
+    public MessageItem(final int messageStatus, final boolean messageRcvd, final String messageId,
+                       final String messageData, final String senderId, final Date messageTime,
+                       final Date messageRcvdTime) {
         this.messageStatus = messageStatus;
         this.messageRcvd = messageRcvd;
         this.messageId = messageId;
@@ -46,7 +53,7 @@ public class MessageItem extends RealmObject {
         return messageId;
     }
 
-    public void setMessageId(String messageId) {
+    public void setMessageId(final String messageId) {
         this.messageId = messageId;
     }
 
@@ -54,7 +61,7 @@ public class MessageItem extends RealmObject {
         return messageData;
     }
 
-    public void setMessageData(String messageData) {
+    public void setMessageData(final String messageData) {
         this.messageData = messageData;
     }
 
@@ -62,7 +69,7 @@ public class MessageItem extends RealmObject {
         return senderId;
     }
 
-    public void setSenderId(String senderId) {
+    public void setSenderId(final String senderId) {
         this.senderId = senderId;
     }
 
@@ -70,7 +77,7 @@ public class MessageItem extends RealmObject {
         return messageTime;
     }
 
-    public void setMessageTime(Date messageTime) {
+    public void setMessageTime(final Date messageTime) {
         this.messageTime = messageTime;
     }
 
@@ -78,7 +85,7 @@ public class MessageItem extends RealmObject {
         return messageRcvdTime;
     }
 
-    public void setMessageRcvdTime(Date messageRcvdTime) {
+    public void setMessageRcvdTime(final Date messageRcvdTime) {
         this.messageRcvdTime = messageRcvdTime;
     }
 
@@ -86,7 +93,7 @@ public class MessageItem extends RealmObject {
         return messageRcvd;
     }
 
-    public void setMessageRcvd(boolean messageRcvd) {
+    public void setMessageRcvd(final boolean messageRcvd) {
         this.messageRcvd = messageRcvd;
     }
 
@@ -94,7 +101,7 @@ public class MessageItem extends RealmObject {
         return messageStatus;
     }
 
-    public void setMessageStatus(@MessageStatusType.MessageStatus int messageStatus) {
+    public void setMessageStatus(@MessageStatusType.MessageStatus final int messageStatus) {
         this.messageStatus = messageStatus;
     }
 }

@@ -49,7 +49,7 @@ public class NotificationService extends IntentService {
         final RealmResults<MessageItem> unreadMessagesUsers = database.where(MessageItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                 .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
-                .distinct("senderId");
+                .distinct(MessageItemKeys.SENDER_ID);
 
         final List<ChatsItem> chatsItems = new ArrayList<>();
         for (final MessageItem mi : unreadMessagesUsers) {
@@ -63,7 +63,7 @@ public class NotificationService extends IntentService {
         }
         for (final ChatsItem ci : chatsItems) {
             final RealmResults<MessageItem> unreadMessages = database.where(MessageItem.class)
-                    .equalTo("senderId", ci.getId())
+                    .equalTo(MessageItemKeys.SENDER_ID, ci.getId())
                     .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                     .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
                     .findAllSorted(new String[]{"messageRcvdTime", "messageTime"},
@@ -71,7 +71,7 @@ public class NotificationService extends IntentService {
             if (unreadMessages.size() == 0) continue;
             final Intent piIntent = new Intent(this, ChatActivity.class);
             piIntent.putExtra("title", ci.getName());
-            piIntent.putExtra("senderId", ci.getId());
+            piIntent.putExtra(MessageItemKeys.SENDER_ID, ci.getId());
             piIntent.putExtra("photoUrl", ci.getPhotoUrl());
 
             final PendingIntent pi = PendingIntent
@@ -97,7 +97,8 @@ public class NotificationService extends IntentService {
                                 + ": "
                                 + unreadMessages.get(2).getMessageData());
 
-            final NotificationCompat.Builder builder = new NotificationCompat.Builder(this, ci.getId())
+            final NotificationCompat.Builder builder
+                    = new NotificationCompat.Builder(this, ci.getId())
                     .setAutoCancel(true)
                     .setContentIntent(pi)
                     .setContentTitle(ci.getName())
@@ -111,12 +112,21 @@ public class NotificationService extends IntentService {
                     .setStyle(inboxStyle);
 
             final NotificationManagerCompat nmc = NotificationManagerCompat.from(this);
-            Log.e(TAG, "Notification id -> " +
-                    ci.getId().hashCode());
-            nmc.notify(ci.getId().hashCode(), builder.build());
+            Log.e(TAG, "Notification id -> "
+                    + ci.getId().hashCode());
+
+            //TODO improve not showing notif for current uesr
+            if (ChatActivity.visible) {
+                if (ChatActivity.senderId != null
+                        && !ChatActivity.senderId.equals(ci.getId())) {
+                    nmc.notify(ci.getId().hashCode(), builder.build());
+                }
+            } else nmc.notify(ci.getId().hashCode(), builder.build());
+
             final Intent notificationBC = new Intent(Actions.NOTIFICATION_ACTION);
-            notificationBC.putExtra("senderId", ci.getId());
+            notificationBC.putExtra(MessageItemKeys.SENDER_ID, ci.getId());
             sendBroadcast(notificationBC);
+
         }
         database.close();
     }
