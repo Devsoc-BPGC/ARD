@@ -9,27 +9,56 @@ import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
 
 /**
- * Created by vikramaditya on 24/10/17.
+ * Message item for chat.
+ *
+ * @author Vikramaditya Kukreja
  */
-
 public class MessageItem extends RealmObject {
+
+    /**
+     * Unique message id.
+     */
     @PrimaryKey
     @Required
     private String messageId;
 
+    /**
+     * 1 of 4 values to indicate the message status.
+     *
+     * @see MessageStatusType#MSG_WAIT
+     * @see MessageStatusType#MSG_SENT
+     * @see MessageStatusType#MSG_RCVD
+     * @see MessageStatusType#MSG_READ
+     */
     private int messageStatus;
 
+    /**
+     * Flag to indicate whether message was sent or received.
+     * {@code true} if received, false otherwise.
+     */
     private boolean messageRcvd;
 
+    /**
+     * Message Data.
+     */
     @Required
     private String messageData;
 
+    /**
+     * Uid of other user. Similar to {@link UserItem#getUid()}.
+     */
     @Required
     private String senderId;
 
+    /**
+     * Actual message time from sender.
+     */
     @Required
     private Date messageTime;
 
+    /**
+     * Received time of message on current user's device.
+     */
     @Required
     private Date messageRcvdTime;
 
@@ -37,12 +66,12 @@ public class MessageItem extends RealmObject {
 
     }
 
-    public MessageItem(final int messageStatus, final boolean messageRcvd, final String messageId,
+    public MessageItem(final String messageId, final int messageStatus, final boolean messageRcvd,
                        final String messageData, final String senderId, final Date messageTime,
                        final Date messageRcvdTime) {
+        this.messageId = messageId;
         this.messageStatus = messageStatus;
         this.messageRcvd = messageRcvd;
-        this.messageId = messageId;
         this.messageData = messageData;
         this.senderId = senderId;
         this.messageTime = messageTime;
@@ -103,5 +132,18 @@ public class MessageItem extends RealmObject {
 
     public void setMessageStatus(@MessageStatusType.MessageStatus final int messageStatus) {
         this.messageStatus = messageStatus;
+    }
+
+    @Override
+    public String toString() {
+        return "MessageItem{"
+                + "messageId='" + messageId + '\''
+                + ", messageStatus=" + messageStatus
+                + ", messageRcvd=" + messageRcvd
+                + ", messageData='" + messageData + '\''
+                + ", senderId='" + senderId + '\''
+                + ", messageTime=" + messageTime
+                + ", messageRcvdTime=" + messageRcvdTime
+                + '}';
     }
 }

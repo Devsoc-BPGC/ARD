@@ -37,6 +37,7 @@ public class MessagingService extends BaseIntentService {
 
     private final DatabaseReference messageStatusRef = getRootReference().child(AHC.FDR_CHAT);
 
+
     public MessagingService() {
         super(MessagingService.class.getSimpleName());
     }
@@ -48,8 +49,17 @@ public class MessagingService extends BaseIntentService {
                 .child(AHC.FDR_CHAT)
                 .child(getUser().getUid())
                 .child(ChatItemKeys.PRIVATE_MESSAGES);
+        final DatabaseReference sentMessageStatusRef = getRootReference()
+                .child(AHC.FDR_CHAT)
+                .child(getUser().getUid())
+                .child(ChatItemKeys.SENT_STATUS);
+
         final ValueEventListener messagesRefVEL = getEventListener();
+        final ValueEventListener sendListener = getSentMsgStatusVEL();
+
         messagesRef.addValueEventListener(messagesRefVEL);
+        sentMessageStatusRef.addValueEventListener(sendListener);
+
         try {
             Thread.sleep(1000 * 60 * 10);
         } catch (final InterruptedException e) {
@@ -57,7 +67,6 @@ public class MessagingService extends BaseIntentService {
         } finally {
             AHC.setNextAlarm(this, MessagingService.class, REQUEST_CODE, 0);
             messagesRef.removeEventListener(messagesRefVEL);
-
         }
     }
 
@@ -67,6 +76,11 @@ public class MessagingService extends BaseIntentService {
         if (getUser() == null) onDestroy();
     }
 
+    /**
+     * Method to get messages event listener.
+     *
+     * @return Messages event listener.
+     */
     public ValueEventListener getEventListener() {
         return new ValueEventListener() {
             private Realm database;
@@ -83,15 +97,15 @@ public class MessagingService extends BaseIntentService {
                     final DataSnapshot newChatDS = newChatsQ.poll();
                     final DataSnapshot senderChild = newChatDS.child(ChatItemKeys.SENDER);
                     final String senderId = senderChild
-                            .child("id").getValue(String.class);
+                            .child(ChatItemKeys.FDR_ID).getValue(String.class);
                     final String name = senderChild
-                            .child("name").getValue(String.class);
+                            .child(ChatItemKeys.FDR_NAME).getValue(String.class);
                     final String latest = senderChild
-                            .child("latest").getValue(String.class);
+                            .child(ChatItemKeys.FDR_LATEST).getValue(String.class);
                     final String photoUrl = senderChild
-                            .child("photoUrl").getValue(String.class);
+                            .child(ChatItemKeys.FDR_PHOTO_URL).getValue(String.class);
                     final Date update = senderChild
-                            .child("date").getValue(Date.class);
+                            .child(ChatItemKeys.FDR_DATE).getValue(Date.class);
 
 
                     if (senderId == null
@@ -181,7 +195,7 @@ public class MessagingService extends BaseIntentService {
 
                     database.beginTransaction();
                     ChatsItem ci = database.where(ChatsItem.class)
-                            .equalTo("id", senderId)
+                            .equalTo(ChatItemKeys.DB_ID, senderId)
                             .findFirst();
                     if (ci == null) {
                         ci = database.createObject(ChatsItem.class, senderId);
@@ -203,7 +217,7 @@ public class MessagingService extends BaseIntentService {
                             .findAll().isEmpty())
                         database.executeTransaction(r -> {
                             r.where(ChatsItem.class)
-                                    .equalTo("id", senderId)
+                                    .equalTo(ChatItemKeys.DB_ID, senderId)
                                     .findFirst()
                                     .deleteFromRealm();
                         });
@@ -225,6 +239,43 @@ public class MessagingService extends BaseIntentService {
                     }
                     database.close();
                 }
+            }
+        };
+    }
+
+    /**
+     * Handle sent messages status.
+     *
+     * @return ValueEventListener object for hadnling ref updates.
+     */
+    public ValueEventListener getSentMsgStatusVEL() {
+        return new ValueEventListener() {
+            private Realm database;
+
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                database = Realm.getDefaultInstance();
+                for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    final String key = child.getKey();
+                    final MessageItem mi = database
+                            .where(MessageItem.class)
+                            .equalTo(MessageItemKeys.MESSAGE_ID, key)
+                            .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS,
+                                    MessageStatusType.MSG_SENT)
+                            .findFirst();
+                    if (mi != null) {
+                        database.beginTransaction();
+                        mi.setMessageStatus(MessageStatusType.MSG_SENT);
+                        database.commitTransaction();
+                    }
+                    child.getRef().removeValue();
+                }
+                database.close();
+            }
+
+            @Override
+            public void onCancelled(final DatabaseError databaseError) {
+                if (database != null && !database.isClosed()) database.close();
             }
         };
     }

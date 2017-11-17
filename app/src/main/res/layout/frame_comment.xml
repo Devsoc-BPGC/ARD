@@ -42,7 +42,7 @@
                 android:layout_marginTop="@dimen/marginTop_frame_comment_message"
                 android:background="@color/transparent"
                 android:hint="@string/hint_frame_comment_message"
-                android:inputType="textWebEmailAddress"
+                android:inputType="textCapSentences|textImeMultiLine|textAutoComplete"
                 android:textColorHint="@color/grey_500"
                 android:textSize="@dimen/textSize_frame_comment_message" />
         </LinearLayout>

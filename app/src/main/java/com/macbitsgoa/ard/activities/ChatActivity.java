@@ -335,7 +335,7 @@ public class ChatActivity extends BaseActivity {
 
             final Intent mIntent = new Intent(this, SendService.class);
             mIntent.putExtra(MessageItemKeys.MESSAGE_DATA, messageData);
-            mIntent.putExtra("receiverId", senderId);
+            mIntent.putExtra(MessageItemKeys.RECEIVER_ID, senderId);
             startService(mIntent);
             updateCounts();
 

@@ -36,7 +36,12 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 
 /**
- * Created by vikramaditya on 30/10/17.
+ * Service to show various section updates. Currently chats and announcements are shown.
+ * Announcements that have {@link AnnItem#read} status as {@code false} are include.
+ * For chats those that have {@link MessageStatusType} as {@code MessageStatusType.MSG_RCVD} or
+ * from other senders is shown.
+ *
+ * @author Vikramaditya Kukreja
  */
 
 public class NotificationService extends IntentService {
@@ -52,14 +57,21 @@ public class NotificationService extends IntentService {
     public static final int RC = 90;
 
     /**
+     * Realm database.
+     */
+    private Realm database;
+
+    /**
+     * Notification manager.
+     */
+    private NotificationManagerCompat nmc;
+
+    /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      */
     public NotificationService() {
         super("NotificationService");
     }
-
-    private Realm database;
-    private NotificationManagerCompat nmc;
 
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {

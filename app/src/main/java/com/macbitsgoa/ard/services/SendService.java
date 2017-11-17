@@ -3,11 +3,9 @@ package com.macbitsgoa.ard.services;
 import android.content.Intent;
 import android.util.Log;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
@@ -19,18 +17,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 
 /**
- * Service to send information to Firebase.
+ * Service to send information to Firebase. This service's only job is to send messages to Firebase
+ * It also calls the {@link NotifyService} for old messages. Sent messages listener is in
+ * {@link MessagingService}.
  *
  * @author Vikramaditya Kukreja
  */
 
 public class SendService extends BaseIntentService {
 
+    /**
+     * TAG for this class.
+     */
     public static final String TAG = SendService.class.getSimpleName();
 
-    private ValueEventListener sendListener;
+    /**
+     * Realm instance.
+     */
+    private Realm database;
 
     public SendService() {
         super(SendService.class.getSimpleName());
@@ -39,18 +46,78 @@ public class SendService extends BaseIntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
-        if (intent == null) return;
-        final String messageData = intent.getStringExtra("messageData");
-        final String receiverId = intent.getStringExtra("receiverId");
-        if (messageData == null || receiverId == null) return;
+        database = Realm.getDefaultInstance();
+        if (intent == null) {
+            Log.d(TAG, "Null intent was passed, sending all unsent messages");
+            sendAll();
+        } else {
+            Log.e(TAG, intent.toString());
+            final String messageData = intent.getStringExtra(MessageItemKeys.MESSAGE_DATA);
+            final String receiverId = intent.getStringExtra(MessageItemKeys.RECEIVER_ID);
+            if (messageData == null || receiverId == null) {
+                Log.e(TAG, "No extras sent in intent");
+                return;
+            }
+            sendMessage(messageData, receiverId);
+        }
+        database.close();
+    }
 
-        notifyStatus(receiverId);
+    /**
+     * If {@link #onHandleIntent(Intent)} has {@code null} intent, then automatically check for
+     * any unsent messages.
+     */
+    private void sendAll() {
+        final RealmList<MessageItem> notSentMessages = new RealmList<>();
+        notSentMessages.addAll(database.where(MessageItem.class)
+                .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_WAIT)
+                .findAll());
+        for (int i = 0; i < notSentMessages.size(); i++) {
+            sendMessage(notSentMessages.get(i));
+        }
+    }
 
+    /**
+     * Method to create a temporary {@link MessageItem} object.
+     *
+     * @param messageData Message Data to send.
+     * @param receiverId  Other user's unique id.
+     */
+    private void sendMessage(final String messageData, final String receiverId) {
 
-        final Realm database = Realm.getDefaultInstance();
+        //Get current system time and include this is in message id
+        final Date messageTime = Calendar.getInstance().getTime();
+        final String messageId = "" + messageTime.getTime()
+                + messageTime.hashCode()
+                + messageData.hashCode();
+
+        final MessageItem mi = new MessageItem();
+        mi.setMessageId(messageId);
+        mi.setMessageRcvd(false);
+        mi.setMessageTime(messageTime);
+        mi.setMessageRcvdTime(Calendar.getInstance().getTime());
+        mi.setMessageData(messageData);
+        mi.setSenderId(receiverId);
+        mi.setMessageStatus(MessageStatusType.MSG_WAIT);
+
+        sendMessage(mi);
+    }
+
+    /**
+     * Sends a single message using information from the {@link MessageItem} object.
+     *
+     * @param mItem message item object to extact information from.
+     */
+    private void sendMessage(final MessageItem mItem) {
+        final String messageId = mItem.getMessageId();
+        final String messageData = mItem.getMessageData();
+        final String receiverId = mItem.getSenderId();
+        final String latestMessage = messageData.substring(0, messageData.length() % 50);
+        final Date messageTime = mItem.getMessageTime();
+
         final DatabaseReference sendMessageRef = getRootReference()
                 .child(AHC.FDR_CHAT)
-                .child(receiverId)
+                .child(mItem.getSenderId())
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
         final DatabaseReference sentMessageStatusRef = getRootReference()
@@ -58,26 +125,20 @@ public class SendService extends BaseIntentService {
                 .child(getUser().getUid())
                 .child(ChatItemKeys.SENT_STATUS);
 
-        //Get current system time and include this is in message id;
-        final Date messageTime = Calendar.getInstance().getTime();
-        final String messageId = "" + messageTime.getTime()
-                + messageTime.hashCode()
-                + messageData.hashCode();
-        Log.e(TAG, "Sending message with id " + messageId);
-        final String latestMessage = messageData.substring(0, messageData.length() % 50);
+        Log.e(TAG, "Sending message with id " + mItem.getMessageId());
 
         //Add new message
         final Map<String, Object> messageMap = new HashMap<>();
-        messageMap.put("data", messageData);
-        messageMap.put("date", messageTime);
+        messageMap.put(MessageItemKeys.FDR_DATA, messageData);
+        messageMap.put(MessageItemKeys.FDR_DATE, messageTime);
 
         //Update latest sender information
         final Map<String, Object> senderMap = new HashMap<>();
-        senderMap.put("id", getUser().getUid());
-        senderMap.put("name", getUser().getDisplayName());
-        senderMap.put("latest", latestMessage);
-        senderMap.put("photoUrl", getUser().getPhotoUrl().toString());
-        senderMap.put("date", messageTime);
+        senderMap.put(ChatItemKeys.FDR_ID, getUser().getUid());
+        senderMap.put(ChatItemKeys.FDR_NAME, getUser().getDisplayName());
+        senderMap.put(ChatItemKeys.FDR_LATEST, latestMessage);
+        senderMap.put(ChatItemKeys.FDR_PHOTO_URL, getUser().getPhotoUrl().toString());
+        senderMap.put(ChatItemKeys.FDR_DATE, messageTime);
 
         final Map<String, Integer> sentStatusMap = new HashMap<>();
         sentStatusMap.put(messageId, MessageStatusType.MSG_SENT);
@@ -97,20 +158,16 @@ public class SendService extends BaseIntentService {
         });
 
         database.executeTransaction(r -> {
-            if (receiverId == null) return;
-            final ChatsItem ci = r.where(ChatsItem.class).equalTo("id", receiverId).findFirst();
+            final ChatsItem ci = r.where(ChatsItem.class)
+                    .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
             if (ci != null) {
                 ci.setLatest(latestMessage);
                 ci.setUpdate(messageTime);
             }
         });
-        sendListener = getSentMsgStatusVEL();
-        sentMessageStatusRef.addValueEventListener(sendListener);
 
         Log.e(TAG, "Calling notify service");
         notifyStatus(receiverId);
-        //sentMessageStatusRef.removeEventListener(sendListener);
-        database.close();
     }
 
     /**
@@ -122,44 +179,8 @@ public class SendService extends BaseIntentService {
     private void notifyStatus(final String receiverId) {
         //Update any message read status of this receiver user
         final Intent notifyIntent = new Intent(this, NotifyService.class);
-        notifyIntent.putExtra("receiverId", receiverId);
+        notifyIntent.putExtra(MessageItemKeys.RECEIVER_ID, receiverId);
         startService(notifyIntent);
     }
 
-    /**
-     * Handle onDataSnapshot for {@link #sendListener}.
-     *
-     * @return ValueEventListener object for hadnling ref updates.
-     */
-    public ValueEventListener getSentMsgStatusVEL() {
-        return new ValueEventListener() {
-            Realm database;
-
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                database = Realm.getDefaultInstance();
-                for (final DataSnapshot child : dataSnapshot.getChildren()) {
-                    final String key = child.getKey();
-                    final MessageItem mi = database
-                            .where(MessageItem.class)
-                            .equalTo("messageId", key)
-                            .lessThanOrEqualTo("messageStatus", MessageStatusType.MSG_SENT)
-                            .findFirst();
-                    if (mi != null) {
-                        database.beginTransaction();
-                        mi.setMessageStatus(MessageStatusType.MSG_SENT);
-                        database.commitTransaction();
-                    }
-                    //TODO still buggy
-                    //child.getRef().removeValue();
-                }
-                database.close();
-            }
-
-            @Override
-            public void onCancelled(final DatabaseError databaseError) {
-                if (database != null && !database.isClosed()) database.close();
-            }
-        };
-    }
 }

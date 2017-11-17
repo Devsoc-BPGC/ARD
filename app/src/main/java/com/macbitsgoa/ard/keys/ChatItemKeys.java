@@ -13,4 +13,19 @@ public class ChatItemKeys {
     public static final String ONLINE = "online";
     public static final String SENT_STATUS = "sentMessages";
 
+    /**
+     * Field name used in database for {@link com.macbitsgoa.ard.models.ChatsItem#name}.
+     */
+    public static final String DB_NAME = "name";
+    public static final String DB_ID = "id";
+    public static final String DB_LATEST = "latest";
+    public static final String DB_PHOTO_URL = "photoUrl";
+    public static final String DB_DATE = "update";
+
+    public static final String FDR_NAME = DB_NAME;
+    public static final String FDR_ID = DB_ID;
+    public static final String FDR_LATEST = DB_LATEST;
+    public static final String FDR_PHOTO_URL = DB_PHOTO_URL;
+    public static final String FDR_DATE = "date";
+
 }
