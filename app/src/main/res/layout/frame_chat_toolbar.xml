@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="?attr/actionBarSize"
     android:animateLayoutChanges="true"
-    android:background="@color/green_800"
+    android:background="@color/white"
     android:elevation="8dp">
 
     <LinearLayout
@@ -28,6 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
+            android:tint="#073f42"
             app:srcCompat="@drawable/ic_back" />
 
         <ImageView
@@ -52,7 +53,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="Chat"
-        android:textColor="@color/white"
+        android:textColor="#073f42"
         android:textSize="18sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/tv_frame_chat_toolbar_subtitle"
@@ -70,8 +71,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="online"
-        android:textColor="@color/white"
         android:textSize="12sp"
+        android:textColor="#073f42"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

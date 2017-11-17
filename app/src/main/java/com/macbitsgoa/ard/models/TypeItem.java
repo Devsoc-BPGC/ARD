@@ -1,5 +1,7 @@
 package com.macbitsgoa.ard.models;
 
+import android.support.annotation.NonNull;
+
 /**
  * Item format that can store any data and a type value.
  *
@@ -24,7 +26,7 @@ public class TypeItem {
      * @param data Object data.
      * @param type int value of type declared in an util class.
      */
-    public TypeItem(final Object data, final int type) {
+    public TypeItem(@NonNull final Object data, final int type) {
         this.data = data;
         this.type = type;
     }

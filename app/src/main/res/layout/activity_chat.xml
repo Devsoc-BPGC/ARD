@@ -8,16 +8,6 @@
     android:fitsSystemWindows="true"
     tools:context="com.macbitsgoa.ard.activities.ChatActivity">
 
-    <ImageView
-        android:id="@+id/imageView"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@color/grey_500"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
     <include
         android:id="@+id/include"
         layout="@layout/frame_chat_toolbar" />

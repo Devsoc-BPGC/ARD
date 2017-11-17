@@ -21,7 +21,7 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.imgView_vh_activity_chatmsg_tick)
     public ImageView status;
 
-    public ChatMsgViewHolder(View itemView) {
+    public ChatMsgViewHolder(final View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
     }

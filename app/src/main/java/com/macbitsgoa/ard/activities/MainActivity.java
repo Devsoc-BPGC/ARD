@@ -221,6 +221,7 @@ public class MainActivity extends BaseActivity
     @Override
     public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
         // Handle navigation view item clicks here.
+        //TODO add backstack as well.
         final int id = item.getItemId();
 
         if (id == R.id.bottom_nav_faq) {

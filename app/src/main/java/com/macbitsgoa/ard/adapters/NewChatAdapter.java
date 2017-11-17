@@ -35,22 +35,22 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+        final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if (viewType == TEXT)
             return new TextViewHolder(inflater.inflate(R.layout.vh_text, parent, false), R.id.tv_vh_text);
         return new NewChatViewHolder(inflater.inflate(R.layout.vh_newchat, parent, false), context);
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder generalHolder, int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder generalHolder, final int position) {
         if (generalHolder.getItemViewType() == TEXT) {
-            TextViewHolder holder = (TextViewHolder) generalHolder;
+            final TextViewHolder holder = (TextViewHolder) generalHolder;
             if (position == admins.size() + 1)
                 holder.text.setText("User(s)");
             else holder.text.setText("Admin(s)");
         } else {
-            NewChatViewHolder holder = (NewChatViewHolder) generalHolder;
+            final NewChatViewHolder holder = (NewChatViewHolder) generalHolder;
             UserItem ui;
             if (position <= admins.size()) ui = admins.get(position - 1);
             else ui = users.get(position - admins.size() - 2);
@@ -65,7 +65,7 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public int getItemViewType(final int position) {
         if (position == 0 || position == admins.size() + 1) return TEXT;
         else return USER;
     }

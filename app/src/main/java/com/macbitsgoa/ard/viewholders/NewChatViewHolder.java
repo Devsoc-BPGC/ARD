@@ -35,24 +35,21 @@ public class NewChatViewHolder extends RecyclerView.ViewHolder {
     private UserItem ui;
     private Activity activity;
 
-    public NewChatViewHolder(View itemView, final Activity activity) {
+    public NewChatViewHolder(final View itemView, final Activity activity) {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.activity = activity;
-        itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(activity, ChatActivity.class);
-                intent.putExtra("title", ui.getName());
-                intent.putExtra("senderId", ui.getUid());
-                intent.putExtra("photoUrl", ui.getPhotoUrl());
-                activity.startActivity(intent);
-                activity.finish();
-            }
+        itemView.setOnClickListener(v -> {
+            final Intent intent = new Intent(activity, ChatActivity.class);
+            intent.putExtra("title", ui.getName());
+            intent.putExtra("senderId", ui.getUid());
+            intent.putExtra("photoUrl", ui.getPhotoUrl());
+            activity.startActivity(intent);
+            activity.finish();
         });
     }
 
-    public void setUi(UserItem ui) {
+    public void setUi(final UserItem ui) {
         this.ui = ui;
         name.setText(ui.getName());
         desc.setText(ui.getDesc());

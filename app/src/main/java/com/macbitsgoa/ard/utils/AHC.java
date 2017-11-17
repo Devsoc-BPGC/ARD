@@ -13,7 +13,6 @@ import android.util.Log;
 import android.util.TypedValue;
 
 import com.macbitsgoa.ard.BuildConfig;
-import com.macbitsgoa.ard.services.MessagingService;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -88,9 +87,14 @@ public class AHC {
     public static final String FDR_NAV_DRAWER_IMAGE_LIST = "navDrawerImages";
 
     /**
+     * Reference to announcements node.
+     */
+    public static final String FDR_ANN = "announcements";
+
+    /**
      * Reference to home fragment node.
      */
-    public static final String FDR_HOME = "home";
+    public static final String FDR_HOME = "home1";
 
     /**
      * Reference to extra informations.
@@ -121,11 +125,6 @@ public class AHC {
      * SharedPreferences file name for the app.
      */
     public static final String SP_APP = "prefs";
-
-    /**
-     * Unique code for Alarm receiver.
-     */
-    public static final int ALARM_RECEIVER_REQUEST_CODE = 49;
 
     /**
      * Action for alarm receiver.
@@ -179,14 +178,14 @@ public class AHC {
      * @return converted string.
      */
     public static String getSimpleDayAndTime(@Nullable final Date date) {
-        return getSimpleTime(date);
+        final long diff = Math.abs(date.getTime() - Calendar.getInstance().getTime().getTime());
+        if (diff / (1000 * 60 * 60 * 24) < 1)
+            return getSimpleTime(date);
+        return getSimpleDay(date) + ", " + getSimpleTime(date);
     }
 
     public static String getSimpleDay(@Nullable final Date date) {
         if (date == null) return "";
-        long diff = Math.abs(date.getTime() - Calendar.getInstance().getTime().getTime());
-        if (diff / (1000 * 60 * 60 * 24) < 1)
-            return getSimpleTime(date);
         final SimpleDateFormat sdf = new SimpleDateFormat("E", Locale.UK);
         return sdf.format(date);
     }
@@ -199,24 +198,48 @@ public class AHC {
 
     /**
      * Setup alarm after delay.
+     *
+     * @param context      Context object for use.
+     * @param className    Class to start.
+     * @param requestCode  Unique code for pending intent.
+     * @param delayMinutes Delay value in minutes.
      */
-    public static void setNextAlarm(final Context context) {
-         /*
-        Set alarm for service start.
-         */
-        Log.e("TAG", "setting next alarm");
+    public static void setNextAlarm(final Context context, final Class className,
+                                    final int requestCode, final int delayMinutes) {
+        Log.i(TAG, "Setting next alarm for given class name " + className.getSimpleName());
         final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, 1);
+        calendar.add(Calendar.MINUTE, delayMinutes);
         //Create a new PendingIntent and add it to the AlarmManager
-        final Intent intent = new Intent(context, MessagingService.class);
-        PendingIntent pi = PendingIntent.getService(
+        final Intent intent = new Intent(context, className);
+        final PendingIntent pi = PendingIntent.getService(
                 context,
-                AHC.ALARM_RECEIVER_REQUEST_CODE,
+                requestCode,
                 intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
         final AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
     }
 
-
+    /**
+     * Setup alarm after delay.
+     *
+     * @param context      Context object for use.
+     * @param intent       Intent object for pending intent.
+     * @param requestCode  Unique code for pending intent.
+     * @param delayMinutes Delay value in minutes.
+     */
+    public static void setNextAlarm(final Context context, final Intent intent,
+                                    final int requestCode, final int delayMinutes) {
+        Log.i(TAG, "Setting next alarm for given intent");
+        final Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, delayMinutes);
+        //Create a new PendingIntent and add it to the AlarmManager
+        final PendingIntent pi = PendingIntent.getService(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+        final AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
+        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
+    }
 }

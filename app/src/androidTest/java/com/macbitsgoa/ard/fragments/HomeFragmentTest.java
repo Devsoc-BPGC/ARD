@@ -80,7 +80,6 @@ public class HomeFragmentTest {
                         HomeFragment homeFragment = (HomeFragment) activityTestRule.getActivity()
                                 .getSupportFragmentManager()
                                 .findFragmentById(R.id.frame_content_main);
-                        homeFragment.setupData(data);
                     }
                 });
 

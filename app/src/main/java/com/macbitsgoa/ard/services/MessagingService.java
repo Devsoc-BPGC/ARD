@@ -25,7 +25,15 @@ import io.realm.Realm;
 
 public class MessagingService extends BaseIntentService {
 
+    /**
+     * TAG for class.
+     */
     public static final String TAG = MessagingService.class.getSimpleName();
+
+    /**
+     * Request code for alarm manager.
+     */
+    public static final int REQUEST_CODE = 107;
 
     private final DatabaseReference messageStatusRef = getRootReference().child(AHC.FDR_CHAT);
 
@@ -36,10 +44,6 @@ public class MessagingService extends BaseIntentService {
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
         super.onHandleIntent(intent);
-        Log.d(TAG, "service started");
-        //TODO: restart service using alarm bc
-        AHC.setNextAlarm(this);
-        final Realm database = Realm.getDefaultInstance();
         final DatabaseReference messagesRef = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(getUser().getUid())
@@ -48,11 +52,13 @@ public class MessagingService extends BaseIntentService {
         messagesRef.addValueEventListener(messagesRefVEL);
         try {
             Thread.sleep(1000 * 60 * 10);
-        } catch (InterruptedException e) {
+        } catch (final InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            AHC.setNextAlarm(this, MessagingService.class, REQUEST_CODE, 0);
+            messagesRef.removeEventListener(messagesRefVEL);
+
         }
-        messagesRef.removeEventListener(messagesRefVEL);
-        database.close();
     }
 
     @Override
@@ -63,7 +69,7 @@ public class MessagingService extends BaseIntentService {
 
     public ValueEventListener getEventListener() {
         return new ValueEventListener() {
-            Realm database;
+            private Realm database;
 
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
@@ -150,10 +156,12 @@ public class MessagingService extends BaseIntentService {
                         final DataSnapshot messageStatusDS = messageStatusQ.poll();
                         final MessageItem mi = database
                                 .where(MessageItem.class)
-                                .equalTo("messageId", messageStatusDS.getKey())
+                                .equalTo(MessageItemKeys.MESSAGE_ID, messageStatusDS.getKey())
                                 .findFirst();
                         if (mi == null) {
                             Log.e(TAG, "Message lost");
+                            //If message is lost, we can safely remove this value from firebase
+                            messageStatusDS.getRef().removeValue();
                             continue;
                         }
                         database.beginTransaction();
@@ -210,8 +218,13 @@ public class MessagingService extends BaseIntentService {
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
-                Log.e(TAG, databaseError.toString());
-                if (database != null && !database.isClosed()) database.close();
+                Log.e(TAG, "Could not get data " + databaseError.toString());
+                if (database != null && !database.isClosed()) {
+                    if (database.isInTransaction()) {
+                        database.cancelTransaction();
+                    }
+                    database.close();
+                }
             }
         };
     }

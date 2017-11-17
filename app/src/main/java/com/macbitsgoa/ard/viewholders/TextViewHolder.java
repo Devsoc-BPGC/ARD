@@ -12,8 +12,8 @@ import android.widget.TextView;
 public class TextViewHolder extends RecyclerView.ViewHolder {
     public TextView text;
 
-    public TextViewHolder(View itemView, @IdRes int resourceId) {
+    public TextViewHolder(final View itemView, @IdRes final int resourceId) {
         super(itemView);
-        text = (TextView) itemView.findViewById(resourceId);
+        text = itemView.findViewById(resourceId);
     }
 }

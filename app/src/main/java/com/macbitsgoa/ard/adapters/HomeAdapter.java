@@ -1,15 +1,27 @@
 package com.macbitsgoa.ard.adapters;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
+import android.text.Html;
 import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
+import com.macbitsgoa.ard.models.home.HomeItem;
+import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.AnnViewHolder;
+import com.macbitsgoa.ard.viewholders.AnnouncementViewHolder;
+import com.macbitsgoa.ard.viewholders.HomeItemViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,45 +34,106 @@ import java.util.List;
 public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
 
     /**
+     * Viewtype value for Announcement.
+     */
+    public static final int ANNOUNCEMENT_TAB = -1;
+
+    public static final int HOME_ITEM = -2;
+
+    /**
      * List to hold all data.
      */
     private List<TypeItem> data;
 
     /**
-     * Constructor that initialises empty data list of type {@link TypeItem}.
+     * Context for use with glide.
      */
-    public HomeAdapter() {
-        this.data = new ArrayList<>(0);
-    }
+    private Context context;
 
     /**
-     * Get the current list that is being used by the adapter.
-     * This can be used to update the list.
+     * Constructor that initialises empty data list of type {@link TypeItem}.
      *
-     * @return {@code List<TypeItem>} current data.
+     * @param data    Data of type {@link TypeItem}
+     * @param context For use with Image downloading.
      */
-    public List<TypeItem> getData() {
-        return data;
+    public HomeAdapter(@Nullable final List<TypeItem> data, @NonNull final Context context) {
+        this.data = data;
+        this.context = context;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        return new AnnViewHolder(inflater.inflate(R.layout.viewholder_home_fragment_ann, parent, false));
+        final View view;
+        switch (viewType) {
+            case ANNOUNCEMENT_TAB:
+                view = inflater.inflate(R.layout.vh_ann_card_fragment_home, parent, false);
+                return new AnnouncementViewHolder(view);
+            case PostType.ANNOUNCEMENT:
+                view = inflater.inflate(R.layout.vh_ann_activity_item, parent, false);
+                return new AnnViewHolder(view);
+            case HOME_ITEM:
+                view = inflater.inflate(R.layout.vh_home_item_1, parent, false);
+                return new HomeItemViewHolder(view);
+        }
+        return null;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
-        final AnnViewHolder annViewHolder = (AnnViewHolder) holder;
-        final AnnItem item = (AnnItem) data.get(position).getData();
-        annViewHolder.data.setText(item.getData());
-        final String extras = item.getAuthor() + ", " + AHC.getSimpleDate(item.getDate());
-        annViewHolder.extras.setText(extras);
+        switch (holder.getItemViewType()) {
+            case ANNOUNCEMENT_TAB: {
+                final AnnouncementViewHolder avh = (AnnouncementViewHolder) holder;
+                avh.setTextData((ArrayList<String>) data.get(position).getData());
+                avh.subtitleTextView.setText("Announcements");
+                break;
+            }
+            case PostType.ANNOUNCEMENT: {
+                final AnnViewHolder anvh = (AnnViewHolder) holder;
+                final AnnItem ai = (AnnItem) data.get(position).getData();
+                anvh.data.setText(Html.fromHtml(ai.getData()));
+                anvh.extras.setText(Html.fromHtml(ai.getAuthor()
+                        + ", "
+                        + AHC.getSimpleDayAndTime(ai.getDate())));
+                if (ai.isRead()) anvh.newTag.setVisibility(View.INVISIBLE);
+                else anvh.newTag.setVisibility(View.VISIBLE);
+                break;
+            }
+            case HOME_ITEM: {
+                final HomeItemViewHolder hivh = (HomeItemViewHolder) holder;
+                final HomeItem hi = (HomeItem) data.get(position).getData();
+                if (hi.getImages().size() == 0) {
+                    hivh.imageView.setVisibility(View.GONE);
+                } else {
+                    hivh.imageView.setVisibility(View.VISIBLE);
+                    Glide.with(context)
+                            .load(hi.getImages().get(0).getData())
+                            .transition(DrawableTransitionOptions.withCrossFade())
+                            .apply(RequestOptions.centerCropTransform())
+                            .into(hivh.imageView);
+
+                }
+                if (hi.getTexts().size() == 0) {
+                    hivh.textView1.setVisibility(View.GONE);
+                    hivh.textView2.setVisibility(View.GONE);
+                } else if (hi.getTexts().size() == 1) {
+                    hivh.textView1.setVisibility(View.VISIBLE);
+                    hivh.textView2.setVisibility(View.GONE);
+                    hivh.textView1.setText(Html.fromHtml(hi.getTexts().get(0).getData()));
+                } else {
+                    hivh.textView1.setVisibility(View.VISIBLE);
+                    hivh.textView2.setVisibility(View.VISIBLE);
+                    hivh.textView1.setText(Html.fromHtml(hi.getTexts().get(0).getData()));
+                    hivh.textView2.setText(Html.fromHtml(hi.getTexts().get(1).getData()));
+                }
+                break;
+            }
+        }
     }
 
     @Override
     public int getItemCount() {
-        return data.size();
+        return data == null ? 0 : data.size();
     }
 
     @Override

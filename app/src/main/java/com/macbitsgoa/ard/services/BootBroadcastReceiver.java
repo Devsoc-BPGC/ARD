@@ -22,12 +22,11 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(final Context context, final Intent intent) {
         if (intent == null) return;
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
-            // Set the alarm here.
             Log.e(TAG, "Starting services");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(new Intent(context, MessagingService.class));
+                context.startForegroundService(new Intent(context, ServicesStarter.class));
             } else {
-                context.startService(new Intent(context, MessagingService.class));
+                context.startService(new Intent(context, ServicesStarter.class));
             }
         }
     }

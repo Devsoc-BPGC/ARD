@@ -1,5 +1,6 @@
 package com.macbitsgoa.ard.activities;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -23,6 +24,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.services.AnnService;
+import com.macbitsgoa.ard.services.HomeService;
+import com.macbitsgoa.ard.services.MessagingService;
+import com.macbitsgoa.ard.services.NotificationService;
 import com.macbitsgoa.ard.utils.AHC;
 
 import io.realm.Realm;
@@ -32,8 +37,15 @@ import io.realm.Realm;
  *
  * @author Vikramaditya Kukreja
  */
+@SuppressLint("Registered")
 public class BaseActivity extends AppCompatActivity implements View.OnClickListener {
 
+    /**
+     * Realm database object. This object is initialised in {@link BaseActivity}'s
+     * {@link #onCreate(Bundle)} and closed in {@link BaseActivity}'s {@link #onDestroy()}.
+     * Activities that extend this class should call all closing functions before the
+     * {@code super.onDestroy()} method to prevent ANR because of closed Realm database.
+     */
     public Realm database;
 
     /**
@@ -46,12 +58,15 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(@Nullable final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (FirebaseAuth.getInstance().getCurrentUser() == null && !(this instanceof AuthActivity)) {
             startActivity(new Intent(this, AuthActivity.class));
         }
-        AHC.setNextAlarm(this);
+        AHC.setNextAlarm(this, AnnService.class, AnnService.REQUEST_CODE, 0);
+        AHC.setNextAlarm(this, HomeService.class, HomeService.REQUEST_CODE, 0);
+        AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
+        AHC.setNextAlarm(this, NotificationService.class, NotificationService.RC, 0);
         database = Realm.getDefaultInstance();
     }
 
@@ -59,7 +74,10 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         database.close();
-        AHC.setNextAlarm(this);
+        AHC.setNextAlarm(this, AnnService.class, AnnService.REQUEST_CODE, 0);
+        AHC.setNextAlarm(this, HomeService.class, HomeService.REQUEST_CODE, 0);
+        AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
+        AHC.setNextAlarm(this, NotificationService.class, NotificationService.RC, 0);
     }
 
     /**
@@ -137,7 +155,7 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
      * @param v View that was clicked.
      */
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
 
     }
 

@@ -4,24 +4,34 @@ import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
+import android.text.Html;
 import android.util.Log;
 
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.activities.ChatActivity;
+import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
+import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.Actions;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -37,15 +47,71 @@ public class NotificationService extends IntentService {
     public static final String TAG = NotificationService.class.getSimpleName();
 
     /**
+     * Request code for alarm manager.
+     */
+    public static final int RC = 90;
+
+    /**
      * Creates an IntentService.  Invoked by your subclass's constructor.
      */
     public NotificationService() {
         super("NotificationService");
     }
 
+    private Realm database;
+    private NotificationManagerCompat nmc;
+
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
-        final Realm database = Realm.getDefaultInstance();
+        database = Realm.getDefaultInstance();
+        nmc = NotificationManagerCompat.from(this);
+        chatNotifications();
+        announcementNotifications();
+        database.close();
+    }
+
+    /**
+     * Genereate notifications for new announcements.
+     */
+    private void announcementNotifications() {
+        final ApplicationInfo appInfo;
+        try {
+            appInfo = getPackageManager().getApplicationInfo(BuildConfig.APPLICATION_ID, 0);
+        } catch (PackageManager.NameNotFoundException e) {
+            return;
+        }
+        final String appFile = appInfo.sourceDir;
+        final long installedTime = new File(appFile).lastModified();
+
+        if (AnnActivity.isActive || installedTime == Long.MAX_VALUE) return;
+
+        final RealmList<AnnItem> annItems = new RealmList<>();
+        final Date date = new Date(installedTime);
+        annItems.addAll(database.where(AnnItem.class)
+                .equalTo("read", false)
+                .greaterThanOrEqualTo(AnnItemKeys.DATE, date).findAll());
+        for (final AnnItem ai : annItems) {
+            final Intent intent = new Intent(this, AnnActivity.class);
+            final PendingIntent pIntent = PendingIntent.getActivity(this, ai.getKey().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            final NotificationCompat.Builder builder
+                    = new NotificationCompat.Builder(this, "Announcements")
+                    .setAutoCancel(true)
+                    .setContentIntent(pIntent)
+                    .setContentTitle(Html.fromHtml(ai.getData()))
+                    .setContentText(Html.fromHtml(ai.getData()))
+                    .setShowWhen(true)
+                    .setVibrate(new long[]{Notification.DEFAULT_VIBRATE})
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setTicker("New announcement from ARD")
+                    .setDefaults(Notification.DEFAULT_SOUND)
+                    .setStyle(new NotificationCompat.BigTextStyle()
+                            .bigText(Html.fromHtml(ai.getData()))
+                            .setBigContentTitle("Announcement"));
+            nmc.notify(ai.getKey().hashCode(), builder.build());
+        }
+    }
+
+    private void chatNotifications() {
         final RealmResults<MessageItem> unreadMessagesUsers = database.where(MessageItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                 .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
@@ -111,7 +177,6 @@ public class NotificationService extends IntentService {
                     .setDefaults(Notification.DEFAULT_SOUND)
                     .setStyle(inboxStyle);
 
-            final NotificationManagerCompat nmc = NotificationManagerCompat.from(this);
             Log.e(TAG, "Notification id -> "
                     + ci.getId().hashCode());
 
@@ -126,8 +191,6 @@ public class NotificationService extends IntentService {
             final Intent notificationBC = new Intent(Actions.NOTIFICATION_ACTION);
             notificationBC.putExtra(MessageItemKeys.SENDER_ID, ci.getId());
             sendBroadcast(notificationBC);
-
         }
-        database.close();
     }
 }

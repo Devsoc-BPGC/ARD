@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:paddingBottom="@dimen/paddingBottom_viewHolder_ann_constraintLayout">
+
+    <ImageView
+        android:id="@+id/imageView_viewHolder_ann_icon"
+        android:layout_width="@dimen/width_viewHolder_ann_icon"
+        android:layout_height="@dimen/height_viewHolder_ann_icon"
+        android:layout_marginBottom="@dimen/marginBottom_viewHolder_ann_icon"
+        android:layout_marginStart="@dimen/marginStart_viewHolder_ann_icon"
+        android:layout_marginTop="@dimen/marginTop_viewHolder_ann_icon"
+        android:contentDescription="@string/contentDesc_viewHolder_ann_icon"
+        android:tint="?attr/tint_viewHolder_ann_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/textView_viewHolder_ann_data"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView_viewHolder_ann_data"
+        app:srcCompat="@drawable/ic_announcements" />
+
+    <TextView
+        android:id="@+id/textView_viewHolder_ann_data"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="@dimen/marginTop_viewHolder_ann_data"
+        android:autoLink="all"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:linksClickable="true"
+        android:padding="@dimen/padding_viewHolder_ann_data"
+        android:text="@string/text_viewHolder_ann_data_default"
+        android:textColor="?attr/textColor_viewHolder_ann_data"
+        android:textSize="@dimen/textSize_viewHolder_ann_data"
+        app:layout_constraintEnd_toStartOf="@+id/cv_vh_ann_activity_item"
+        app:layout_constraintLeft_toRightOf="@+id/imageView_viewHolder_ann_icon"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView_viewHolder_ann_extras"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="@dimen/marginTop_viewHolder_ann_extras"
+        android:autoLink="all"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical|end"
+        android:linksClickable="true"
+        android:padding="@dimen/padding_viewHolder_ann_extras"
+        android:text="@string/text_viewHolder_ann_extras_default"
+        android:textColor="?attr/textColor_viewHolder_ann_extras"
+        android:textStyle="italic"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintLeft_toLeftOf="@+id/textView_viewHolder_ann_data"
+        app:layout_constraintTop_toBottomOf="@+id/textView_viewHolder_ann_data" />
+
+    <android.support.v7.widget.CardView
+        android:id="@+id/cv_vh_ann_activity_item"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        app:cardBackgroundColor="@color/red_700"
+        app:layout_constraintBottom_toBottomOf="@+id/textView_viewHolder_ann_data"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/textView_viewHolder_ann_data">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:padding="2dp"
+            android:text="NEW"
+            android:textColor="@color/white"
+            android:textSize="12sp" />
+    </android.support.v7.widget.CardView>
+</android.support.constraint.ConstraintLayout>

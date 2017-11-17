@@ -11,6 +11,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
@@ -21,7 +22,6 @@ import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
-import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
@@ -54,6 +54,10 @@ public class ChatFragment extends BaseFragment {
 
     private DatabaseReference myStatus;
 
+    TextView emptyListTV;
+
+    RealmResults<ChatsItem> chats;
+
     /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
@@ -76,6 +80,7 @@ public class ChatFragment extends BaseFragment {
         mListener.updateChatFragment();
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
+        emptyListTV = view.findViewById(R.id.tv_fragment_chat_empty);
         recyclerView = view.findViewById(R.id.recyclerView_fragment_chat);
         final FloatingActionButton newChatFab = view.findViewById(R.id.fab_fragment_chat);
 
@@ -109,14 +114,18 @@ public class ChatFragment extends BaseFragment {
         myStatus.setValue(true);
         myStatus.onDisconnect().removeValue();
 
-        final RealmResults<ChatsItem> chats = database.where(ChatsItem.class)
+        chats = database.where(ChatsItem.class)
                 .findAllSorted("update", Sort.DESCENDING);
 
+        if (chats.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+        else emptyListTV.setVisibility(View.GONE);
         deleteEmptyChats();
 
         chatsAdapter = new ChatsAdapter(chats, getContext());
 
         chats.addChangeListener(results -> {
+            if (results.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+            else emptyListTV.setVisibility(View.GONE);
             chatsAdapter.notifyDataSetChanged();
         });
 
@@ -135,15 +144,13 @@ public class ChatFragment extends BaseFragment {
                         .findAll().isEmpty())
                     cItem.deleteFromRealm();
             }
-        }, () -> {
-            if (chatsAdapter != null)
-                chatsAdapter.notifyDataSetChanged();
         });
     }
 
     @Override
     public void onStop() {
         super.onStop();
+        chats.removeAllChangeListeners();
         myStatus.removeValue();
     }
 
@@ -154,7 +161,7 @@ public class ChatFragment extends BaseFragment {
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(final View v) {
         //Only fab  is registered
         startActivity(new Intent(getContext(), NewChatActivity.class));
     }

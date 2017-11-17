@@ -35,15 +35,14 @@ import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendService;
-import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.Actions;
+import com.macbitsgoa.ard.utils.CenterCropDrawable;
 
 import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.OrderedCollectionChangeSet;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -110,6 +109,7 @@ public class ChatActivity extends BaseActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new CenterCropDrawable(ContextCompat.getDrawable(this, R.drawable.bg_chat_activity)));
         setContentView(R.layout.activity_chat);
 
         senderId = getIntent().getStringExtra(MessageItemKeys.SENDER_ID);
