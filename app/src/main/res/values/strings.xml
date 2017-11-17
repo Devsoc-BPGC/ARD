@@ -70,4 +70,10 @@
     <string name="title_activity_new_chat">New</string>
     <string name="title_activity_ann">Announcements</string>
 
+    <!-- Message status -->
+    <string name="msg_read">Message Read</string>
+    <string name="msg_rcvd">Message Delivered</string>
+    <string name="msg_sent">Message Sent</string>
+    <string name="msg_wait">Waiting</string>
+
 </resources>

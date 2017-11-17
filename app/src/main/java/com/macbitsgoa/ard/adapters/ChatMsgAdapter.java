@@ -1,23 +1,23 @@
 package com.macbitsgoa.ard.adapters;
 
-import android.graphics.Color;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.MessageItem;
-import com.macbitsgoa.ard.types.MessageStatusType;
-import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.ChatMsgViewHolder;
 
 import io.realm.RealmResults;
 
 public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
 
-    private final int RECEIVER = 0;
-    private final int SENDER = 1;
+    public static final int RECEIVER = 0;
+    public static final int SENDER = 1;
 
     private RealmResults<MessageItem> messages;
 
@@ -28,37 +28,22 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
     @Override
     public ChatMsgViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view = null;
-        if (viewType == RECEIVER)
-            view = inflater.inflate(R.layout.vh_activity_chat_chatmsg_receiver, parent, false);
-        else if (viewType == SENDER)
-            view = inflater.inflate(R.layout.vh_activity_chat_chatmsg_sender, parent, false);
+        final View view = inflater.inflate(R.layout.vh_activity_chat_chatmsg, parent, false);
+        final LinearLayout root = view.findViewById(R.id.ll_chatmsg_root);
+        final LinearLayout msgBox = view.findViewById(R.id.ll_chatmsg_msg_box);
+        if (viewType == RECEIVER) {
+            root.setGravity(Gravity.END);
+            msgBox.setBackground(ContextCompat.getDrawable(parent.getContext(), R.drawable.bg_chat_rcv));
+        } else if (viewType == SENDER) {
+            root.setGravity(Gravity.START);
+            msgBox.setBackground(ContextCompat.getDrawable(parent.getContext(), R.drawable.bg_chat_sen));
+        }
         return new ChatMsgViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(final ChatMsgViewHolder holder, final int position) {
-        holder.time.setText(AHC.getSimpleDayAndTime(messages.get(position).getMessageTime()));
-        holder.message.setText(messages.get(position).getMessageData());
-        if (holder.getItemViewType() == RECEIVER) {
-            switch (messages.get(position).getMessageStatus()) {
-                case MessageStatusType.MSG_READ:
-                    holder.status.setImageResource(R.drawable.ic_double_tick);
-                    holder.status.setColorFilter(Color.parseColor("#03A9F4"));
-                    break;
-                case MessageStatusType.MSG_RCVD:
-                    holder.status.setImageResource(R.drawable.ic_double_tick);
-                    holder.status.setColorFilter(Color.GRAY);
-                    break;
-                case MessageStatusType.MSG_SENT:
-                    holder.status.setImageResource(R.drawable.ic_single_tick);
-                    holder.status.setColorFilter(Color.GRAY);
-                    break;
-                default:
-                    holder.status.setImageResource(R.drawable.ic_wait);
-                    holder.status.setColorFilter(Color.GRAY);
-            }
-        }
+        holder.populate(messages.get(position));
     }
 
     @Override
