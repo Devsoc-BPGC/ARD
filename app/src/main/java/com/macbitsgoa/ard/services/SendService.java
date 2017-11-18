@@ -143,10 +143,7 @@ public class SendService extends BaseIntentService {
         final Map<String, Integer> sentStatusMap = new HashMap<>();
         sentStatusMap.put(messageId, MessageStatusType.MSG_SENT);
 
-        sendMessageRef.child(ChatItemKeys.MESSAGES).child(messageId).setValue(messageMap);
-        sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
-        sentMessageStatusRef.setValue(sentStatusMap);
-
+        //First write to local database
         database.executeTransaction(r -> {
             final MessageItem mi = r.createObject(MessageItem.class, messageId);
             mi.setMessageRcvd(false);
@@ -165,6 +162,12 @@ public class SendService extends BaseIntentService {
                 ci.setUpdate(messageTime);
             }
         });
+
+        //Sent node should be updated after database write as MessageingService doesn't
+        //update local value of unwritten message.
+        sentMessageStatusRef.setValue(sentStatusMap);
+        sendMessageRef.child(ChatItemKeys.MESSAGES).child(messageId).setValue(messageMap);
+        sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
 
         Log.e(TAG, "Calling notify service");
         notifyStatus(receiverId);

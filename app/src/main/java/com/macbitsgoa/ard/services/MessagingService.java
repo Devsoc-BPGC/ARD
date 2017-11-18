@@ -260,15 +260,17 @@ public class MessagingService extends BaseIntentService {
                     final MessageItem mi = database
                             .where(MessageItem.class)
                             .equalTo(MessageItemKeys.MESSAGE_ID, key)
-                            .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS,
-                                    MessageStatusType.MSG_SENT)
                             .findFirst();
                     if (mi != null) {
                         database.beginTransaction();
-                        mi.setMessageStatus(MessageStatusType.MSG_SENT);
+                        if (mi.getMessageStatus() == MessageStatusType.MSG_WAIT) {
+                            mi.setMessageStatus(MessageStatusType.MSG_SENT);
+                            child.getRef().removeValue();
+                        }
                         database.commitTransaction();
+                    } else {
+                        Log.e(TAG, "Sent message not in database");
                     }
-                    child.getRef().removeValue();
                 }
                 database.close();
             }

@@ -22,6 +22,10 @@ import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.services.MessagingService;
+import com.macbitsgoa.ard.services.NotificationService;
+import com.macbitsgoa.ard.services.NotifyService;
+import com.macbitsgoa.ard.services.SendService;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
@@ -86,6 +90,10 @@ public class ChatFragment extends BaseFragment {
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        getContext().startService(new Intent(getContext(), MessagingService.class));
+        getContext().startService(new Intent(getContext(), SendService.class));
+        getContext().startService(new Intent(getContext(), NotificationService.class));
 
         newChatFab.setOnClickListener(this);
         return view;

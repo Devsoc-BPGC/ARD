@@ -24,6 +24,7 @@ public class ServicesStarter extends BaseIntentService {
         startService(new Intent(this, AnnService.class));
         startService(new Intent(this, MessagingService.class));
         startService(new Intent(this, NotificationService.class));
+        startService(new Intent(this, SendService.class));
 
         final Intent homeServiceIntent = new Intent(this, HomeService.class);
         homeServiceIntent.putExtra(HomeService.LIMIT_TO_LAST, DEFAULT_LIMIT_TO_LAST);

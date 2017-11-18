@@ -73,7 +73,8 @@ public class NotifyService extends BaseIntentService {
                     .equalTo("id", receiverId)
                     .findFirst();
             Log.e(TAG, "Chat item count set to 0");
-            ci.setUnreadCount(0);
+            if (ci != null)
+                ci.setUnreadCount(0);
         });
         database.close();
     }
