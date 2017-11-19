@@ -14,14 +14,12 @@ import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
-import static com.macbitsgoa.ard.utils.AHC.getScreenWidth;
-
 public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
 
     /**
-     * Maximum width fraction of {@link #message} + {@link #time} + {@link #status} of screen size.
+     * Maximum width fraction of {@link #message} of screen size.
      */
-    private static final float MAX_WIDTH_FRACTION = 0.8f;
+    public static final float MAX_WIDTH_FRACTION = 0.6f;
 
     private TextView time;
 
@@ -44,13 +42,6 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
         time.setText(AHC.getSimpleDayAndTime(messageItem.getMessageTime()));
         message.setText(messageItem.getMessageData());
 
-        // https://stackoverflow.com/a/24035591
-        message.getViewTreeObserver().addOnGlobalLayoutListener(() -> {
-            final int msgMaxWidth = ((int) (getScreenWidth() * MAX_WIDTH_FRACTION)) - time.getWidth() - status.getWidth();
-            if (message.getWidth() > msgMaxWidth) {
-                message.setWidth(msgMaxWidth);
-            }
-        });
         if (getItemViewType() == ChatMsgAdapter.RECEIVER) {
             final Context context = status.getContext();
             switch (messageItem.getMessageStatus()) {
@@ -75,7 +66,7 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
                     status.setColorFilter(Color.GRAY);
                     break;
             }
-        } else {
+        } else if (getItemViewType() == ChatMsgAdapter.SENDER) {
             status.setVisibility(View.GONE);
         }
     }
