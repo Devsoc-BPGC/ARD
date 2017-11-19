@@ -24,10 +24,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.services.AnnService;
 import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.services.MessagingService;
-import com.macbitsgoa.ard.services.NotificationService;
 import com.macbitsgoa.ard.utils.AHC;
 
 import io.realm.Realm;
@@ -63,10 +61,8 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
         if (FirebaseAuth.getInstance().getCurrentUser() == null && !(this instanceof AuthActivity)) {
             startActivity(new Intent(this, AuthActivity.class));
         }
-        AHC.setNextAlarm(this, AnnService.class, AnnService.REQUEST_CODE, 0);
         AHC.setNextAlarm(this, HomeService.class, HomeService.REQUEST_CODE, 0);
         AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
-        AHC.setNextAlarm(this, NotificationService.class, NotificationService.RC, 0);
         database = Realm.getDefaultInstance();
     }
 
@@ -74,10 +70,8 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         database.close();
-        AHC.setNextAlarm(this, AnnService.class, AnnService.REQUEST_CODE, 0);
         AHC.setNextAlarm(this, HomeService.class, HomeService.REQUEST_CODE, 0);
         AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
-        AHC.setNextAlarm(this, NotificationService.class, NotificationService.RC, 0);
     }
 
     /**

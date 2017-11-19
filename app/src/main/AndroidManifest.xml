@@ -94,10 +94,6 @@
         <service
             android:name=".services.NotifyService"
             android:process=":BackgroundServices" />
-        <service
-            android:name=".services.AnnService"
-            android:label="@string/ann_service_label"
-            android:process=":BackgroundServices" />
         <service android:name=".services.ServicesStarter" />
         <service
             android:name=".services.HomeService"

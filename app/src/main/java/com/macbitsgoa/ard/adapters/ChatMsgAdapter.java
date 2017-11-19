@@ -11,11 +11,11 @@ import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.ChatMsgViewHolder;
 
 import io.realm.RealmResults;
 
-import static com.macbitsgoa.ard.utils.AHC.getScreenWidth;
 import static com.macbitsgoa.ard.viewholders.ChatMsgViewHolder.MAX_WIDTH_FRACTION;
 
 public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
@@ -45,7 +45,7 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<ChatMsgViewHolder> {
         }
 
         final TextView messageTv = view.findViewById(R.id.textView_viewHolder_chatmsg_msg);
-        final int msgMaxWidth = ((int) (getScreenWidth() * MAX_WIDTH_FRACTION));
+        final int msgMaxWidth = (int) (AHC.getScreenWidth() * MAX_WIDTH_FRACTION);
         messageTv.setMaxWidth(msgMaxWidth);
 
         return new ChatMsgViewHolder(view);

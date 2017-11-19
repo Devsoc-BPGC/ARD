@@ -23,8 +23,6 @@ import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
-import com.macbitsgoa.ard.services.NotificationService;
-import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendService;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -80,7 +78,6 @@ public class ChatFragment extends BaseFragment {
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         mListener.updateChatFragment();
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
 
@@ -93,7 +90,6 @@ public class ChatFragment extends BaseFragment {
 
         getContext().startService(new Intent(getContext(), MessagingService.class));
         getContext().startService(new Intent(getContext(), SendService.class));
-        getContext().startService(new Intent(getContext(), NotificationService.class));
 
         newChatFab.setOnClickListener(this);
         return view;

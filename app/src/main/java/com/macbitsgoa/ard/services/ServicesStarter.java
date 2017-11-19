@@ -21,7 +21,6 @@ public class ServicesStarter extends BaseIntentService {
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
         super.onHandleIntent(intent);
-        startService(new Intent(this, AnnService.class));
         startService(new Intent(this, MessagingService.class));
         startService(new Intent(this, NotificationService.class));
         startService(new Intent(this, SendService.class));

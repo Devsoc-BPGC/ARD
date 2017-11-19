@@ -8,7 +8,9 @@ import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
+import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.models.home.PhotoItem;
 import com.macbitsgoa.ard.models.home.TextItem;
@@ -50,19 +52,26 @@ public class HomeService extends BaseIntentService {
     protected void onHandleIntent(@Nullable final Intent intent) {
         super.onHandleIntent(intent);
         int limitToLast = -1;
-        if (intent != null && intent.hasExtra(LIMIT_TO_LAST))
+        if (intent != null && intent.hasExtra(LIMIT_TO_LAST)) {
             limitToLast = intent.getIntExtra(LIMIT_TO_LAST, -1);
+        }
 
         final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
-        final ChildEventListener homeCEL = getListener();
+        final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
+        final ChildEventListener homeCEL = getHomeListener();
+        final ChildEventListener annRefCEL = getAnnListener();
+
         if (limitToLast != -1) homeRef.limitToLast(limitToLast).addChildEventListener(homeCEL);
         else homeRef.addChildEventListener(homeCEL);
+        annRef.addChildEventListener(annRefCEL);
+
         try {
             Thread.sleep(1000 * 60 * 5);
         } catch (final InterruptedException e) {
             Log.e(TAG, "Thread sleep interrupted with error\n" + e.toString());
         } finally {
             homeRef.removeEventListener(homeCEL);
+            annRef.removeEventListener(annRefCEL);
             AHC.setNextAlarm(this, new Intent(this, HomeService.class), REQUEST_CODE, 0);
         }
     }
@@ -72,7 +81,7 @@ public class HomeService extends BaseIntentService {
      *
      * @return listener for children.
      */
-    private ChildEventListener getListener() {
+    private ChildEventListener getHomeListener() {
         return new ChildEventListener() {
             private Realm database;
 
@@ -142,6 +151,95 @@ public class HomeService extends BaseIntentService {
                         Log.e(TAG, "Home item was not present and thus could not delete");
                     } else {
                         hi.deleteFromRealm();
+                    }
+                });
+                database.close();
+            }
+
+            @Override
+            public void onChildMoved(final DataSnapshot dataSnapshot, final String s) {
+                onChildRemoved(s);
+                onChildAdded(dataSnapshot, s);
+            }
+
+            @Override
+            public void onCancelled(final DatabaseError databaseError) {
+                Log.e(TAG, "Error in getting announcements\n" + databaseError.getDetails());
+                if (database != null && !database.isClosed()) {
+                    if (database.isInTransaction()) {
+                        database.cancelTransaction();
+                    }
+                    database.close();
+                }
+            }
+        };
+    }
+
+
+    /**
+     * Method to initialise announcement reference listener object.
+     *
+     * @return ChildEventListener object.
+     */
+    public ChildEventListener getAnnListener() {
+        return new ChildEventListener() {
+            private Realm database;
+
+            @Override
+            public void onChildAdded(final DataSnapshot dataSnapshot, final String s) {
+                if (dataSnapshot.getValue() == null) return;
+                database = Realm.getDefaultInstance();
+
+                final String key = dataSnapshot.getKey();
+                final String data = dataSnapshot.child(AnnItemKeys.DATA).getValue(String.class);
+                final Date date = dataSnapshot.child(AnnItemKeys.DATE).getValue(Date.class);
+                final String author = dataSnapshot.child(AnnItemKeys.AUTHOR).getValue(String.class);
+
+                if (data == null || date == null || data.length() == 0) return;
+
+                database.executeTransaction(r -> {
+                    AnnItem annItem = r.where(AnnItem.class)
+                            .equalTo(AnnItemKeys.KEY, key)
+                            .findFirst();
+                    if (annItem == null) {
+                        annItem = r.createObject(AnnItem.class, key);
+                    } else {
+                        if (annItem.getDate().getTime() == date.getTime())
+                            return;
+                    }
+                    //Only way an update occurred is if date objecct changed, in which case ann is
+                    //now unread
+                    annItem.setRead(false);
+                    annItem.setAuthor(author == null || author.length() == 0 ? "Admin" : author);
+                    annItem.setDate(date);
+                    annItem.setData(data);
+                    startService(new Intent(HomeService.this, NotificationService.class));
+                });
+
+                database.close();
+            }
+
+            @Override
+            public void onChildChanged(final DataSnapshot dataSnapshot, final String s) {
+                onChildAdded(dataSnapshot, s);
+            }
+
+            @Override
+            public void onChildRemoved(final DataSnapshot dataSnapshot) {
+                onChildRemoved(dataSnapshot.getKey());
+            }
+
+            void onChildRemoved(final String key) {
+                database = Realm.getDefaultInstance();
+                database.executeTransaction(r -> {
+                    final AnnItem annItem = r
+                            .where(AnnItem.class)
+                            .equalTo(AnnItemKeys.KEY, key)
+                            .findFirst();
+                    if (annItem != null) {
+                        annItem.deleteFromRealm();
+                    } else {
+                        Log.e(TAG, "Trying to delete a non existent ann item");
                     }
                 });
                 database.close();

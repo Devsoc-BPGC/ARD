@@ -82,8 +82,6 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener((v) -> onBackPressed());
 
-
-
         annRV.setHasFixedSize(true);
         annRV.setLayoutManager(new LinearLayoutManager(this));
         onItemTouchListener = new RecyclerItemClickListener(this, annRV, this);
