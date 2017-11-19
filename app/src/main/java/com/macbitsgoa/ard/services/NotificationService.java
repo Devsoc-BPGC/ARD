@@ -56,10 +56,13 @@ public class NotificationService extends IntentService {
      */
     public static final int RC = 90;
 
+    public static final int ANN_NOTIF_CODE = 193;
+
     /**
      * Realm database.
      */
     private Realm database;
+
 
     /**
      * Notification manager.
@@ -86,6 +89,8 @@ public class NotificationService extends IntentService {
      * Genereate notifications for new announcements.
      */
     private void announcementNotifications() {
+        final int pIntentCode = 192;
+
         final ApplicationInfo appInfo;
         try {
             appInfo = getPackageManager().getApplicationInfo(BuildConfig.APPLICATION_ID, 0);
@@ -100,27 +105,41 @@ public class NotificationService extends IntentService {
         final RealmList<AnnItem> annItems = new RealmList<>();
         final Date date = new Date(installedTime);
         annItems.addAll(database.where(AnnItem.class)
-                .equalTo("read", false)
+                .equalTo(AnnItemKeys.READ, false)
                 .greaterThanOrEqualTo(AnnItemKeys.DATE, date).findAll());
-        for (final AnnItem ai : annItems) {
-            final Intent intent = new Intent(this, AnnActivity.class);
-            final PendingIntent pIntent = PendingIntent.getActivity(this, ai.getKey().hashCode(), intent, PendingIntent.FLAG_UPDATE_CURRENT);
-            final NotificationCompat.Builder builder
-                    = new NotificationCompat.Builder(this, "Announcements")
-                    .setAutoCancel(true)
-                    .setContentIntent(pIntent)
-                    .setContentTitle(Html.fromHtml(ai.getData()))
-                    .setContentText(Html.fromHtml(ai.getData()))
-                    .setShowWhen(true)
-                    .setVibrate(new long[]{Notification.DEFAULT_VIBRATE})
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setTicker("New announcement from ARD")
-                    .setDefaults(Notification.DEFAULT_SOUND)
+
+        if (annItems.isEmpty()) return;
+
+        final Intent intent = new Intent(this, AnnActivity.class);
+        final PendingIntent pIntent = PendingIntent.getActivity(this,
+                pIntentCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        final NotificationCompat.Builder builder
+                = new NotificationCompat.Builder(this, "Announcements")
+                .setAutoCancel(true)
+                .setContentIntent(pIntent)
+                .setShowWhen(true)
+                .setVibrate(new long[]{Notification.DEFAULT_VIBRATE})
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setTicker("New announcement from ARD");
+
+        if (annItems.size() == 1) {
+            builder.setContentTitle(annItems.get(0).getData())
+                    .setContentText(Html.fromHtml(annItems.get(0).getData()))
                     .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(Html.fromHtml(ai.getData()))
-                            .setBigContentTitle("Announcement"));
-            nmc.notify(ai.getKey().hashCode(), builder.build());
+                            .bigText(Html.fromHtml(annItems.get(0).getData()))
+                            .setBigContentTitle("ARD Announcement"));
+
+        } else {
+            final NotificationCompat.InboxStyle is = new NotificationCompat.InboxStyle()
+                    .setBigContentTitle("ARD Announcements");
+            for (int i = 0; i < annItems.size(); i++) {
+                is.addLine(Html.fromHtml(annItems.get(i).getData()));
+            }
+            builder.setContentTitle(annItems.size() + " new announcements")
+                    .setContentText(Html.fromHtml("Latest: " + annItems.get(0).getData()))
+                    .setStyle(is);
         }
+        nmc.notify(ANN_NOTIF_CODE, builder.build());
     }
 
     private void chatNotifications() {

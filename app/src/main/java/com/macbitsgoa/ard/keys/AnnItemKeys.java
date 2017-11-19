@@ -33,4 +33,8 @@ public class AnnItemKeys {
      */
     public static final String DATE = "date";
 
+    /**
+     * Key for {@link com.macbitsgoa.ard.models.AnnItem#read} field.
+     */
+    public static final String READ = "read";
 }

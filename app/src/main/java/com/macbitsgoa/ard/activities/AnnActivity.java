@@ -18,6 +18,7 @@ import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
+import com.macbitsgoa.ard.services.NotificationService;
 import com.macbitsgoa.ard.types.PostType;
 
 import java.util.ArrayList;
@@ -90,6 +91,7 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
 
         //Cancel any ongoing notifications
         final NotificationManagerCompat nmc = NotificationManagerCompat.from(this);
+        nmc.cancel(NotificationService.ANN_NOTIF_CODE);
 
         //Generate data
         final List<TypeItem> data = new ArrayList<>();
@@ -97,7 +99,6 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
                 .findAllSorted(AnnItemKeys.DATE, Sort.DESCENDING);
         for (final AnnItem ai : anns) {
             data.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
-            nmc.cancel(ai.getKey().hashCode());
         }
 
         if (data.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
@@ -109,9 +110,9 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
         //Setup on change listener
         anns.addChangeListener(annItems -> {
             data.clear();
+            nmc.cancel(NotificationService.ANN_NOTIF_CODE);
             for (final AnnItem ais : annItems) {
                 data.add(new TypeItem(ais, PostType.ANNOUNCEMENT));
-                nmc.cancel(ais.getKey().hashCode());
             }
             if (data.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
             else emptyListTV.setVisibility(View.INVISIBLE);
