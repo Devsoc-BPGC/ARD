@@ -20,10 +20,10 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.ChatFragment;
-import com.macbitsgoa.ard.fragments.FaqFragment;
+import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
-import com.macbitsgoa.ard.interfaces.FaqFragmentListener;
+import com.macbitsgoa.ard.interfaces.ForumFragmentListener;
 import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.services.MessagingService;
@@ -42,7 +42,7 @@ import butterknife.ButterKnife;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         BottomNavigationView.OnNavigationItemSelectedListener,
-        FaqFragmentListener,
+        ForumFragmentListener,
         ChatFragmentListener {
 
     /**
@@ -96,9 +96,9 @@ public class MainActivity extends BaseActivity
     private FragmentManager fragmentManager;
 
     /**
-     * FaqFragment object.
+     * ForumFragment object.
      */
-    private FaqFragment faqFragment;
+    private ForumFragment forumFragment;
 
     /**
      * HomeFragment object.
@@ -156,9 +156,9 @@ public class MainActivity extends BaseActivity
         navDrawerDBRef = getRootReference().child(AHC.FDR_NAV_DRAWER);
 
         final View headerView = navigationView.getHeaderView(0);
-        final ImageView navDrawerImage = ButterKnife.findById(headerView, R.id.nav_drawer_image);
-        final TextView navDrawerTitle = ButterKnife.findById(headerView, R.id.nav_drawer_title);
-        final TextView navDrawerSubtitle = ButterKnife.findById(headerView, R.id.nav_drawer_subtitle);
+        final ImageView navDrawerImage = headerView.findViewById(R.id.nav_drawer_image);
+        final TextView navDrawerTitle = headerView.findViewById(R.id.nav_drawer_title);
+        final TextView navDrawerSubtitle = headerView.findViewById(R.id.nav_drawer_subtitle);
 
         if (navDrawerTitleText != null) {
             navDrawerTitle.setText(navDrawerTitleText);
@@ -189,7 +189,7 @@ public class MainActivity extends BaseActivity
 
         fragmentManager = getSupportFragmentManager();
 
-        faqFragment = FaqFragment.newInstance(null);
+        forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
         homeFragment = HomeFragment.newInstance(null);
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
 
@@ -224,9 +224,9 @@ public class MainActivity extends BaseActivity
         //TODO add backstack as well.
         final int id = item.getItemId();
 
-        if (id == R.id.bottom_nav_faq) {
+        if (id == R.id.bottom_nav_forum) {
             fragmentManager.beginTransaction()
-                    .replace(R.id.frame_content_main, faqFragment)
+                    .replace(R.id.frame_content_main, forumFragment)
                     .commit();
             return true;
         } else if (id == R.id.bottom_nav_home) {
@@ -252,7 +252,7 @@ public class MainActivity extends BaseActivity
     }
 
     @Override
-    public void updateFaqFragment() {
+    public void updateForumFragment() {
 
     }
 

@@ -73,7 +73,7 @@ public class BrowserTest {
                 .addMenuItem("Lol2", mPendingIntent)
                 .setShareInMenu(true)
                 .setActionButton(
-                        ContextCompat.getDrawable(mActivity, R.drawable.ic_faq_24dp),
+                        ContextCompat.getDrawable(mActivity, R.drawable.ic_forum_24dp),
                         "lorem ipsum",
                         mPendingIntent,
                         true

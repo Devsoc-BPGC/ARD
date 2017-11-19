@@ -200,6 +200,7 @@ public class MessagingService extends BaseIntentService {
                     if (ci == null) {
                         ci = database.createObject(ChatsItem.class, senderId);
                     } else {
+                        //TODO something wrong here
                         if (update.getTime() >= ci.getUpdate().getTime()) {
                             ci.setLatest(latest);
                             ci.setUpdate(update);
@@ -246,7 +247,7 @@ public class MessagingService extends BaseIntentService {
     /**
      * Handle sent messages status.
      *
-     * @return ValueEventListener object for hadnling ref updates.
+     * @return ValueEventListener object for handling ref updates.
      */
     public ValueEventListener getSentMsgStatusVEL() {
         return new ValueEventListener() {
@@ -264,6 +265,7 @@ public class MessagingService extends BaseIntentService {
                     if (mi != null) {
                         database.beginTransaction();
                         if (mi.getMessageStatus() == MessageStatusType.MSG_WAIT) {
+                            Log.d(TAG, "msg status updated");
                             mi.setMessageStatus(MessageStatusType.MSG_SENT);
                             child.getRef().removeValue();
                         }

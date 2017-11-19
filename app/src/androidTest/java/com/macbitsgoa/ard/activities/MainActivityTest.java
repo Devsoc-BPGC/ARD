@@ -85,17 +85,17 @@ public class MainActivityTest {
                 withContentDescription("Home"), isDisplayed()))
                 .perform(click());
         onView(withId(R.id.fragment_home_layout)).check(matches(isDisplayed()));
-        onView(withId(R.id.fragment_faq_layout)).check(doesNotExist());
+        onView(withId(R.id.fragment_forum_layout)).check(doesNotExist());
         onView(withId(R.id.fragment_chat_layout)).check(doesNotExist());
 
-        onView(allOf(withId(R.id.bottom_nav_faq),
+        onView(allOf(withId(R.id.bottom_nav_forum),
                 withContentDescription("F.A.Q."), isDisplayed()))
                 .perform(click());
-        onView(withId(R.id.fragment_faq_layout)).check(matches(isDisplayed()));
+        onView(withId(R.id.fragment_forum_layout)).check(matches(isDisplayed()));
         onView(withId(R.id.fragment_home_layout)).check(doesNotExist());
         onView(withId(R.id.fragment_chat_layout)).check(doesNotExist());
-        onView(withId(R.id.tabLayout_fragment_faq)).check(matches(isDisplayed()));
-        onView(withId(R.id.viewPager_fragment_faq)).check(matches(isDisplayed()));
+        onView(withId(R.id.tabLayout_fragment_forum)).check(matches(isDisplayed()));
+        onView(withId(R.id.viewPager_fragment_forum)).check(matches(isDisplayed()));
         onView(withText("General")).check(matches(isDisplayed()));
 
 
@@ -104,7 +104,7 @@ public class MainActivityTest {
                 .perform(click());
         onView(withId(R.id.fragment_chat_layout)).check(matches(isDisplayed()));
         onView(withId(R.id.fragment_home_layout)).check(doesNotExist());
-        onView(withId(R.id.fragment_faq_layout)).check(doesNotExist());
+        onView(withId(R.id.fragment_forum_layout)).check(doesNotExist());
     }
 
     @Test

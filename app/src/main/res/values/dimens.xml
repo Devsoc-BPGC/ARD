@@ -16,12 +16,12 @@
     <dimen name="marginTop_home_ann_fragment_counter">8dp</dimen>
     <dimen name="textSize_home_ann_fragment_counter">12sp</dimen>
 
-    <!-- Faq Fragment dimens -->
-    <dimen name="tabLayout_fragment_faq_content_margin">0dp</dimen>
-    <dimen name="tabLayout_fragment_faq_content_width">0dp</dimen>
-    <dimen name="viewpager_fragment_faq_content_margin">0dp</dimen>
-    <dimen name="viewpager_fragment_faq_content_height">0dp</dimen>
-    <dimen name="viewpager_fragment_faq_content_width">0dp</dimen>
+    <!-- Forum Fragment dimens -->
+    <dimen name="tabLayout_fragment_forum_content_margin">0dp</dimen>
+    <dimen name="tabLayout_fragment_forum_content_width">0dp</dimen>
+    <dimen name="viewpager_fragment_forum_content_margin">0dp</dimen>
+    <dimen name="viewpager_fragment_forum_content_height">0dp</dimen>
+    <dimen name="viewpager_fragment_forum_content_width">0dp</dimen>
 
     <!-- Post Activity fab margin -->
     <dimen name="margin_home_fragment_fab">16dp</dimen>

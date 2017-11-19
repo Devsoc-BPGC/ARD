@@ -77,7 +77,6 @@ public class NotificationService extends IntentService {
     protected void onHandleIntent(@Nullable final Intent intent) {
         database = Realm.getDefaultInstance();
         nmc = NotificationManagerCompat.from(this);
-        nmc.cancelAll();
         chatNotifications();
         announcementNotifications();
         database.close();
@@ -110,7 +109,7 @@ public class NotificationService extends IntentService {
                     = new NotificationCompat.Builder(this, "Announcements")
                     .setAutoCancel(true)
                     .setContentIntent(pIntent)
-                    .setContentTitle("ARD Announcement")
+                    .setContentTitle(Html.fromHtml(ai.getData()))
                     .setContentText(Html.fromHtml(ai.getData()))
                     .setShowWhen(true)
                     .setVibrate(new long[]{Notification.DEFAULT_VIBRATE})

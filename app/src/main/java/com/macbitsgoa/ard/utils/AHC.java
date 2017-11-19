@@ -14,10 +14,12 @@ import android.util.Log;
 import android.util.TypedValue;
 
 import com.macbitsgoa.ard.BuildConfig;
+import com.macbitsgoa.ard.models.TypeItem;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
@@ -98,6 +100,11 @@ public class AHC {
     public static final String FDR_HOME = "home1";
 
     /**
+     * Reference to forum node on firebase.
+     */
+    public static final String FDR_FORUM = "forum";
+
+    /**
      * Reference to extra informations.
      */
     public static final String FDR_EXTRAS = "extra";
@@ -126,6 +133,11 @@ public class AHC {
      * SharedPreferences file name for the app.
      */
     public static final String SP_APP = "prefs";
+
+    /**
+     * Name of default content poster.
+     */
+    public static final String DEFAULT_AUTHOR = "Admin";
 
     /**
      * Action for alarm receiver.
@@ -246,9 +258,26 @@ public class AHC {
 
     /**
      * Get screen width.
+     *
      * @return width of screen in pixels.
      */
     public static int getScreenWidth() {
         return Resources.getSystem().getDisplayMetrics().widthPixels;
+    }
+
+    /**
+     * Convenience method to add a list of generic object to a {@link TypeItem} list.
+     *
+     * @param list      List to add to of type {@link TypeItem}.
+     * @param additions List of objects to add to list.
+     * @param type      Integer value to be used as type. {@link TypeItem#type}.
+     * @param <T>       Generic object list for additions list.
+     */
+    public static <T> void fill(@NonNull final List<TypeItem> list,
+                                @NonNull final List<T> additions, final int type) {
+        for (final T addition : additions) {
+            final TypeItem ti = new TypeItem(addition, type);
+            list.add(ti);
+        }
     }
 }
