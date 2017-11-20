@@ -14,7 +14,7 @@ import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.models.home.PhotoItem;
 import com.macbitsgoa.ard.models.home.TextItem;
-import com.macbitsgoa.ard.types.PostType;
+import com.macbitsgoa.ard.types.HomeType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Date;
@@ -61,8 +61,11 @@ public class HomeService extends BaseIntentService {
         final ChildEventListener homeCEL = getHomeListener();
         final ChildEventListener annRefCEL = getAnnListener();
 
-        if (limitToLast != -1) homeRef.limitToLast(limitToLast).addChildEventListener(homeCEL);
-        else homeRef.addChildEventListener(homeCEL);
+        if (limitToLast != -1) {
+            homeRef.limitToLast(limitToLast).addChildEventListener(homeCEL);
+        } else {
+            homeRef.addChildEventListener(homeCEL);
+        }
         annRef.addChildEventListener(annRefCEL);
 
         try {
@@ -105,7 +108,8 @@ public class HomeService extends BaseIntentService {
                     } else {
                         //if (date.getTime() == hi.getDate().getTime()) return;
                     }
-                    hi.setAuthor(author == null || author.length() == 0 ? "Admin" : author);
+                    hi.setAuthor(author == null
+                            || author.length() == 0 ? AHC.DEFAULT_AUTHOR : author);
                     hi.setDate(date);
                     final RealmList<PhotoItem> images = new RealmList<>();
                     final RealmList<TextItem> texts = new RealmList<>();
@@ -114,14 +118,16 @@ public class HomeService extends BaseIntentService {
                         final int type = subSectionDS.child(HomeItemKeys.TYPE).getValue(Integer.class);
                         final String data = subSectionDS.child(HomeItemKeys.DATA).getValue(String.class);
                         switch (type) {
-                            case PostType.PHOTO:
+                            case HomeType.FDR_PHOTO_ITEM:
                                 final PhotoItem pi = r.createObject(PhotoItem.class);
-                                pi.setData(data);
+                                pi.setPhotoUrl(data);
+                                pi.setPriority(subSectionDS.getKey());
                                 images.add(pi);
                                 break;
-                            case PostType.TEXT:
+                            case HomeType.FDR_TEXT_ITEM:
                                 final TextItem ti = r.createObject(TextItem.class);
                                 ti.setData(data);
+                                ti.setPriority(subSectionDS.getKey());
                                 texts.add(ti);
                                 break;
                         }
@@ -195,7 +201,9 @@ public class HomeService extends BaseIntentService {
                 final Date date = dataSnapshot.child(AnnItemKeys.DATE).getValue(Date.class);
                 final String author = dataSnapshot.child(AnnItemKeys.AUTHOR).getValue(String.class);
 
-                if (data == null || date == null || data.length() == 0) return;
+                if (data == null || date == null || data.length() == 0) {
+                    return;
+                }
 
                 database.executeTransaction(r -> {
                     AnnItem annItem = r.where(AnnItem.class)

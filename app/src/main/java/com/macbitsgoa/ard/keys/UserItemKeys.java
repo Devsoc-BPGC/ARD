@@ -9,6 +9,17 @@ import com.macbitsgoa.ard.models.UserItem;
  */
 public class UserItemKeys {
 
+
+    /**
+     * Field {@link UserItem#uid} (uid field).
+     */
+    public static final String UID = "uid";
+
+    /**
+     * Field {@link UserItem#admin} (admin status).
+     */
+    public static final String ADMIN = "admin";
+
     /**
      * Field {@link UserItem#name} (Name of UserItem).
      */

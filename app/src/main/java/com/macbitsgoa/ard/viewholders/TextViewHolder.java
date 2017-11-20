@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.viewholders;
 
 import android.support.annotation.IdRes;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
@@ -10,10 +11,14 @@ import android.widget.TextView;
  */
 
 public class TextViewHolder extends RecyclerView.ViewHolder {
-    public TextView text;
+    private TextView text;
 
     public TextViewHolder(final View itemView, @IdRes final int resourceId) {
         super(itemView);
         text = itemView.findViewById(resourceId);
+    }
+
+    public void setText(@NonNull final String data) {
+        text.setText(data);
     }
 }

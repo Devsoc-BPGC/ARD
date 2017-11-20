@@ -160,13 +160,12 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
     public void onItemClick(final View view, final int position) {
         final AnnItem ai = anns.get(position);
         if (ai.getKey() == null) {
-            Log.e(TAG, "Key was null");
+            Log.e(TAG, "Key was null, was item deleted?");
             return;
         }
         final Intent intent = new Intent(this, PostDetailsActivity.class);
-        intent.putExtra(AnnItemKeys.KEY, ai.getKey());
+        intent.putExtra("annItem", ai.getKey());
         startActivity(intent);
-
     }
 
     @Override

@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,11 +18,16 @@ import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
+import com.macbitsgoa.ard.models.home.PhotoItem;
+import com.macbitsgoa.ard.models.home.TextItem;
+import com.macbitsgoa.ard.types.HomeType;
 import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.AnnViewHolder;
 import com.macbitsgoa.ard.viewholders.AnnouncementViewHolder;
 import com.macbitsgoa.ard.viewholders.HomeItemViewHolder;
+import com.macbitsgoa.ard.viewholders.ImageViewHolder;
+import com.macbitsgoa.ard.viewholders.TextViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +43,6 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
      * Viewtype value for Announcement.
      */
     public static final int ANNOUNCEMENT_TAB = -1;
-
-    public static final int HOME_ITEM = -2;
 
     /**
      * List to hold all data.
@@ -72,25 +76,32 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
             case PostType.ANNOUNCEMENT:
                 view = inflater.inflate(R.layout.vh_ann_activity_item, parent, false);
                 return new AnnViewHolder(view);
-            case HOME_ITEM:
+            case HomeType.HOME_ITEM:
                 view = inflater.inflate(R.layout.vh_home_item_1, parent, false);
                 return new HomeItemViewHolder(view);
+            case HomeType.TEXT_ITEM:
+                view = inflater.inflate(R.layout.vh_big_text, parent, false);
+                return new TextViewHolder(view, R.id.tv_vh_big_text);
+            case HomeType.PHOTO_ITEM:
+                view = inflater.inflate(R.layout.vh_big_image, parent, false);
+                return new ImageViewHolder(view, context, R.id.imgView_vh_big_image);
         }
         return null;
     }
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, final int position) {
+        final Object obj = data.get(position).getData();
         switch (holder.getItemViewType()) {
             case ANNOUNCEMENT_TAB: {
                 final AnnouncementViewHolder avh = (AnnouncementViewHolder) holder;
-                avh.setTextData((ArrayList<String>) data.get(position).getData());
+                avh.setTextData((ArrayList<String>) obj);
                 avh.subtitleTextView.setText("Announcements");
                 break;
             }
             case PostType.ANNOUNCEMENT: {
                 final AnnViewHolder anvh = (AnnViewHolder) holder;
-                final AnnItem ai = (AnnItem) data.get(position).getData();
+                final AnnItem ai = (AnnItem) obj;
                 anvh.data.setText(Html.fromHtml(ai.getData()));
                 anvh.extras.setText(Html.fromHtml(ai.getAuthor()
                         + ", "
@@ -99,15 +110,16 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
                 else anvh.newTag.setVisibility(View.VISIBLE);
                 break;
             }
-            case HOME_ITEM: {
+            case HomeType.HOME_ITEM: {
                 final HomeItemViewHolder hivh = (HomeItemViewHolder) holder;
-                final HomeItem hi = (HomeItem) data.get(position).getData();
+                final HomeItem hi = (HomeItem) obj;
+                Log.d("TAG", hi.toString());
                 if (hi.getImages().size() == 0) {
                     hivh.imageView.setVisibility(View.GONE);
                 } else {
                     hivh.imageView.setVisibility(View.VISIBLE);
                     Glide.with(context)
-                            .load(hi.getImages().get(0).getData())
+                            .load(hi.getImages().get(0).getPhotoUrl())
                             .transition(DrawableTransitionOptions.withCrossFade())
                             .apply(RequestOptions.centerCropTransform())
                             .into(hivh.imageView);
@@ -126,6 +138,18 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
                     hivh.textView1.setText(Html.fromHtml(hi.getTexts().get(0).getData()));
                     hivh.textView2.setText(Html.fromHtml(hi.getTexts().get(1).getData()));
                 }
+                break;
+            }
+            case HomeType.TEXT_ITEM: {
+                final TextViewHolder tvh = (TextViewHolder) holder;
+                final TextItem ti = (TextItem) obj;
+                tvh.setText(ti.getData());
+                break;
+            }
+            case HomeType.PHOTO_ITEM: {
+                final ImageViewHolder imgvh = (ImageViewHolder) holder;
+                final PhotoItem pi = (PhotoItem) obj;
+                imgvh.setImage(pi.getPhotoUrl());
                 break;
             }
         }

@@ -119,4 +119,15 @@ public class HomeItem extends RealmObject {
     public void setTexts(@NonNull final RealmList<TextItem> texts) {
         this.texts = texts;
     }
+
+    @Override
+    public String toString() {
+        return "HomeItem{"
+                + "key='" + key + '\''
+                + ", author='" + author + '\''
+                + ", date=" + date
+                + ", images=" + images.toString()
+                + ", texts=" + texts.toString()
+                + '}';
+    }
 }

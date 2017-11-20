@@ -12,4 +12,6 @@ public class HomeItemKeys {
     public static final String TYPE = "type";
     public static final String DATA = "data";
 
+    public static final String PRIORITY = "priority";
+
 }

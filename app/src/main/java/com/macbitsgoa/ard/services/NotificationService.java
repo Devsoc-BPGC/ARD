@@ -1,6 +1,5 @@
 package com.macbitsgoa.ard.services;
 
-import android.app.IntentService;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -44,7 +43,7 @@ import io.realm.Sort;
  * @author Vikramaditya Kukreja
  */
 
-public class NotificationService extends IntentService {
+public class NotificationService extends BaseIntentService {
 
     /**
      * TAG for class.
@@ -78,6 +77,7 @@ public class NotificationService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
+        if (getUser() == null) return;
         database = Realm.getDefaultInstance();
         nmc = NotificationManagerCompat.from(this);
         chatNotifications();

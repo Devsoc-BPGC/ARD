@@ -38,6 +38,7 @@ import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.SlideshowItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
+import com.macbitsgoa.ard.types.HomeType;
 import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -250,7 +251,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
         final RealmResults<HomeItem> homeItems = database.where(HomeItem.class)
                 .findAllSorted(HomeItemKeys.DATE, Sort.DESCENDING);
         for (final HomeItem hi : homeItems) {
-            list.add(new TypeItem(hi, HomeAdapter.HOME_ITEM));
+            list.add(new TypeItem(hi, HomeType.HOME_ITEM));
         }
 
         return list;
@@ -339,7 +340,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
             final Intent intent = new Intent(getContext(), PostDetailsActivity.class);
             final HomeItem hi = (HomeItem) dataSet.get(position).getData();
             intent.putExtra(HomeItemKeys.KEY, hi.getKey());
-            intent.putExtra(PostKeys.TYPE, PostType.HOME_ITEM);
             startActivity(intent);
         }
     }

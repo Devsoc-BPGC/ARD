@@ -6,9 +6,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Created by vikramaditya on 25/10/17.
+ * Various status type of {@link com.macbitsgoa.ard.models.MessageItem}.
+ *
+ * @author Vikramaditya Kukreja
  */
-
 public class MessageStatusType {
 
     /**
@@ -16,7 +17,8 @@ public class MessageStatusType {
      */
     @IntDef({MSG_WAIT, MSG_SENT, MSG_RCVD, MSG_READ})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface MessageStatus {}
+    public @interface MessageStatus {
+    }
 
 
     /**

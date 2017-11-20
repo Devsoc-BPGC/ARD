@@ -47,8 +47,8 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (generalHolder.getItemViewType() == TEXT) {
             final TextViewHolder holder = (TextViewHolder) generalHolder;
             if (position == admins.size() + 1)
-                holder.text.setText("User(s)");
-            else holder.text.setText("Admin(s)");
+                holder.setText("User(s)");
+            else holder.setText("Admin(s)");
         } else {
             final NewChatViewHolder holder = (NewChatViewHolder) generalHolder;
             UserItem ui;

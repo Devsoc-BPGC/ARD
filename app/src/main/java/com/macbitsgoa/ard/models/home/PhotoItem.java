@@ -1,34 +1,53 @@
 package com.macbitsgoa.ard.models.home;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import io.realm.RealmObject;
 
 /**
- * Created by vikramaditya on 8/11/17.
+ * Class representing a Photo object.
+ *
+ * @author Vikamaditya Kukreja
  */
-
 public class PhotoItem extends RealmObject {
 
     /**
-     * Image url data.
+     * Image url photoUrl.
      */
-    @Nullable
-    private String data;
+    private String photoUrl;
+
+    /**
+     * Order of placement in the list.
+     */
+    private String priority;
 
     public PhotoItem() {
-    }
-
-    public PhotoItem(@Nullable final String data) {
-        this.data = data;
+        priority = "" + Integer.MAX_VALUE;
     }
 
     @Nullable
-    public String getData() {
-        return data;
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 
-    public void setData(@Nullable final String data) {
-        this.data = data;
+    public void setPhotoUrl(final String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(final String priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public String toString() {
+        return "PhotoItem{"
+                + "photoUrl='" + photoUrl + '\''
+                + ", priority=" + priority
+                + '}';
     }
 }

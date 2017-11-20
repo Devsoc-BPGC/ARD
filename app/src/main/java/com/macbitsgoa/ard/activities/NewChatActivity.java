@@ -49,13 +49,13 @@ public class NewChatActivity extends BaseActivity {
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
         final RealmResults<UserItem> adminsList = database.where(UserItem.class)
-                .equalTo("admin", true)
-                .notEqualTo("uid", getUser().getUid())
-                .findAllSorted("name");
+                .equalTo(UserItemKeys.ADMIN, true)
+                .notEqualTo(UserItemKeys.UID, getUser().getUid())
+                .findAllSorted(UserItemKeys.NAME);
         final RealmResults<UserItem> usersList = database.where(UserItem.class)
-                .equalTo("admin", false)
-                .notEqualTo("uid", getUser().getUid())
-                .findAllSorted("name");
+                .equalTo(UserItemKeys.ADMIN, false)
+                .notEqualTo(UserItemKeys.UID, getUser().getUid())
+                .findAllSorted(UserItemKeys.NAME);
 
         adminsList.addChangeListener(userItems -> {
             adapter.notifyDataSetChanged();
@@ -83,9 +83,11 @@ public class NewChatActivity extends BaseActivity {
                     final String uid = child.getKey();
                     final String name = child.child(UserItemKeys.NAME).getValue(String.class);
                     final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
-                    final String photoUrl = child.child(UserItemKeys.PHOTO_URL).getValue(String.class);
+                    final String photoUrl = child.child(UserItemKeys.PHOTO_URL)
+                            .getValue(String.class);
                     final String desc = child.child(UserItemKeys.DESC).getValue(String.class);
-                    UserItem ui = database.where(UserItem.class).equalTo("uid", uid).findFirst();
+                    UserItem ui = database
+                            .where(UserItem.class).equalTo(UserItemKeys.UID, uid).findFirst();
                     database.beginTransaction();
                     if (ui == null) {
                         ui = database.createObject(UserItem.class, uid);
@@ -107,12 +109,15 @@ public class NewChatActivity extends BaseActivity {
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
+
                 for (final DataSnapshot child : dataSnapshot.getChildren()) {
                     final String uid = child.getKey();
                     final String name = child.child(UserItemKeys.NAME).getValue(String.class);
                     final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
-                    final String photoUrl = child.child(UserItemKeys.PHOTO_URL).getValue(String.class);
-                    UserItem ui = database.where(UserItem.class).equalTo("uid", uid).findFirst();
+                    final String photoUrl = child.child(UserItemKeys.PHOTO_URL)
+                            .getValue(String.class);
+                    UserItem ui = database
+                            .where(UserItem.class).equalTo(UserItemKeys.UID, uid).findFirst();
                     database.beginTransaction();
                     if (ui == null) {
                         ui = database.createObject(UserItem.class, uid);
@@ -130,7 +135,5 @@ public class NewChatActivity extends BaseActivity {
 
             }
         });
-
     }
-
 }
