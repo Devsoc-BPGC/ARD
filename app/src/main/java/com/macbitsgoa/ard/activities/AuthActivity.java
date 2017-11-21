@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -95,6 +96,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         //if (requestCode == AuthActivityKeys.RC_GOOGLE_SIGN_IN) {}
         if (resultCode == Activity.RESULT_CANCELED) {
             googleSignInButton.setClickable(true);
+            if (pd != null)
+                pd.cancel();
             showToast("Sign in cancelled");
             return;
         }
@@ -108,6 +111,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     public void handleGoogleSignInFailure() {
         showToast(getString(R.string.error_google_sign_in_failed));
         googleSignInButton.setClickable(true);
+        if (pd != null)
+            pd.cancel();
     }
 
     @Override
@@ -121,7 +126,11 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     public void onConnectionFailed(@NonNull final ConnectionResult connectionResult) {
         Log.e(TAG, "Connection Failure " + connectionResult);
         handleGoogleSignInFailure();
+        if (pd != null)
+            pd.cancel();
     }
+
+    ProgressDialog pd;
 
     /**
      * Launch Google Sign screen.
@@ -130,6 +139,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      */
     public void launchGoogleSignIn(@NonNull final Intent intent) {
         startActivityForResult(intent, AuthActivityKeys.RC_GOOGLE_SIGN_IN);
+        pd = ProgressDialog.show(this, "Google sign in", "Signing in to ARD");
+        pd.show();
     }
 
     @Override
@@ -150,8 +161,10 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
         updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
-        startActivity(new Intent(this, MainActivity.class));
+        if (pd != null)
+            pd.cancel();
         finish();
+        startActivity(new Intent(this, MainActivity.class));
     }
 
     /**

@@ -13,6 +13,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.SlideshowItem;
@@ -56,6 +58,8 @@ public class SlideshowAdapter extends PagerAdapter {
             final SlideshowItem si = slideshowItems.get(position);
             Glide.with(container.getContext())
                     .load(si.getPhotoUrl())
+                    .apply(RequestOptions.placeholderOf(R.drawable.nav_drawer_default_image))
+                    .transition(DrawableTransitionOptions.withCrossFade())
                     .into((ImageView) itemView
                             .findViewById(R.id.imgView_vh_slideshow_fragment_home));
 

@@ -16,19 +16,23 @@ ext {
     espIntVer = "2.2.2"
     espUIAVer = "2.1.2"
     firebaseVer = "11.2.0"
+    flexboxVer = "0.3.1"
     glideVer = "4.0.0-RC0"
     playServicesVer = "11.2.0"
     hamcrestVer = "1.3"
     jacocoVer = "0.7.9"
     junitVer = "4.12"
+    lapismSearchVer = "5.0.0-alpha7"
     minSdkVer = 21
     mockitoVer = "2.9.0"
     roboElecVer = "3.4.2"
     rxJavaVer = "1.3.0"
-    supportVer = "27.0.0"
+    rxJava2Ver = "2.1.6"
+    supportVer = "27.0.1"
     targetSdkVer = 26
-    verCode = 1
-    verName = "1.0"
+    verCode = 2
+    verName = "1.0-beta"
+    vPagerIndVer = "1.0.2"
 }
 
 def configDir = "${project.rootDir}/config/"
@@ -113,7 +117,6 @@ dependencies {
     implementation "com.android.support:cardview-v7:${supportVer}"
 
     implementation "com.jakewharton:butterknife:${butterknifeVer}"
-    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
     implementation "com.google.firebase:firebase-core:${firebaseVer}"
     implementation "com.google.firebase:firebase-database:${firebaseVer}"
@@ -124,11 +127,11 @@ dependencies {
 
     implementation "com.github.bumptech.glide:glide:${glideVer}"
     annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
-    implementation 'com.lapism:searchview:5.0.0-alpha7'
-    implementation 'com.google.android:flexbox:0.3.1'
-    implementation 'com.github.vivchar:ViewPagerIndicator:1.0.2'
+    implementation "com.lapism:searchview:${lapismSearchVer}"
+    implementation "com.google.android:flexbox:${flexboxVer}"
+    implementation "com.github.vivchar:ViewPagerIndicator:${vPagerIndVer}"
 
-    implementation "io.reactivex.rxjava2:rxjava:2.1.6"
+    implementation "io.reactivex.rxjava2:rxjava:${rxJava2Ver}"
 
     //Unit test compiles
     testCompile "junit:junit:${junitVer}"

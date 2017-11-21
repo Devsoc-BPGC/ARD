@@ -1,21 +1,14 @@
 package com.macbitsgoa.ard.activities;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
@@ -24,12 +17,8 @@ import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.interfaces.ForumFragmentListener;
-import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.services.MessagingService;
-import com.macbitsgoa.ard.utils.AHC;
-
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -44,45 +33,6 @@ public class MainActivity extends BaseActivity
         BottomNavigationView.OnNavigationItemSelectedListener,
         ForumFragmentListener,
         ChatFragmentListener {
-
-    /**
-     * The title of nav Drawer.
-     */
-    public static String navDrawerTitleText;
-
-    /**
-     * The subtitle of nav Drawer.
-     */
-    public static String navDrawerSubtitleText;
-
-    /**
-     * The array of urls of images used as nav drawer background.
-     */
-    public static ArrayList<String> navDrawerImageList;
-
-    /**
-     * URL of nav drawer background for current instance of app.
-     * Chosen randomly from navDrawerImageList when app launches
-     * and when corresponding list changes in firebase.
-     */
-    public static String navDrawerImageURL;
-
-    /**
-     * Duration of cross fade animation between in nav drawer background images (in milliseconds).
-     */
-    public static final int NAV_DRAWER_BACKGROUND_ANIM_DUR = 50;
-
-    /**
-     * DrawerLayout for nav drawer.
-     */
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawer;
-
-    /**
-     * Navigation view in drawer.
-     */
-    @BindView(R.id.nav_view)
-    NavigationView navigationView;
 
     /**
      * Bottom navigation view.
@@ -115,11 +65,6 @@ public class MainActivity extends BaseActivity
      */
     private DatabaseReference navDrawerDBRef;
 
-    /**
-     * navDrawerListener listens for db changes for nav drawer.
-     */
-    private NavigationDrawerListener navDrawerListener;
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         //Check if authorised
@@ -132,7 +77,7 @@ public class MainActivity extends BaseActivity
         setContentView(R.layout.activity_main);
         init();
         startService(new Intent(this, MessagingService.class));
-        initListeners();
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
     }
 
     /**
@@ -153,40 +98,6 @@ public class MainActivity extends BaseActivity
     private void init() {
         ButterKnife.bind(this);
 
-        navDrawerDBRef = getRootReference().child(AHC.FDR_NAV_DRAWER);
-
-        final View headerView = navigationView.getHeaderView(0);
-        final ImageView navDrawerImage = headerView.findViewById(R.id.nav_drawer_image);
-        final TextView navDrawerTitle = headerView.findViewById(R.id.nav_drawer_title);
-        final TextView navDrawerSubtitle = headerView.findViewById(R.id.nav_drawer_subtitle);
-
-        if (navDrawerTitleText != null) {
-            navDrawerTitle.setText(navDrawerTitleText);
-        }
-
-        if (navDrawerSubtitleText != null) {
-            navDrawerSubtitle.setText(navDrawerSubtitleText);
-        }
-
-        if (navDrawerImageURL != null) {
-            final RequestOptions navDrawerImageOptions = new RequestOptions()
-                    .placeholder(getDrawable(R.drawable.nav_drawer_default_image));
-
-            Glide.with(this)
-                    .load(navDrawerImageURL)
-                    .transition(DrawableTransitionOptions.withCrossFade()
-                            .crossFade(NAV_DRAWER_BACKGROUND_ANIM_DUR)
-                    )
-                    .apply(navDrawerImageOptions)
-                    .into(navDrawerImage);
-        }
-
-        navDrawerListener = new NavigationDrawerListener(
-                this,
-                navDrawerTitle,
-                navDrawerSubtitle,
-                navDrawerImage);
-
         fragmentManager = getSupportFragmentManager();
 
         forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
@@ -194,27 +105,15 @@ public class MainActivity extends BaseActivity
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
 
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
+        bottomNavigationView.getMenu().findItem(R.id.bottom_nav_home).setChecked(true);
         fragmentManager.beginTransaction().replace(R.id.frame_content_main, homeFragment,
                 getString(R.string.bottom_nav_home_activity_main)).commit();
     }
 
-    /**
-     * Initialise listeners.
-     */
-    private void initListeners() {
-        navigationView.setNavigationItemSelectedListener(this);
-        bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        navDrawerDBRef.addValueEventListener(navDrawerListener);
-    }
-
     @Override
-    public void onBackPressed() {
-
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
-        } else {
-            super.onBackPressed();
-        }
+    public void onConfigurationChanged(final Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        bottomNavigationView.getMenu().findItem(R.id.bottom_nav_home).setChecked(true);
     }
 
     @SuppressWarnings("StatementWithEmptyBody")
@@ -240,10 +139,12 @@ public class MainActivity extends BaseActivity
                     .commit();
             return true;
         }
+    }
 
-        //Not required until we have an item in Nav drawer.
-        //drawer.closeDrawer(GravityCompat.START);
-        //return true;
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
     }
 
     @Override
@@ -254,11 +155,5 @@ public class MainActivity extends BaseActivity
     @Override
     public void updateForumFragment() {
 
-    }
-
-    @Override
-    protected void onDestroy() {
-        navDrawerDBRef.removeEventListener(navDrawerListener);
-        super.onDestroy();
     }
 }

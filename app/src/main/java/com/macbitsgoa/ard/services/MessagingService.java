@@ -61,7 +61,7 @@ public class MessagingService extends BaseIntentService {
         sentMessageStatusRef.addValueEventListener(sendListener);
 
         try {
-            Thread.sleep(1000 * 60 * 10);
+            Thread.sleep(1000 * 60 * 5);
         } catch (final InterruptedException e) {
             e.printStackTrace();
         } finally {

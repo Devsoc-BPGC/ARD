@@ -57,7 +57,15 @@ public class NewChatActivity extends BaseActivity {
                 .notEqualTo(UserItemKeys.UID, getUser().getUid())
                 .findAllSorted(UserItemKeys.NAME);
 
-        adminsList.addChangeListener(userItems -> {
+        final UserItem thisUser = database.where(UserItem.class)
+                .equalTo(UserItemKeys.UID, getUser().getUid()).findFirst();
+
+        boolean isAdmin = false;
+        if (thisUser != null && thisUser.isAdmin())
+            isAdmin = true;
+
+        adminsList.addChangeListener(adminUsers -> {
+            adapter.setAdmin(true);
             adapter.notifyDataSetChanged();
             progressBar.setVisibility(View.GONE);
         });
@@ -70,6 +78,7 @@ public class NewChatActivity extends BaseActivity {
             }
         });
         adapter = new NewChatAdapter(adminsList, usersList, this);
+        adapter.setAdmin(isAdmin);
         userRV.setLayoutManager(new LinearLayoutManager(this));
         userRV.setHasFixedSize(true);
         userRV.setAdapter(adapter);
@@ -80,6 +89,7 @@ public class NewChatActivity extends BaseActivity {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    if (child.getValue() == null) continue;
                     final String uid = child.getKey();
                     final String name = child.child(UserItemKeys.NAME).getValue(String.class);
                     final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
@@ -93,10 +103,10 @@ public class NewChatActivity extends BaseActivity {
                         ui = database.createObject(UserItem.class, uid);
                     }
                     ui.setAdmin(true);
-                    ui.setDesc(desc);
-                    ui.setEmail(email);
-                    ui.setName(name);
-                    ui.setPhotoUrl(photoUrl);
+                    ui.setDesc(desc == null ? "" : desc);
+                    ui.setEmail(email == null ? "" : email);
+                    ui.setName(name == null ? "" : name);
+                    ui.setPhotoUrl(photoUrl == null ? "" : photoUrl);
                     database.commitTransaction();
                 }
             }
@@ -111,6 +121,7 @@ public class NewChatActivity extends BaseActivity {
             public void onDataChange(final DataSnapshot dataSnapshot) {
 
                 for (final DataSnapshot child : dataSnapshot.getChildren()) {
+                    if (child.getValue() == null) continue;
                     final String uid = child.getKey();
                     final String name = child.child(UserItemKeys.NAME).getValue(String.class);
                     final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
@@ -123,9 +134,10 @@ public class NewChatActivity extends BaseActivity {
                         ui = database.createObject(UserItem.class, uid);
                         ui.setAdmin(false);
                     }
-                    ui.setEmail(email);
-                    ui.setName(name);
-                    ui.setPhotoUrl(photoUrl);
+                    ui.setDesc("");
+                    ui.setEmail(email == null ? "" : email);
+                    ui.setName(name == null ? "" : name);
+                    ui.setPhotoUrl(photoUrl == null ? "" : photoUrl);
                     database.commitTransaction();
                 }
             }

@@ -51,8 +51,8 @@
     <dimen name="marginBottom_frame_comment_message">4dp</dimen>
     <dimen name="marginEnd_frame_comment_fab">8dp</dimen>
     <dimen name="marginEnd_frame_comment_card">8dp</dimen>
-    <dimen name="marginEnd_frame_comment_message">8dp</dimen>
-    <dimen name="marginStart_frame_comment_message">8dp</dimen>
+    <dimen name="marginEnd_frame_comment_message">16dp</dimen>
+    <dimen name="marginStart_frame_comment_message">16dp</dimen>
     <dimen name="marginStart_frame_comment_card">8dp</dimen>
     <dimen name="marginStart_frame_comment_emoji">8dp</dimen>
     <dimen name="marginTop_frame_comment_card">8dp</dimen>

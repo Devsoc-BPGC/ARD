@@ -25,12 +25,12 @@
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:theme="@style/AppTheme.AppBarOverlay"
-            app:expanded="false">
+            app:expanded="true">
 
             <android.support.design.widget.CollapsingToolbarLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:minHeight="64dp"
+                android:minHeight="0dp"
                 app:layout_scrollFlags="scroll|exitUntilCollapsed">
 
                 <android.support.v4.view.ViewPager
@@ -63,6 +63,7 @@
                     app:search_clear_on_close="true"
                     app:search_hide_on_keyboard_close="true"
                     app:search_hint="Search"
+                    android:visibility="gone"
                     app:search_shadow="false"
                     app:search_theme="play_store"
                     app:search_version="toolbar"

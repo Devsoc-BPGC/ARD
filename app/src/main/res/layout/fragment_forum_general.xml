@@ -4,6 +4,14 @@
     android:layout_height="match_parent"
     tools:context="com.macbitsgoa.ard.fragments.forum.GeneralFragment">
 
+    <TextView
+        android:id="@+id/tv_fg_forum_general_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone"
+        android:text="Nothing to show! Come back later." />
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_fg_forum_general"
         android:layout_width="match_parent"

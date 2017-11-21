@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true">
+    android:animateLayoutChanges="true"
+    android:descendantFocusability="afterDescendants">
 
     <TextView
         android:id="@+id/tv_vh_fg_forum_general_question"
@@ -23,10 +24,11 @@
         android:id="@+id/tv_vh_fg_forum_general_answer"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:descendantFocusability="afterDescendants"
         android:orientation="horizontal"
+        app:animDuration="100"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:animDuration="100"
         app:layout_constraintTop_toBottomOf="@+id/tv_vh_fg_forum_general_question"
         app:maxCollapsedLines="3">
 
@@ -35,8 +37,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="top"
-            android:background="@color/transparent"
             android:layout_marginStart="16dp"
+            android:background="@color/transparent"
             android:tint="@color/colorPrimaryDark" />
 
         <TextView

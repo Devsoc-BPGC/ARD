@@ -1,19 +1,14 @@
 package com.macbitsgoa.ard.activities;
 
 import android.app.Instrumentation;
-import android.os.IBinder;
-import android.support.test.espresso.Root;
 import android.support.test.espresso.intent.rule.IntentsTestRule;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.view.WindowManager;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.macbitsgoa.ard.R;
 
-import org.hamcrest.Description;
-import org.hamcrest.TypeSafeMatcher;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,6 +33,7 @@ import static org.hamcrest.CoreMatchers.not;
 
 /**
  * UI tests for AuthActivity.
+ *
  * @author Rushikesh Jogdand
  */
 @RunWith(AndroidJUnit4.class)

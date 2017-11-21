@@ -121,8 +121,11 @@ public class ChatFragment extends BaseFragment {
         chats = database.where(ChatsItem.class)
                 .findAllSorted("update", Sort.DESCENDING);
 
-        if (chats.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
-        else emptyListTV.setVisibility(View.GONE);
+        if (chats.size() == 0) {
+            emptyListTV.setVisibility(View.VISIBLE);
+        } else {
+            emptyListTV.setVisibility(View.GONE);
+        }
         deleteEmptyChats();
 
         chatsAdapter = new ChatsAdapter(chats, getContext());

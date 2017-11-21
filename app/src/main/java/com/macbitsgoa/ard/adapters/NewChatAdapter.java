@@ -1,7 +1,9 @@
 package com.macbitsgoa.ard.adapters;
 
 import android.app.Activity;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -22,16 +24,21 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private RealmResults<UserItem> users;
     private Activity context;
 
-    private final int TEXT = 0;
-    private final int USER = 1;
+    private static final int TEXT = 0;
+    private static final int USER = 1;
 
+    boolean isAdmin = false;
 
     public NewChatAdapter(final RealmResults<UserItem> admins,
-                          final RealmResults<UserItem> users,
+                          @Nullable final RealmResults<UserItem> users,
                           final Activity context) {
         this.admins = admins;
         this.users = users;
         this.context = context;
+    }
+
+    public void setAdmin(final boolean admin) {
+        isAdmin = admin;
     }
 
     @Override
@@ -58,10 +65,11 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         }
     }
 
-
     @Override
     public int getItemCount() {
-        return 1 + admins.size() + 1 + users.size();
+        int size = 1 + admins.size();
+        size += isAdmin ? 1 + users.size() : 0;
+        return size;
     }
 
     @Override

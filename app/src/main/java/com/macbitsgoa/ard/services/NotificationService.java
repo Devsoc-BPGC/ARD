@@ -91,23 +91,27 @@ public class NotificationService extends BaseIntentService {
     private void announcementNotifications() {
         final int pIntentCode = 192;
 
-        final ApplicationInfo appInfo;
+        ApplicationInfo appInfo = null;
         try {
             appInfo = getPackageManager().getApplicationInfo(BuildConfig.APPLICATION_ID, 0);
-        } catch (PackageManager.NameNotFoundException e) {
-            return;
+        } catch (final PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "Error in getting installed date info, " + e.toString());
         }
-        final String appFile = appInfo.sourceDir;
-        final long installedTime = new File(appFile).lastModified();
+        final String appFile;
+        long installedTime = Long.MAX_VALUE;
+        if (appInfo != null)
+        {
+            appFile = appInfo.sourceDir;
+            installedTime = new File(appFile).lastModified();
+        }
 
         if (AnnActivity.isActive || installedTime == Long.MAX_VALUE) return;
 
         final RealmList<AnnItem> annItems = new RealmList<>();
         final Date date = new Date(installedTime);
+        Log.e(TAG, "installed date as " + date);
         annItems.addAll(database.where(AnnItem.class)
-                .equalTo(AnnItemKeys.READ, false)
-                .greaterThanOrEqualTo(AnnItemKeys.DATE, date).findAll());
-
+                .equalTo(AnnItemKeys.READ, false).findAll());
         if (annItems.isEmpty()) return;
 
         final Intent intent = new Intent(this, AnnActivity.class);

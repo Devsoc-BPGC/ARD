@@ -21,7 +21,7 @@ public class BootBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(final Context context, final Intent intent) {
         if (intent == null) return;
-        if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
+        if (true) {
             Log.e(TAG, "Starting services");
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(new Intent(context, ServicesStarter.class));

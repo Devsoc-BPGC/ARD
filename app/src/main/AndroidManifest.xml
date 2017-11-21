@@ -104,6 +104,8 @@
             android:name=".services.BootBroadcastReceiver"
             android:enabled="true">
             <intent-filter>
+                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
+                <action android:name="android.intent.action.SCREEN_ON" />
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>

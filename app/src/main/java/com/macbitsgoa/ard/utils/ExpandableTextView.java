@@ -25,6 +25,7 @@ import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.text.method.MovementMethod;
 import android.util.AttributeSet;
 import android.util.SparseBooleanArray;
 import android.view.MotionEvent;
@@ -160,7 +161,7 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
+    public boolean onInterceptTouchEvent(final MotionEvent ev) {
         // while an animation is in progress, intercept all the touch events to children to
         // prevent extra clicks during the animation
         return mAnimating;
@@ -173,7 +174,7 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
     }
 
     @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    protected void onMeasure(final int widthMeasureSpec, final int heightMeasureSpec) {
         // If no change, measure and return
         if (!mRelayout || getVisibility() == View.GONE) {
             super.onMeasure(widthMeasureSpec, heightMeasureSpec);
@@ -220,7 +221,7 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         }
     }
 
-    public void setOnExpandStateChangeListener(@Nullable OnExpandStateChangeListener listener) {
+    public void setOnExpandStateChangeListener(@Nullable final OnExpandStateChangeListener listener) {
         mListener = listener;
     }
 
@@ -241,6 +242,10 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         setText(text);
         getLayoutParams().height = ViewGroup.LayoutParams.WRAP_CONTENT;
         requestLayout();
+    }
+
+    public void setMovement(final MovementMethod mm) {
+        mTv.setMovementMethod(mm);
     }
 
     @Nullable

@@ -6,7 +6,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -113,7 +112,6 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
             case HomeType.HOME_ITEM: {
                 final HomeItemViewHolder hivh = (HomeItemViewHolder) holder;
                 final HomeItem hi = (HomeItem) obj;
-                Log.d("TAG", hi.toString());
                 if (hi.getImages().size() == 0) {
                     hivh.imageView.setVisibility(View.GONE);
                 } else {

@@ -12,7 +12,6 @@
         android:id="@+id/include"
         layout="@layout/frame_chat_toolbar" />
 
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView_activity_chat"
         android:layout_width="0dp"

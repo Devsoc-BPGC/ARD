@@ -18,7 +18,7 @@ import com.macbitsgoa.ard.BuildConfig;
  */
 @SuppressLint("Registered")
 public class BaseIntentService extends IntentService {
-    public BaseIntentService(String name) {
+    public BaseIntentService(final String name) {
         super(name);
     }
 
@@ -32,7 +32,7 @@ public class BaseIntentService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    protected void onHandleIntent(@Nullable final Intent intent) {
 
     }
 }

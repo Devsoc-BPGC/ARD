@@ -56,9 +56,10 @@ public class SendService extends BaseIntentService {
             final String receiverId = intent.getStringExtra(MessageItemKeys.RECEIVER_ID);
             if (messageData == null || receiverId == null) {
                 Log.e(TAG, "No extras sent in intent");
-                return;
+                sendAll();
+            } else {
+                sendMessage(messageData, receiverId);
             }
-            sendMessage(messageData, receiverId);
         }
         database.close();
     }
@@ -115,6 +116,32 @@ public class SendService extends BaseIntentService {
         final String latestMessage = messageData.substring(0, messageData.length() % 50);
         final Date messageTime = mItem.getMessageTime();
 
+        //First write to local database
+        database.executeTransaction(r -> {
+            MessageItem mi = r.where(MessageItem.class)
+                    .equalTo(MessageItemKeys.MESSAGE_ID, messageId).findFirst();
+            if (mi == null) {
+                mi = r.createObject(MessageItem.class, messageId);
+                mi.setMessageRcvd(false);
+                mi.setMessageTime(messageTime);
+                mi.setMessageRcvdTime(Calendar.getInstance().getTime());
+                mi.setMessageData(messageData);
+                mi.setSenderId(receiverId);
+                mi.setMessageStatus(MessageStatusType.MSG_WAIT);
+            }
+        });
+
+        database.executeTransaction(r -> {
+            final ChatsItem ci = r.where(ChatsItem.class)
+                    .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
+            if (ci != null) {
+                ci.setLatest(latestMessage);
+                ci.setUpdate(messageTime);
+            }
+        });
+
+        if (getUser() == null) return;
+
         final DatabaseReference sendMessageRef = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(mItem.getSenderId())
@@ -142,26 +169,6 @@ public class SendService extends BaseIntentService {
 
         final Map<String, Integer> sentStatusMap = new HashMap<>();
         sentStatusMap.put(messageId, MessageStatusType.MSG_SENT);
-
-        //First write to local database
-        database.executeTransaction(r -> {
-            final MessageItem mi = r.createObject(MessageItem.class, messageId);
-            mi.setMessageRcvd(false);
-            mi.setMessageTime(messageTime);
-            mi.setMessageRcvdTime(Calendar.getInstance().getTime());
-            mi.setMessageData(messageData);
-            mi.setSenderId(receiverId);
-            mi.setMessageStatus(MessageStatusType.MSG_WAIT);
-        });
-
-        database.executeTransaction(r -> {
-            final ChatsItem ci = r.where(ChatsItem.class)
-                    .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
-            if (ci != null) {
-                ci.setLatest(latestMessage);
-                ci.setUpdate(messageTime);
-            }
-        });
 
         //Sent node should be updated after database write as MessageingService doesn't
         //update local value of unwritten message.
