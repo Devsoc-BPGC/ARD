@@ -354,7 +354,11 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
     }
 
     @Override
-    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+    public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
         appBarOffset = verticalOffset;
+    }
+
+    public void scrollToTop() {
+        if (recyclerView != null) recyclerView.smoothScrollToPosition(0);
     }
 }

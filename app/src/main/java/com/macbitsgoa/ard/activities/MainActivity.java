@@ -121,18 +121,17 @@ public class MainActivity extends BaseActivity
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, forumFragment)
                     .commit();
-            return true;
         } else if (id == R.id.bottom_nav_home) {
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, homeFragment)
                     .commit();
-            return true;
+            homeFragment.scrollToTop();
         } else {
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, chatFragment)
                     .commit();
-            return true;
         }
+        return true;
     }
 
     @Override

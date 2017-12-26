@@ -1,14 +1,19 @@
 package com.macbitsgoa.ard.adapters;
 
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.Html;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -37,7 +42,12 @@ import java.util.Locale;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
+public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> implements ImageViewHolder.ImageClickListener {
+
+    /**
+     * TAG for class.
+     */
+    public static final String TAG = HomeAdapter.class.getSimpleName();
 
     /**
      * Viewtype value for Announcement.
@@ -84,7 +94,7 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
                 return new TextViewHolder(view, R.id.tv_vh_big_text);
             case HomeType.PHOTO_ITEM:
                 view = inflater.inflate(R.layout.vh_big_image, parent, false);
-                return new ImageViewHolder(view, context, R.id.imgView_vh_big_image);
+                return new ImageViewHolder(view, context, R.id.imgView_vh_big_image, this);
         }
         return null;
     }
@@ -119,8 +129,11 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
                 } else {
                     hivh.imageView.setVisibility(View.VISIBLE);
                     hivh.statusBar.setVisibility(View.VISIBLE);
-                    hivh.commentCount.setText(String.format(Locale.ENGLISH, "%d", hi.getTexts().size()));
-                    hivh.imageCount.setText(String.format(Locale.ENGLISH, "%d", hi.getImages().size()));
+
+                    final String numberFormat = "%d";
+
+                    hivh.commentCount.setText(String.format(Locale.ENGLISH, numberFormat, hi.getTexts().size()));
+                    hivh.imageCount.setText(String.format(Locale.ENGLISH, numberFormat, hi.getImages().size()));
                     Glide.with(context)
                             .load(hi.getImages().get(0).getPhotoUrl())
                             .transition(DrawableTransitionOptions.withCrossFade())
@@ -166,5 +179,16 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public int getItemViewType(final int position) {
         return data.get(position).getType();
+    }
+
+    @Override
+    public void onImageClick(final String url) {
+        if (url == null) return;
+        try {
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+        } catch (final ActivityNotFoundException e) {
+            Toast.makeText(context, "Error loading image", Toast.LENGTH_SHORT).show();
+            Log.e(TAG, "Activity not found");
+        }
     }
 }
