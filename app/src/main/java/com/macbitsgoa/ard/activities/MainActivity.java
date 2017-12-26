@@ -11,6 +11,7 @@ import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.ChatFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
@@ -38,6 +39,15 @@ public class MainActivity extends BaseActivity
      */
     @BindView(R.id.bottom_nav_activity_main)
     BottomNavigationView bottomNavigationView;
+
+    /**
+     * MainActivity Fragments.
+     */
+    enum MaFragment {
+        FAQ, HOME, CHAT;
+    }
+
+    private static MaFragment maFragment = MaFragment.HOME;
 
     /**
      * Fragment manager used to handle the 3 fragments.
@@ -98,10 +108,13 @@ public class MainActivity extends BaseActivity
         homeFragment = HomeFragment.newInstance(null);
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
 
-        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
-        bottomNavigationView.getMenu().findItem(R.id.bottom_nav_home).setChecked(true);
-        fragmentManager.beginTransaction().replace(R.id.frame_content_main, homeFragment,
-                getString(R.string.bottom_nav_home_activity_main)).commit();
+        final int menuId;
+        if (maFragment == MaFragment.FAQ) menuId = R.id.bottom_nav_forum;
+        else if (maFragment == MaFragment.HOME) menuId = R.id.bottom_nav_home;
+        else menuId = R.id.bottom_nav_chat;
+        bottomNavigationView.setSelectedItemId(menuId);
+        bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
+        launchFragment();
     }
 
     @Override
@@ -118,20 +131,31 @@ public class MainActivity extends BaseActivity
         final int id = item.getItemId();
 
         if (id == R.id.bottom_nav_forum) {
+            maFragment = MaFragment.FAQ;
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, forumFragment)
                     .commit();
         } else if (id == R.id.bottom_nav_home) {
+            maFragment = MaFragment.HOME;
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, homeFragment)
                     .commit();
             homeFragment.scrollToTop();
         } else {
+            maFragment = MaFragment.CHAT;
             fragmentManager.beginTransaction()
                     .replace(R.id.frame_content_main, chatFragment)
                     .commit();
         }
         return true;
+    }
+
+    private void launchFragment() {
+        BaseFragment baseFragment;
+        if (maFragment == MaFragment.FAQ) baseFragment = forumFragment;
+        else if (maFragment == MaFragment.HOME) baseFragment = homeFragment;
+        else baseFragment = chatFragment;
+        fragmentManager.beginTransaction().replace(R.id.frame_content_main, baseFragment).commit();
     }
 
     @Override
