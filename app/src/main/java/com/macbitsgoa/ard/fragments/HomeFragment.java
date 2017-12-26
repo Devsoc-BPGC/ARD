@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.DividerItemDecoration;
@@ -16,7 +17,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.vivchar.viewpagerindicator.ViewPagerIndicator;
-import com.google.android.flexbox.FlexboxItemDecoration;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,14 +32,12 @@ import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
-import com.macbitsgoa.ard.keys.PostKeys;
 import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.SlideshowItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.types.HomeType;
-import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
@@ -63,7 +61,7 @@ import io.realm.Sort;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeFragment extends BaseFragment implements OnItemClickListener {
+public class HomeFragment extends BaseFragment implements OnItemClickListener, AppBarLayout.OnOffsetChangedListener {
 
     /**
      * TAG for this class.
@@ -93,6 +91,9 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
      */
     @BindView(R.id.search_view_fragment_home)
     SearchView searchView;
+
+    @BindView(R.id.ab_fragment_home)
+    AppBarLayout appBarLayout;
 
     //----------------------------------------------------------------------------------------------
 
@@ -133,6 +134,11 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
     private RecyclerView.OnItemTouchListener onItemTouchListener;
 
     /**
+     * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
+     */
+    private int appBarOffset = 0;
+
+    /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
@@ -164,7 +170,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
         onItemTouchListener = new RecyclerItemClickListener(getContext(), recyclerView, this);
         recyclerView.addOnItemTouchListener(onItemTouchListener);
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-
+        appBarLayout.addOnOffsetChangedListener(this);
         database = Realm.getDefaultInstance();
     }
 
@@ -174,9 +180,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
         dataSet = generateList();
         homeAdapter = new HomeAdapter(dataSet, getContext());
         recyclerView.setAdapter(homeAdapter);
-
-        searchView.hideKeyboard();
-        searchView.clearFocus();
+        appBarLayout.offsetTopAndBottom(appBarOffset);
 
         setupSlideshow();
 
@@ -347,5 +351,10 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener {
     @Override
     public void onLongItemClick(final View view, final int position) {
         //Not required as of now
+    }
+
+    @Override
+    public void onOffsetChanged(AppBarLayout appBarLayout, int verticalOffset) {
+        appBarOffset = verticalOffset;
     }
 }

@@ -25,6 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="250dp"
             android:theme="@style/AppTheme.AppBarOverlay"
+            android:id="@+id/ab_fragment_home"
             app:expanded="true">
 
             <android.support.design.widget.CollapsingToolbarLayout
