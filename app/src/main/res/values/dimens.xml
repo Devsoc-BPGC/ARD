@@ -31,8 +31,8 @@
     <dimen name="marginBottom_home_fragment_coordinatorLayout">0dp</dimen>
     <dimen name="marginEnd_home_fragment_coordinatorLayout">0dp</dimen>
     <dimen name="marginEnd_home_fragment_subFab">32dp</dimen>
-    <dimen name="marginEnd_home_fragment_recyclerView">8dp</dimen>
-    <dimen name="marginStart_home_fragment_recyclerView">8dp</dimen>
+    <dimen name="paddingEnd_home_fragment_recyclerView">4dp</dimen>
+    <dimen name="paddingStart_home_fragment_recyclerView">4dp</dimen>
     <dimen name="marginStart_home_fragment_coordinatorLayout">0dp</dimen>
     <dimen name="marginTop_home_fragment_coordinatorLayout">0dp</dimen>
 

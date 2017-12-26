@@ -77,8 +77,8 @@
             android:id="@+id/recyclerView_fragment_home"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginEnd="@dimen/marginEnd_home_fragment_recyclerView"
-            android:layout_marginStart="@dimen/marginStart_home_fragment_recyclerView"
+            android:paddingEnd="@dimen/paddingEnd_home_fragment_recyclerView"
+            android:paddingStart="@dimen/paddingStart_home_fragment_recyclerView"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
     </android.support.design.widget.CoordinatorLayout>

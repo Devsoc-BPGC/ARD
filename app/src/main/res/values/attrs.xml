@@ -36,6 +36,7 @@
 
     <!-- ViewHolder colors -->
     <!-- AnnItemViewHolder -->
+    <attr name="fillColor_vh_home_item_status" format="color" />
     <attr name="tint_viewHolder_ann_icon" format="color" />
     <attr name="textColor_viewHolder_ann_data" format="color" />
     <attr name="textColor_viewHolder_ann_extras" format="color" />

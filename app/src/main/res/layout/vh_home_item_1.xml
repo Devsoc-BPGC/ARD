@@ -3,14 +3,16 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="8dp"
-    android:layout_marginTop="8dp">
+    android:paddingTop="4dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?selectableItemBackground">
 
     <ImageView
         android:id="@+id/imgView_home_item"
         android:layout_width="0dp"
-        android:layout_height="160dp"
-        android:layout_marginTop="8dp"
+        android:layout_height="200dp"
+        android:foreground="@drawable/gradient"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -19,9 +21,9 @@
         android:id="@+id/tv_vh_home_item_1"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="8dp"
         android:autoLink="all"
-        android:text="TextView"
+        android:padding="8dp"
+        android:text="News"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/imgView_home_item" />
@@ -30,16 +32,62 @@
         android:id="@+id/tv_vh_home_item_2"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:autoLink="all"
         android:ellipsize="end"
         android:maxLines="2"
-        android:autoLink="all"
+        android:minHeight="36dp"
         android:paddingBottom="8dp"
         android:paddingEnd="8dp"
         android:paddingStart="8dp"
         android:paddingTop="4dp"
-        android:text="TextView"
+        android:text="News"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_vh_home_item_1" />
+
+    <LinearLayout
+        android:id="@+id/ll_vh_home_status"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:layout_marginEnd="8dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/tv_vh_home_item_1"
+        app:layout_constraintEnd_toEndOf="parent">
+
+
+        <ImageView
+            android:id="@+id/imgView_vh_home_item_comment_ic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_comment_count_24dp" />
+
+        <TextView
+            android:id="@+id/tv_vh_home_item_comment_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingEnd="8dp"
+            android:paddingStart="4dp"
+            android:text="0"
+            android:textColor="?fillColor_vh_home_item_status" />
+
+        <ImageView
+            android:id="@+id/imgView_vh_home_item_image_ic"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:srcCompat="@drawable/ic_image_count_24dp" />
+
+        <TextView
+            android:id="@+id/tv_vh_home_item_image_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingEnd="4dp"
+            android:paddingStart="4dp"
+            android:text="1+"
+            android:textColor="?fillColor_vh_home_item_status" />
+
+    </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

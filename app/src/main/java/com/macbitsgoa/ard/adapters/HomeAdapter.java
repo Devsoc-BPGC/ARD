@@ -30,6 +30,7 @@ import com.macbitsgoa.ard.viewholders.TextViewHolder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Adapter class to display data in HomeFragment.
@@ -114,8 +115,12 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> {
                 final HomeItem hi = (HomeItem) obj;
                 if (hi.getImages().size() == 0) {
                     hivh.imageView.setVisibility(View.GONE);
+                    hivh.statusBar.setVisibility(View.GONE);
                 } else {
                     hivh.imageView.setVisibility(View.VISIBLE);
+                    hivh.statusBar.setVisibility(View.VISIBLE);
+                    hivh.commentCount.setText(String.format(Locale.ENGLISH, "%d", hi.getTexts().size()));
+                    hivh.imageCount.setText(String.format(Locale.ENGLISH, "%d", hi.getImages().size()));
                     Glide.with(context)
                             .load(hi.getImages().get(0).getPhotoUrl())
                             .transition(DrawableTransitionOptions.withCrossFade())

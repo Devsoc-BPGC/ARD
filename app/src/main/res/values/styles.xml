@@ -50,6 +50,7 @@
         <item name="textColor_viewHolder_ann_data">@color/grey_700</item>
         <item name="textColor_viewHolder_ann_extras">@color/grey_500</item>
         <item name="tint_viewHolder_ann_icon">@color/colorAccent</item>
+        <item name="fillColor_vh_home_item_status">@color/white</item>
 
         <!-- Custom tab colors -->
         <item name="customTab_toolbar_color">@color/colorPrimary</item>
