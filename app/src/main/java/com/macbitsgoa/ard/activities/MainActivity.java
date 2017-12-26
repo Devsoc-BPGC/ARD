@@ -10,7 +10,6 @@ import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.ChatFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
@@ -59,11 +58,6 @@ public class MainActivity extends BaseActivity
      * ChatFragment object.
      */
     private ChatFragment chatFragment;
-
-    /**
-     * Firebase db ref for navigation drawer.
-     */
-    private DatabaseReference navDrawerDBRef;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

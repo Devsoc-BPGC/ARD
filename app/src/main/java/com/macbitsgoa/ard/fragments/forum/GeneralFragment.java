@@ -113,7 +113,7 @@ public class GeneralFragment extends BaseFragment {
             items = new ArrayList<>();
         items.clear();
         AHC.fill(items, faqItems, ForumType.FAQ_ITEM);
-        if (forumAdapter == null) {
+        if (recyclerView.getAdapter() == null) {
             forumAdapter = new ForumAdapter(items);
             recyclerView.setAdapter(forumAdapter);
         } else {

@@ -197,6 +197,7 @@ public class ForumFragment extends BaseFragment {
 
     /**
      * Initialise {@link #forumRefVEL}.
+     * Syncs firebase db with local realm db.
      *
      * @return ValueEventListener
      */
@@ -241,10 +242,8 @@ public class ForumFragment extends BaseFragment {
                                 .equalTo(FaqItemKeys.KEY, key).findFirst();
                         if (fi == null) {
                             fi = r.createObject(FaqItem.class, key);
-                        } else {
-                            if (fi.getUpdateDate().getTime() == updateDate.getTime()) {
-                                return;
-                            }
+                        } else if (fi.getUpdateDate().getTime() == updateDate.getTime()) {
+                            return;
                         }
                         fi.setQuestion(child.child(FaqItemKeys.QUES).getValue(String.class));
                         fi.setAnswer(child.child(FaqItemKeys.ANS).getValue(String.class));
