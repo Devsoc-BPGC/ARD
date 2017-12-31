@@ -85,6 +85,7 @@ public class HomeService extends BaseIntentService {
      * @return listener for children.
      */
     private ChildEventListener getHomeListener() {
+        //noinspection OverlyLongMethod
         return new ChildEventListener() {
             private Realm database;
 
@@ -106,7 +107,12 @@ public class HomeService extends BaseIntentService {
                     if (hi == null) {
                         hi = r.createObject(HomeItem.class, key);
                     } else {
-                        //if (date.getTime() == hi.getDate().getTime()) return;
+                        if (hi.getImages() != null) {
+                            hi.getImages().deleteAllFromRealm();
+                        }
+                        if (hi.getTexts() != null) {
+                            hi.getTexts().deleteAllFromRealm();
+                        }
                     }
                     hi.setAuthor(author == null
                             || author.length() == 0 ? AHC.DEFAULT_AUTHOR : author);

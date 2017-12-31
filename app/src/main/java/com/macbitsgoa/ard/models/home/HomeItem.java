@@ -61,7 +61,7 @@ public class HomeItem extends RealmObject {
      *
      * @param key    Unique key.
      * @param author Author string.
-     * @param date   Date obect of post.
+     * @param date   Date object of post.
      * @param images List of sub section image items.
      * @param texts  List of sub section text items.
      */
