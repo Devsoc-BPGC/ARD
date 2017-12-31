@@ -147,10 +147,6 @@ public class SendService extends BaseIntentService {
                 .child(mItem.getSenderId())
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
-        final DatabaseReference sentMessageStatusRef = getRootReference()
-                .child(AHC.FDR_CHAT)
-                .child(getUser().getUid())
-                .child(ChatItemKeys.SENT_STATUS);
 
         Log.e(TAG, "Sending message with id " + mItem.getMessageId());
 
@@ -167,12 +163,6 @@ public class SendService extends BaseIntentService {
         senderMap.put(ChatItemKeys.FDR_PHOTO_URL, getUser().getPhotoUrl().toString());
         senderMap.put(ChatItemKeys.FDR_DATE, messageTime);
 
-        final Map<String, Integer> sentStatusMap = new HashMap<>();
-        sentStatusMap.put(messageId, MessageStatusType.MSG_SENT);
-
-        //Sent node should be updated after database write as MessageingService doesn't
-        //update local value of unwritten message.
-        sentMessageStatusRef.setValue(sentStatusMap);
         sendMessageRef.child(ChatItemKeys.MESSAGES).child(messageId).setValue(messageMap);
         sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
 
