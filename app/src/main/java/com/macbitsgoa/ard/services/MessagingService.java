@@ -201,7 +201,13 @@ public class MessagingService extends BaseIntentService {
                         ci = database.createObject(ChatsItem.class, senderId);
                     } else {
                         //TODO something wrong here
-                        if (update.getTime() >= ci.getUpdate().getTime()) {
+                        /*
+                        01-01 12:17:55.357 25445-25445/com.macbitsgoa.ard.debug:BackgroundServices E/AndroidRuntime: FATAL EXCEPTION: main
+                        Process: com.macbitsgoa.ard.debug:BackgroundServices, PID: 25445
+                        java.lang.NullPointerException: Attempt to invoke virtual method 'long java.util.Date.getTime()' on a null object reference
+                        at com.macbitsgoa.ard.services.MessagingService$1.onDataChange(MessagingService.java:204)
+                        */
+                        if (false && update.getTime() >= ci.getUpdate().getTime()) {
                             ci.setLatest(latest);
                             ci.setUpdate(update);
                         }
