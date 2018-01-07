@@ -1,9 +1,11 @@
 package com.macbitsgoa.ard.activities;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.NotificationManagerCompat;
@@ -14,9 +16,11 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -34,6 +38,7 @@ import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
+import com.macbitsgoa.ard.services.SendDocumentService;
 import com.macbitsgoa.ard.services.SendService;
 import com.macbitsgoa.ard.utils.Actions;
 import com.macbitsgoa.ard.utils.CenterCropDrawable;
@@ -42,6 +47,7 @@ import java.util.Calendar;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -55,6 +61,10 @@ public class ChatActivity extends BaseActivity {
      */
     public static final String TAG = ChatActivity.class.getSimpleName();
 
+    /**
+     * Request code for selecting a document to share via chat.
+     */
+    private static final int DOCUMENT_READ_REQUEST_CODE = 452;
 
     //----------------------------------------------------------------------------------------------
 
@@ -74,6 +84,9 @@ public class ChatActivity extends BaseActivity {
 
     @BindView(R.id.ll_frame_chat_toolbar_icon)
     ImageView icon;
+
+    @BindView(R.id.imgBtn_frame_comment_doc)
+    ImageButton uploadDocImgBtn;
 
     @BindView(R.id.tv_frame_chat_toolbar_title)
     TextView title;
@@ -227,7 +240,7 @@ public class ChatActivity extends BaseActivity {
         messages = database
                 .where(MessageItem.class)
                 .equalTo(MessageItemKeys.SENDER_ID, senderId)
-                .findAllSorted("messageRcvdTime", Sort.DESCENDING);
+                .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
         messages.addChangeListener((messageItems, changeSet) -> {
             // `null`  means the async query returns the first time.
             if (changeSet == null) {
@@ -258,7 +271,7 @@ public class ChatActivity extends BaseActivity {
             }
         });
 
-        chatMsgAdapter = new ChatMsgAdapter(messages);
+        chatMsgAdapter = new ChatMsgAdapter(messages, this);
         chatsRV.setAdapter(chatMsgAdapter);
 
         final IntentFilter intf = new IntentFilter();
@@ -346,6 +359,48 @@ public class ChatActivity extends BaseActivity {
 
             rlUpdates.setVisibility(View.GONE);
             rlIcons.setVisibility(View.GONE);
+        }
+    }
+
+
+    /**
+     * Fires an intent to spin up the "file chooser" UI and select an image.
+     */
+    @OnClick(R.id.imgBtn_frame_comment_doc)
+    public void performFileSearch() {
+        // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+        // browser.
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+
+        // Filter to only show results that can be "opened", such as a
+        // file (as opposed to a list of contacts or timezones)
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        // Filter to show only images, using the image MIME data type.
+        // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
+        // To search for all documents available via installed storage providers,
+        // it would be "*/*".
+        intent.setType("*/*");
+
+        startActivityForResult(intent, DOCUMENT_READ_REQUEST_CODE);
+    }
+
+    @Override
+    public void onActivityResult(final int requestCode, final int resultCode,
+                                 final Intent resultData) {
+
+        if (requestCode == DOCUMENT_READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            if (resultData != null) {
+                final Uri uri = resultData.getData();
+                Log.i(TAG, "Uri: " + uri.toString());
+                Intent intent = new Intent(this, SendDocumentService.class);
+                intent.setData(uri);
+                intent.putExtra(MessageItemKeys.RECEIVER_ID, senderId);
+                startService(intent);
+            } else {
+                Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
+                Log.e(TAG, "Error occurred while getting URI of file for upload " + resultData + " and result code " + resultCode);
+            }
         }
     }
 }

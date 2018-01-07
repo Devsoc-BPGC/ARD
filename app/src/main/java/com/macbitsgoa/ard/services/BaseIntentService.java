@@ -9,6 +9,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.macbitsgoa.ard.BuildConfig;
 
 /**
@@ -24,6 +26,10 @@ public class BaseIntentService extends IntentService {
 
     protected DatabaseReference getRootReference() {
         return FirebaseDatabase.getInstance().getReference().child(BuildConfig.BUILD_TYPE);
+    }
+
+    protected StorageReference getStorageRef() {
+        return FirebaseStorage.getInstance().getReference().child(BuildConfig.BUILD_TYPE);
     }
 
     @Nullable

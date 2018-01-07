@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.viewholders;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
@@ -24,7 +25,7 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
     /**
      * Current url being displayed.
      */
-    private String url;
+    private Uri uri;
 
     public ImageViewHolder(@NonNull final View itemView, final Context context,
                            @IdRes final int resourceId, final ImageClickListener imageClickListener) {
@@ -32,25 +33,25 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
         this.context = context;
         imageView = itemView.findViewById(resourceId);
         imageView.setOnClickListener(o -> {
-            if (imageClickListener != null) imageClickListener.onImageClick(url);
+            if (imageClickListener != null) imageClickListener.onImageClick(uri);
         });
     }
 
     /**
      * Set image url.
      *
-     * @param url url string to set as image.
+     * @param uri URI to set as image.
      */
-    public void setImage(final String url) {
-        this.url = url;
+    public void setImage(final Uri uri) {
+        this.uri = uri;
         Glide.with(context)
-                .load(url)
+                .load(uri)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .apply(RequestOptions.centerCropTransform())
                 .into(imageView);
     }
 
     public interface ImageClickListener {
-        void onImageClick(String url);
+        void onImageClick(Uri uri);
     }
 }

@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.models;
 
 import com.macbitsgoa.ard.types.MessageStatusType;
+import com.macbitsgoa.ard.types.MessageType;
 
 import java.util.Date;
 
@@ -62,13 +63,23 @@ public class MessageItem extends RealmObject {
     @Required
     private Date messageRcvdTime;
 
+    /**
+     * Defines what sort of message it is. Eg. text or document.
+     * One of {@link com.macbitsgoa.ard.types.MessageType}.
+     */
+    private int messageType;
+
+    private String mimeType;
+    private String localUri;
+
+
     public MessageItem() {
 
     }
 
     public MessageItem(final String messageId, final int messageStatus, final boolean messageRcvd,
                        final String messageData, final String senderId, final Date messageTime,
-                       final Date messageRcvdTime) {
+                       final Date messageRcvdTime, final int messageType) {
         this.messageId = messageId;
         this.messageStatus = messageStatus;
         this.messageRcvd = messageRcvd;
@@ -76,6 +87,7 @@ public class MessageItem extends RealmObject {
         this.senderId = senderId;
         this.messageTime = messageTime;
         this.messageRcvdTime = messageRcvdTime;
+        this.messageType = messageType;
     }
 
     public String getMessageId() {
@@ -134,6 +146,30 @@ public class MessageItem extends RealmObject {
         this.messageStatus = messageStatus;
     }
 
+    public int getMessageType() {
+        return messageType;
+    }
+
+    public void setMessageType(int messageType) {
+        this.messageType = messageType;
+    }
+
+    public String getMimeType() {
+        return mimeType;
+    }
+
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    public String getLocalUri() {
+        return localUri;
+    }
+
+    public void setLocalUri(String localUri) {
+        this.localUri = localUri;
+    }
+
     @Override
     public String toString() {
         return "MessageItem{"
@@ -144,6 +180,9 @@ public class MessageItem extends RealmObject {
                 + ", senderId='" + senderId + '\''
                 + ", messageTime=" + messageTime
                 + ", messageRcvdTime=" + messageRcvdTime
+                + ", messageType=" + messageType
+                + ", mimeType=" + mimeType
+                + ", localUri=" + localUri
                 + '}';
     }
 }

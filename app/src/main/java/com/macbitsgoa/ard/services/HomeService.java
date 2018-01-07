@@ -7,6 +7,7 @@ import android.util.Log;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseException;
 import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
@@ -204,7 +205,13 @@ public class HomeService extends BaseIntentService {
 
                 final String key = dataSnapshot.getKey();
                 final String data = dataSnapshot.child(AnnItemKeys.DATA).getValue(String.class);
-                final Date date = dataSnapshot.child(AnnItemKeys.DATE).getValue(Date.class);
+                final Date date;
+                try {
+                    date = dataSnapshot.child(AnnItemKeys.DATE).getValue(Date.class);
+                } catch (DatabaseException e) {
+                    Log.e(TAG, e.toString());
+                    return;
+                }
                 final String author = dataSnapshot.child(AnnItemKeys.AUTHOR).getValue(String.class);
 
                 if (data == null || date == null || data.length() == 0) {

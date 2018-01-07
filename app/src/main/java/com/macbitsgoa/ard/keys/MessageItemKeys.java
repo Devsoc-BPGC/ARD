@@ -25,4 +25,7 @@ public class MessageItemKeys {
     public static final String RECEIVER_ID = "receiverId";
     public static final String MESSAGE_ID = "messageId";
     public static final String MESSAGE_DATA = "messageData";
+    public static final String MESSAGE_RECEIVED_TIME = "messageRcvdTime";
+    public static final String MESSAGE_TYPE = "messageType";
+    public static final String FDR_MIME_TYPE = "mimeType";
 }

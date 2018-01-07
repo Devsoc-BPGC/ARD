@@ -165,7 +165,7 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> implements Ima
             case HomeType.PHOTO_ITEM: {
                 final ImageViewHolder imgvh = (ImageViewHolder) holder;
                 final PhotoItem pi = (PhotoItem) obj;
-                imgvh.setImage(pi.getPhotoUrl());
+                imgvh.setImage(Uri.parse(pi.getPhotoUrl()));
                 break;
             }
         }
@@ -182,10 +182,10 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> implements Ima
     }
 
     @Override
-    public void onImageClick(final String url) {
-        if (url == null) return;
+    public void onImageClick(final Uri uri) {
+        if (uri == null) return;
         try {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+            context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (final ActivityNotFoundException e) {
             Toast.makeText(context, "Error loading image", Toast.LENGTH_SHORT).show();
             Log.e(TAG, "Activity not found");

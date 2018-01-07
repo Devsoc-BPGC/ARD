@@ -1,9 +1,12 @@
 package com.macbitsgoa.ard.services;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.util.Log;
 
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
@@ -21,48 +24,75 @@ import io.realm.Realm;
 import io.realm.RealmList;
 
 /**
- * Service to send information to Firebase. This service's only job is to send messages to Firebase
- * It also calls the {@link NotifyService} for old messages. Sent messages listener is in
- * {@link MessagingService}.
- *
- * @author Vikramaditya Kukreja
+ * Service to save documents on cloud and use the generated links as message data.
  */
 
-public class SendService extends BaseIntentService {
+public class SendDocumentService extends BaseIntentService {
 
-    /**
-     * TAG for this class.
-     */
-    public static final String TAG = SendService.class.getSimpleName();
+    public static final String TAG = SendDocumentService.class.getSimpleName();
 
-    /**
-     * Realm instance.
-     */
-    private Realm database;
-
-    public SendService() {
-        super(SendService.class.getSimpleName());
+    public SendDocumentService() {
+        super(TAG);
     }
 
     @Override
     protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
-        database = Realm.getDefaultInstance();
-        if (intent == null) {
+        if (intent == null || intent.getData() == null || !intent.hasExtra(MessageItemKeys.RECEIVER_ID)) {
             Log.d(TAG, "Null intent was passed, sending all unsent messages");
             sendAll();
         } else {
-            Log.e(TAG, intent.toString());
-            final String messageData = intent.getStringExtra(MessageItemKeys.MESSAGE_DATA);
-            final String receiverId = intent.getStringExtra(MessageItemKeys.RECEIVER_ID);
-            if (messageData == null || receiverId == null) {
-                Log.e(TAG, "No extras sent in intent");
-                sendAll();
-            } else {
-                sendMessage(messageData, receiverId);
-            }
+            Log.i(TAG, "Sending document " + intent.toString());
+            sendDoucment(intent.getData(), intent.getStringExtra(MessageItemKeys.RECEIVER_ID));
         }
-        database.close();
+    }
+
+    private String getMessageId(final String messageData) {
+        final Date messageTime = Calendar.getInstance().getTime();
+        return "" + messageTime.getTime()
+                + messageTime.hashCode()
+                + messageData.hashCode();
+    }
+
+    private void sendDoucment(final Uri data, final String receiverId) {
+        final String messageId = getMessageId(data.getPath());
+        StorageReference sRef = getStorageRef().child(getUser().getUid()).child(receiverId).child(messageId);
+        UploadTask uploadTask = sRef.putFile(data);
+        // Register observers to listen for when the download is done or if it fails
+        uploadTask.addOnFailureListener(exception -> {
+            // Handle unsuccessful uploads
+        }).addOnSuccessListener(taskSnapshot -> {
+            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+            Uri downloadUrl = taskSnapshot.getDownloadUrl();
+            sendDocument(downloadUrl.toString(), data, receiverId);
+        });
+    }
+
+    /**
+     * Method to create a temporary {@link MessageItem} object.
+     *
+     * @param firebaseUrl url in firebase.
+     * @param localUri    Uri of local file.
+     * @param receiverId  Other user's unique id.
+     */
+    private void sendDocument(final String firebaseUrl, final Uri localUri, final String receiverId) {
+
+        //Get current system time and include this is in message id
+        final Date messageTime = Calendar.getInstance().getTime();
+        final String messageId = getMessageId(firebaseUrl);
+
+        final MessageItem mi = new MessageItem();
+        mi.setMessageId(messageId);
+        mi.setMessageRcvd(false);
+        mi.setMessageTime(messageTime);
+        mi.setMessageRcvdTime(Calendar.getInstance().getTime());
+        mi.setSenderId(receiverId);
+        mi.setMessageStatus(MessageStatusType.MSG_WAIT);
+        mi.setMessageData(firebaseUrl);
+        mi.setMessageType(MessageType.DOCUMENT);
+        mi.setMimeType(AHC.getMimeType(this, localUri));
+        mi.setLocalUri(localUri.toString());
+        sendDocument(mi);
     }
 
     /**
@@ -71,39 +101,15 @@ public class SendService extends BaseIntentService {
      */
     private void sendAll() {
         final RealmList<MessageItem> notSentMessages = new RealmList<>();
+        Realm database = Realm.getDefaultInstance();
         notSentMessages.addAll(database.where(MessageItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_WAIT)
-                .equalTo(MessageItemKeys.MESSAGE_TYPE, MessageType.TEXT)
+                .equalTo(MessageItemKeys.MESSAGE_TYPE, MessageType.DOCUMENT)
                 .findAll());
         for (int i = 0; i < notSentMessages.size(); i++) {
-            sendMessage(notSentMessages.get(i));
+            sendDocument(notSentMessages.get(i));
         }
-    }
-
-    /**
-     * Method to create a temporary {@link MessageItem} object.
-     *
-     * @param messageData Message Data to send.
-     * @param receiverId  Other user's unique id.
-     */
-    private void sendMessage(final String messageData, final String receiverId) {
-
-        //Get current system time and include this is in message id
-        final Date messageTime = Calendar.getInstance().getTime();
-        final String messageId = "" + messageTime.getTime()
-                + messageTime.hashCode()
-                + messageData.hashCode();
-
-        final MessageItem mi = new MessageItem();
-        mi.setMessageId(messageId);
-        mi.setMessageRcvd(false);
-        mi.setMessageTime(messageTime);
-        mi.setMessageRcvdTime(Calendar.getInstance().getTime());
-        mi.setMessageData(messageData);
-        mi.setSenderId(receiverId);
-        mi.setMessageStatus(MessageStatusType.MSG_WAIT);
-
-        sendMessage(mi);
+        database.close();
     }
 
     /**
@@ -111,25 +117,20 @@ public class SendService extends BaseIntentService {
      *
      * @param mItem message item object to extact information from.
      */
-    private void sendMessage(final MessageItem mItem) {
+    private void sendDocument(final MessageItem mItem) {
         final String messageId = mItem.getMessageId();
-        final String messageData = mItem.getMessageData();
         final String receiverId = mItem.getSenderId();
-        final String latestMessage = messageData.substring(0, messageData.length() % 50);
+        final String latestMessage = "[Document]";
         final Date messageTime = mItem.getMessageTime();
 
-        //First write to local database
+        final Realm database = Realm.getDefaultInstance();
+
+        //First write to local database if not already done so.
         database.executeTransaction(r -> {
             MessageItem mi = r.where(MessageItem.class)
                     .equalTo(MessageItemKeys.MESSAGE_ID, messageId).findFirst();
             if (mi == null) {
-                mi = r.createObject(MessageItem.class, messageId);
-                mi.setMessageRcvd(false);
-                mi.setMessageTime(messageTime);
-                mi.setMessageRcvdTime(Calendar.getInstance().getTime());
-                mi.setMessageData(messageData);
-                mi.setSenderId(receiverId);
-                mi.setMessageStatus(MessageStatusType.MSG_WAIT);
+                r.copyToRealm(mItem);
             }
         });
 
@@ -150,11 +151,14 @@ public class SendService extends BaseIntentService {
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
 
-        Log.e(TAG, "Sending message with id " + mItem.getMessageId());
+        if (Log.isLoggable(TAG, Log.DEBUG))
+            Log.d(TAG, "Sending message with id " + mItem.getMessageId());
 
         //Add new message
         final Map<String, Object> messageMap = new HashMap<>();
-        messageMap.put(MessageItemKeys.FDR_DATA, messageData);
+        messageMap.put(MessageItemKeys.FDR_DATA, mItem.getMessageData());
+        messageMap.put(MessageItemKeys.FDR_MIME_TYPE, mItem.getMimeType());
+        messageMap.put(MessageItemKeys.MESSAGE_TYPE, mItem.getMessageType());
         messageMap.put(MessageItemKeys.FDR_DATE, messageTime);
 
         //Update latest sender information
@@ -167,6 +171,8 @@ public class SendService extends BaseIntentService {
 
         sendMessageRef.child(ChatItemKeys.MESSAGES).child(messageId).setValue(messageMap);
         sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
+
+        database.close();
 
         Log.e(TAG, "Calling notify service");
         notifyStatus(receiverId);
@@ -184,5 +190,4 @@ public class SendService extends BaseIntentService {
         notifyIntent.putExtra(MessageItemKeys.RECEIVER_ID, receiverId);
         startService(notifyIntent);
     }
-
 }

@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -279,5 +280,16 @@ public class AHC {
             final TypeItem ti = new TypeItem(addition, type);
             list.add(ti);
         }
+    }
+
+    /**
+     * Method to return mime type of file as a string.
+     *
+     * @param context Context object to use.
+     * @param uri     Uri of file.
+     * @return mime type as string.
+     */
+    public static String getMimeType(final Context context, final Uri uri) {
+        return context.getContentResolver().getType(uri);
     }
 }

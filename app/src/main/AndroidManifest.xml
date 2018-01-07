@@ -99,6 +99,7 @@
             android:name=".services.HomeService"
             android:description="@string/home_service_desc"
             android:process=":BackgroundServices" />
+        <service android:name=".services.SendDocumentService" />
 
         <receiver
             android:name=".services.BootBroadcastReceiver"

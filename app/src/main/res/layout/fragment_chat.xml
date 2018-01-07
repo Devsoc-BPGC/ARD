@@ -26,6 +26,6 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentEnd="true"
         android:layout_margin="16dp"
-        android:src="@drawable/ic_message"
+        android:src="@drawable/ic_plus"
         app:fabSize="normal" />
 </RelativeLayout>
