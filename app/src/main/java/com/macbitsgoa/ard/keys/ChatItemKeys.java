@@ -28,4 +28,6 @@ public class ChatItemKeys {
     public static final String FDR_PHOTO_URL = DB_PHOTO_URL;
     public static final String FDR_DATE = "date";
 
+    public static final String NOTIFICATION_ACTION = "com.macbitsgoa.ard.notificationService.new";
+    public static final String NEW_MESSAGE_ARRIVED = "com.macbitsgoa.ard.messagingService.new";
 }

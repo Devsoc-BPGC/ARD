@@ -14,7 +14,6 @@ import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
-import com.macbitsgoa.ard.utils.Actions;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -156,7 +155,7 @@ public class MessagingService extends BaseIntentService {
                                 .child(messageId)
                                 .setValue(MessageStatusType.MSG_RCVD);
                         newMessageDS.getRef().removeValue();
-                        final Intent broadcastIntent = new Intent(Actions.NEW_MESSAGE_ARRIVED);
+                        final Intent broadcastIntent = new Intent(ChatItemKeys.NEW_MESSAGE_ARRIVED);
                         broadcastIntent.putExtra(MessageItemKeys.SENDER_ID, senderId);
                         sendBroadcast(broadcastIntent);
                     }

@@ -40,7 +40,6 @@ import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendDocumentService;
 import com.macbitsgoa.ard.services.SendService;
-import com.macbitsgoa.ard.utils.Actions;
 import com.macbitsgoa.ard.utils.CenterCropDrawable;
 
 import java.util.Calendar;
@@ -149,12 +148,12 @@ public class ChatActivity extends BaseActivity {
                     return;
                 }
                 switch (intent.getAction()) {
-                    case Actions.NOTIFICATION_ACTION:
+                    case ChatItemKeys.NOTIFICATION_ACTION:
                         //Cancel ongoing notifications for this user
                         Log.e(TAG, "Cancelling notification " + senderId.hashCode());
                         nmc.cancel(senderId.hashCode());
                         break;
-                    case Actions.NEW_MESSAGE_ARRIVED:
+                    case ChatItemKeys.NEW_MESSAGE_ARRIVED:
                         //Fire up intent to notify
                         notifyOfReadStatus();
                         break;
@@ -275,8 +274,8 @@ public class ChatActivity extends BaseActivity {
         chatsRV.setAdapter(chatMsgAdapter);
 
         final IntentFilter intf = new IntentFilter();
-        intf.addAction(Actions.NOTIFICATION_ACTION);
-        intf.addAction(Actions.NEW_MESSAGE_ARRIVED);
+        intf.addAction(ChatItemKeys.NOTIFICATION_ACTION);
+        intf.addAction(ChatItemKeys.NEW_MESSAGE_ARRIVED);
         registerReceiver(newMessageReceiver, intf);
 
         //TODO improve this

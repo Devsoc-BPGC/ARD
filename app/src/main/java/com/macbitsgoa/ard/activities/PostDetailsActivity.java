@@ -5,6 +5,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
@@ -52,11 +53,14 @@ public class PostDetailsActivity extends BaseActivity {
     RecyclerView recyclerView;
 
     /**
-     * Textview to display when there is an error.
+     * Framelayout to display when there is an error.
      */
-    @BindView(R.id.tv_content_post_details_empty)
-    TextView emptyTextView;
+    @BindView(R.id.frameLayout_content_post_details_empty)
+    FrameLayout frameLayout;
 
+    /**
+     * Items to display.
+     */
     private List<TypeItem> postItems;
 
     @Override
@@ -66,9 +70,12 @@ public class PostDetailsActivity extends BaseActivity {
         ButterKnife.bind(this);
 
         //https://developer.android.com/topic/libraries/support-library/preview/emoji-compat.html
+        //If opening intent is null, we don't have data to show
+        //exit this activity
+        //If intent is not null but does not extras to decide what data is to be shown, exit again
         if (getIntent() == null
                 || !(getIntent().hasExtra(HomeItemKeys.KEY)
-                || getIntent().hasExtra("annItem"))) {
+                || getIntent().hasExtra(AnnItemKeys.SECONDARY_KEY))) {
             finish();
         }
 
@@ -82,26 +89,36 @@ public class PostDetailsActivity extends BaseActivity {
         String key = getIntent().getStringExtra(HomeItemKeys.KEY);
 
         if (key == null) {
-            //Key field is same in both and extra chars are required to separate
-            key = getIntent().getStringExtra("annItem");
+            //KEY fields are same in both classes and extra chars are required to differentiate
+            key = getIntent().getStringExtra(AnnItemKeys.SECONDARY_KEY);
             postItems = handleAnnItem(key);
         } else {
             postItems = handleHomeItem(key);
         }
         final HomeAdapter homeAdapter = new HomeAdapter(postItems, this);
         recyclerView.setAdapter(homeAdapter);
-
     }
 
+    /**
+     * Method to take over if key is of HomeItem class.
+     * @param key Homeitem key to search for
+     * @return {@link TypeItem} list to display data.
+     */
     private List<TypeItem> handleHomeItem(final String key) {
         //Atmost 1 will be the size of this list
-        final HomeItem post = database.where(HomeItem.class).equalTo(HomeItemKeys.KEY, key)
+        final HomeItem post = database
+                .where(HomeItem.class)
+                .equalTo(HomeItemKeys.KEY, key)
                 .findFirst();
         final List<TypeItem> pItems = new ArrayList<>();
 
         if (post == null) {
-            emptyTextView.setVisibility(View.VISIBLE);
+            frameLayout.addView(View.inflate(this, R.layout.frame_error, null));
+            frameLayout.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
         } else {
+            frameLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
 
             int i = 0;
             int j = 0;
@@ -133,8 +150,12 @@ public class PostDetailsActivity extends BaseActivity {
                 .findFirst();
         final List<TypeItem> pItems = new ArrayList<>();
         if (ai == null) {
-            emptyTextView.setVisibility(View.VISIBLE);
+            frameLayout.addView(View.inflate(this, R.layout.frame_error, null));
+            frameLayout.setVisibility(View.VISIBLE);
+            recyclerView.setVisibility(View.GONE);
         } else {
+            frameLayout.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
             pItems.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
         }
         return pItems;

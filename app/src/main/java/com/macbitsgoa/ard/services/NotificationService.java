@@ -16,13 +16,13 @@ import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.activities.ChatActivity;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
+import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
-import com.macbitsgoa.ard.utils.Actions;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -223,7 +223,7 @@ public class NotificationService extends BaseIntentService {
                 }
             } else nmc.notify(ci.getId().hashCode(), builder.build());
 
-            final Intent notificationBC = new Intent(Actions.NOTIFICATION_ACTION);
+            final Intent notificationBC = new Intent(ChatItemKeys.NOTIFICATION_ACTION);
             notificationBC.putExtra(MessageItemKeys.SENDER_ID, ci.getId());
             sendBroadcast(notificationBC);
         }
