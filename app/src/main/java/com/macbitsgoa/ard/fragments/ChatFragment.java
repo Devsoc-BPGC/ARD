@@ -21,6 +21,7 @@ import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
+import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.SendService;
@@ -121,12 +122,12 @@ public class ChatFragment extends BaseFragment {
         chats = database.where(ChatsItem.class)
                 .findAllSorted("update", Sort.DESCENDING);
 
+        deleteEmptyChats();
         if (chats.size() == 0) {
             emptyListTV.setVisibility(View.VISIBLE);
         } else {
             emptyListTV.setVisibility(View.GONE);
         }
-        deleteEmptyChats();
 
         chatsAdapter = new ChatsAdapter(chats, getContext());
 
@@ -147,7 +148,13 @@ public class ChatFragment extends BaseFragment {
             final RealmList<ChatsItem> allChats = new RealmList<>();
             allChats.addAll(r.where(ChatsItem.class).findAll());
             for (final ChatsItem cItem : allChats) {
-                if (r.where(MessageItem.class).equalTo(MessageItemKeys.SENDER_ID, cItem.getId())
+                if (r
+                        .where(MessageItem.class)
+                        .equalTo(MessageItemKeys.SENDER_ID, cItem.getId())
+                        .findAll().isEmpty()
+                        && r
+                        .where(DocumentItem.class)
+                        .equalTo(MessageItemKeys.SENDER_ID, cItem.getId())
                         .findAll().isEmpty())
                     cItem.deleteFromRealm();
             }

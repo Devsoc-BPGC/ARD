@@ -3,14 +3,16 @@ package com.macbitsgoa.ard.services;
 import android.content.Intent;
 import android.net.Uri;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.DocumentItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
-import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.types.MessageType;
 import com.macbitsgoa.ard.utils.AHC;
@@ -54,6 +56,12 @@ public class SendDocumentService extends BaseIntentService {
                 + messageData.hashCode();
     }
 
+    /**
+     * Method to upload document to firebase and prepare its url.
+     *
+     * @param data       Uri to save on firebase.
+     * @param receiverId receiver's id.
+     */
     private void sendDoucment(final Uri data, final String receiverId) {
         final String messageId = getMessageId(data.getPath());
         StorageReference sRef = getStorageRef().child(getUser().getUid()).child(receiverId).child(messageId);
@@ -63,13 +71,19 @@ public class SendDocumentService extends BaseIntentService {
             // Handle unsuccessful uploads
         }).addOnSuccessListener(taskSnapshot -> {
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
+            Toast.makeText(this, "Document uploaded on server. Sending to user", Toast.LENGTH_SHORT).show();
             Uri downloadUrl = taskSnapshot.getDownloadUrl();
             sendDocument(downloadUrl.toString(), data, receiverId);
+        }).addOnProgressListener(taskSnapshot -> {
+            if (taskSnapshot.getBytesTransferred() != 0)
+                Toast.makeText(SendDocumentService.this,
+                        taskSnapshot.getBytesTransferred()
+                                + " bytes uploaded", Toast.LENGTH_SHORT).show();
         });
     }
 
     /**
-     * Method to create a temporary {@link MessageItem} object.
+     * Method to create a temporary {@link DocumentItem} object.
      *
      * @param firebaseUrl url in firebase.
      * @param localUri    Uri of local file.
@@ -81,18 +95,19 @@ public class SendDocumentService extends BaseIntentService {
         final Date messageTime = Calendar.getInstance().getTime();
         final String messageId = getMessageId(firebaseUrl);
 
-        final MessageItem mi = new MessageItem();
-        mi.setMessageId(messageId);
-        mi.setMessageRcvd(false);
-        mi.setMessageTime(messageTime);
-        mi.setMessageRcvdTime(Calendar.getInstance().getTime());
-        mi.setSenderId(receiverId);
-        mi.setMessageStatus(MessageStatusType.MSG_WAIT);
-        mi.setMessageData(firebaseUrl);
-        mi.setMessageType(MessageType.DOCUMENT);
-        mi.setMimeType(AHC.getMimeType(this, localUri));
-        mi.setLocalUri(localUri.toString());
-        sendDocument(mi);
+        final DocumentItem dItem = new DocumentItem();
+        dItem.setId(messageId);
+        dItem.setReceived(false);
+        dItem.setActualTime(messageTime);
+        dItem.setRcvdSentTime(Calendar.getInstance().getTime());
+        dItem.setSenderId(receiverId);
+        dItem.setStatus(MessageStatusType.MSG_WAIT);
+        dItem.setFirebaseUrl(firebaseUrl);
+        dItem.setMimeType(AHC.getMimeType(this, localUri));
+        dItem.setLocalUri(localUri.toString());
+        dItem.setThumbnailUrl("http://pngimages.net/sites/default/files/document-png-image-65553.png");
+
+        sendDocument(dItem);
     }
 
     /**
@@ -100,9 +115,9 @@ public class SendDocumentService extends BaseIntentService {
      * any unsent messages.
      */
     private void sendAll() {
-        final RealmList<MessageItem> notSentMessages = new RealmList<>();
+        final RealmList<DocumentItem> notSentMessages = new RealmList<>();
         Realm database = Realm.getDefaultInstance();
-        notSentMessages.addAll(database.where(MessageItem.class)
+        notSentMessages.addAll(database.where(DocumentItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_WAIT)
                 .equalTo(MessageItemKeys.MESSAGE_TYPE, MessageType.DOCUMENT)
                 .findAll());
@@ -113,33 +128,30 @@ public class SendDocumentService extends BaseIntentService {
     }
 
     /**
-     * Sends a single message using information from the {@link MessageItem} object.
+     * Sends a single message using information from the {@link DocumentItem} object.
      *
-     * @param mItem message item object to extact information from.
+     * @param documentItem message item object to extact information from.
      */
-    private void sendDocument(final MessageItem mItem) {
-        final String messageId = mItem.getMessageId();
-        final String receiverId = mItem.getSenderId();
-        final String latestMessage = "[Document]";
-        final Date messageTime = mItem.getMessageTime();
+    private void sendDocument(final DocumentItem documentItem) {
+        final String messageId = documentItem.getId();
+        final String receiverId = documentItem.getSenderId();
+        final String latestMessage = "\uD83D\uDCCE Document";
+        final Date messageTime = documentItem.getActualTime();
 
         final Realm database = Realm.getDefaultInstance();
 
         //First write to local database if not already done so.
         database.executeTransaction(r -> {
-            MessageItem mi = r.where(MessageItem.class)
-                    .equalTo(MessageItemKeys.MESSAGE_ID, messageId).findFirst();
+            DocumentItem mi = r.where(DocumentItem.class)
+                    .equalTo(DocumentItemKeys.ID, messageId).findFirst();
             if (mi == null) {
-                r.copyToRealm(mItem);
-            }
-        });
-
-        database.executeTransaction(r -> {
-            final ChatsItem ci = r.where(ChatsItem.class)
-                    .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
-            if (ci != null) {
-                ci.setLatest(latestMessage);
-                ci.setUpdate(messageTime);
+                r.copyToRealm(documentItem);
+                final ChatsItem ci = r.where(ChatsItem.class)
+                        .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
+                if (ci != null) {
+                    ci.setLatest(latestMessage);
+                    ci.setUpdate(messageTime);
+                }
             }
         });
 
@@ -147,19 +159,19 @@ public class SendDocumentService extends BaseIntentService {
 
         final DatabaseReference sendMessageRef = getRootReference()
                 .child(AHC.FDR_CHAT)
-                .child(mItem.getSenderId())
+                .child(documentItem.getSenderId())
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
 
         if (Log.isLoggable(TAG, Log.DEBUG))
-            Log.d(TAG, "Sending message with id " + mItem.getMessageId());
+            Log.d(TAG, "Sending document with id " + documentItem.getId());
 
-        //Add new message
-        final Map<String, Object> messageMap = new HashMap<>();
-        messageMap.put(MessageItemKeys.FDR_DATA, mItem.getMessageData());
-        messageMap.put(MessageItemKeys.FDR_MIME_TYPE, mItem.getMimeType());
-        messageMap.put(MessageItemKeys.MESSAGE_TYPE, mItem.getMessageType());
-        messageMap.put(MessageItemKeys.FDR_DATE, messageTime);
+        //Add new document
+        final Map<String, Object> documentMap = new HashMap<>();
+        documentMap.put(DocumentItemKeys.FIREBASE_URL, documentItem.getFirebaseUrl());
+        documentMap.put(DocumentItemKeys.MIME_TYPE, documentItem.getMimeType());
+        documentMap.put(DocumentItemKeys.ACTUAL_TIME, documentItem.getActualTime());
+        documentMap.put(DocumentItemKeys.THUMBNAIL_URL, documentItem.getThumbnailUrl());
 
         //Update latest sender information
         final Map<String, Object> senderMap = new HashMap<>();
@@ -169,7 +181,7 @@ public class SendDocumentService extends BaseIntentService {
         senderMap.put(ChatItemKeys.FDR_PHOTO_URL, getUser().getPhotoUrl().toString());
         senderMap.put(ChatItemKeys.FDR_DATE, messageTime);
 
-        sendMessageRef.child(ChatItemKeys.MESSAGES).child(messageId).setValue(messageMap);
+        sendMessageRef.child(ChatItemKeys.FDR_DOCUMENTS).child(messageId).setValue(documentMap);
         sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
 
         database.close();

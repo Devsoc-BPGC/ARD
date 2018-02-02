@@ -8,12 +8,20 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.ChatActivity;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
+import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.utils.AHC;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -43,9 +51,18 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
     public ChatsItem item;
 
     private Context context;
+    DatabaseReference dr;
+    StorageReference sr;
 
     public ChatsViewHolder(View itemView, final Context context) {
         super(itemView);
+        dr = FirebaseDatabase.getInstance().getReference()
+                .child(BuildConfig.BUILD_TYPE)
+                .child(AHC.FDR_CHAT)
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child(ChatItemKeys.PRIVATE_MESSAGES);
+        sr = FirebaseStorage.getInstance().getReference().child(BuildConfig.BUILD_TYPE)
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid());
         ButterKnife.bind(this, itemView);
         this.context = context;
         itemView.setOnClickListener(this);
@@ -63,7 +80,7 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
 
     @Override
     public boolean onLongClick(final View v) {
-        AlertDialog ad = new AlertDialog.Builder(context)
+        new AlertDialog.Builder(context)
                 .setTitle("Select action")
                 .setCancelable(true)
                 .setItems(new String[]{"Delete",}, (dialog, which) -> {
@@ -71,8 +88,11 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
                     database.executeTransaction(realm -> {
                         RealmResults<MessageItem> mis = realm.where(MessageItem.class).equalTo(MessageItemKeys.SENDER_ID, item.getId()).findAll();
                         for (MessageItem mi : mis) mi.deleteFromRealm();
+                        RealmResults<DocumentItem> dis = realm.where(DocumentItem.class).equalTo(MessageItemKeys.SENDER_ID, item.getId()).findAll();
+                        for (DocumentItem di : dis) di.deleteFromRealm();
                         ChatsItem ci = realm.where(ChatsItem.class).equalTo(ChatItemKeys.DB_ID, item.getId()).findFirst();
                         if (ci == null) return;
+                        dr.child(item.getId()).removeValue();
                         ci.deleteFromRealm();
                     });
                     database.close();

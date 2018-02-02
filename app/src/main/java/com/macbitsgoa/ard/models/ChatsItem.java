@@ -22,7 +22,7 @@ public class ChatsItem extends RealmObject {
     public ChatsItem() {
         this.id = null;
         this.name = "";
-        this.latest = "now";
+        this.latest = "";
         this.photoUrl = "";
         this.update = Calendar.getInstance().getTime();
         this.unreadCount = 0;

@@ -18,6 +18,7 @@ import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.models.TypeItem;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -274,8 +275,9 @@ public class AHC {
      * @param type      Integer value to be used as type. {@link TypeItem#type}.
      * @param <T>       Generic object list for additions list.
      */
-    public static <T> void fill(@NonNull final List<TypeItem> list,
+    public static <T> void fill(@Nullable List<TypeItem> list,
                                 @NonNull final List<T> additions, final int type) {
+        if(list == null) list = new ArrayList<>();
         for (final T addition : additions) {
             final TypeItem ti = new TypeItem(addition, type);
             list.add(ti);

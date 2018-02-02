@@ -33,16 +33,23 @@ import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ChatMsgAdapter;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.DocumentItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
+import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendDocumentService;
 import com.macbitsgoa.ard.services.SendService;
+import com.macbitsgoa.ard.types.MessageType;
+import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.CenterCropDrawable;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -110,7 +117,10 @@ public class ChatActivity extends BaseActivity {
 
     public static String senderId = null;
 
-    RealmResults<MessageItem> messages;
+    List<Object> messages;
+
+    RealmResults<DocumentItem> documentMessages;
+    RealmResults<MessageItem> textMessages;
 
     ChatMsgAdapter chatMsgAdapter;
 
@@ -192,6 +202,8 @@ public class ChatActivity extends BaseActivity {
                 .load(getIntent().getStringExtra("photoUrl"))
                 .apply(RequestOptions.circleCropTransform())
                 .into(icon);
+
+        chatsRV.setHasFixedSize(true);
     }
 
     /**
@@ -232,17 +244,22 @@ public class ChatActivity extends BaseActivity {
 
         final LinearLayoutManager llm = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, true);
         chatsRV.setLayoutManager(llm);
-        chatsRV.setHasFixedSize(true);
 
         updateCounts();
-
-        messages = database
+        messages = new ArrayList<>();
+        textMessages = database
                 .where(MessageItem.class)
                 .equalTo(MessageItemKeys.SENDER_ID, senderId)
                 .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
-        messages.addChangeListener((messageItems, changeSet) -> {
+        documentMessages = database
+                .where(DocumentItem.class)
+                .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                .findAllSorted(DocumentItemKeys.RCVD_SENT_TIME, Sort.DESCENDING);
+        fillAndNotify();
+        textMessages.addChangeListener((messageItems, changeSet) -> {
+            fillAndNotify();
             // `null`  means the async query returns the first time.
-            if (changeSet == null) {
+            if (changeSet == null && chatMsgAdapter!=null) {
                 chatMsgAdapter.notifyDataSetChanged();
                 return;
             }
@@ -255,19 +272,21 @@ public class ChatActivity extends BaseActivity {
             for (OrderedCollectionChangeSet.Range range : modifications) {
                 //chatMsgAdapter.notifyItemRangeInserted(range.startIndex, range.length);
             }
-            chatMsgAdapter.notifyDataSetChanged();
             //Cancel any ongoing notification from this user
             nmc.cancel(senderId.hashCode());
 
             //TODO update read status of new messages somewhere
-
-
             if (llm.findFirstCompletelyVisibleItemPosition() < 5) {
                 chatsRV.scrollToPosition(0);
                 rlIcons.setVisibility(View.GONE);
                 updateNumber.setText("0");
                 rlUpdates.setVisibility(View.GONE);
             }
+        });
+        documentMessages.addChangeListener((documentItems, changeSet) -> {
+            fillAndNotify();
+            if(changeSet == null && chatMsgAdapter != null) chatMsgAdapter.notifyDataSetChanged();
+            nmc.cancel(senderId.hashCode());
         });
 
         chatMsgAdapter = new ChatMsgAdapter(messages, this);
@@ -313,12 +332,36 @@ public class ChatActivity extends BaseActivity {
     */
     }
 
+    private void fillAndNotify() {
+        if (messages == null) messages = new ArrayList<>();
+        messages.clear();
+        if (textMessages == null || documentMessages == null) return;
+        int i = 0;
+        int j = 0;
+        while (i < textMessages.size() && j < documentMessages.size()) {
+            if (textMessages.get(i).getMessageRcvdTime().compareTo(documentMessages.get(j).getRcvdSentTime()) <= 0) {
+                messages.add(textMessages.get(i));
+                i++;
+            } else {
+                messages.add(documentMessages.get(j));
+                j++;
+            }
+        }
+
+        for (; i < textMessages.size(); i++)
+            messages.add(textMessages.get(i));
+        for (; j < documentMessages.size(); j++)
+            messages.add(documentMessages.get(j));
+
+    }
+
     @Override
     protected void onStop() {
         visible = false;
         super.onStop();
         unregisterReceiver(newMessageReceiver);
-        messages.removeAllChangeListeners();
+        textMessages.removeAllChangeListeners();
+        documentMessages.removeAllChangeListeners();
         myStatus.removeValue();
     }
 
@@ -392,13 +435,16 @@ public class ChatActivity extends BaseActivity {
             if (resultData != null) {
                 final Uri uri = resultData.getData();
                 Log.i(TAG, "Uri: " + uri.toString());
+                Toast.makeText(this, "File will be uploaded shortly",
+                        Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, SendDocumentService.class);
                 intent.setData(uri);
                 intent.putExtra(MessageItemKeys.RECEIVER_ID, senderId);
                 startService(intent);
             } else {
                 Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();
-                Log.e(TAG, "Error occurred while getting URI of file for upload " + resultData + " and result code " + resultCode);
+                Log.e(TAG, "Error occurred while getting URI of file for upload "
+                        + resultData + " and result code " + resultCode);
             }
         }
     }

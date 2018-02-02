@@ -37,6 +37,9 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
         });
     }
 
+    public void setImage(final String url) {
+        setImage(Uri.parse(url));
+    }
     /**
      * Set image url.
      *

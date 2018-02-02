@@ -9,6 +9,7 @@
 
     <!-- Activity titles -->
     <string name="title_activity_auth">Authenticate</string>
+    <string name="title_activity_document_send">Send</string>
     <string name="title_activity_post">Create</string>
     <string name="title_activity_post_details">Details</string>
     <string name="title_activity_search">Search</string>

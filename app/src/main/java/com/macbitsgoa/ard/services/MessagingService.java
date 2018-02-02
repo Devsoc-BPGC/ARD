@@ -206,7 +206,7 @@ public class MessagingService extends BaseIntentService {
                         java.lang.NullPointerException: Attempt to invoke virtual method 'long java.util.Date.getTime()' on a null object reference
                         at com.macbitsgoa.ard.services.MessagingService$1.onDataChange(MessagingService.java:204)
                         */
-                        if (false && update.getTime() >= ci.getUpdate().getTime()) {
+                        if (update!=null && update.getTime() >= ci.getUpdate().getTime()) {
                             ci.setLatest(latest);
                             ci.setUpdate(update);
                         }
