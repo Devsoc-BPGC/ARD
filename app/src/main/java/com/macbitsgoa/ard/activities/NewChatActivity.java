@@ -18,9 +18,11 @@ import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.models.UserItem;
 import com.macbitsgoa.ard.utils.AHC;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.RealmResults;
 
 /**
  * Activity to show users to talk to.
@@ -50,8 +52,6 @@ public class NewChatActivity extends BaseActivity {
     private final DatabaseReference adminsRef = getRootReference().child(AHC.FDR_ADMINS);
     private final DatabaseReference usersRef = getRootReference().child(AHC.FDR_USERS);
 
-    private NewChatAdapter adapter;
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,37 +61,10 @@ public class NewChatActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        final RealmResults<UserItem> adminsList = database.where(UserItem.class)
-                .equalTo(UserItemKeys.ADMIN, true)
-                .notEqualTo(UserItemKeys.UID, getUser().getUid())
-                .findAllSorted(UserItemKeys.NAME);
-        final RealmResults<UserItem> usersList = database.where(UserItem.class)
-                .equalTo(UserItemKeys.ADMIN, false)
-                .notEqualTo(UserItemKeys.UID, getUser().getUid())
-                .findAllSorted(UserItemKeys.NAME);
+        List<UserItem> adminsList = new ArrayList<>();
+        List<UserItem> usersList = new ArrayList<>();
 
-        final UserItem thisUser = database.where(UserItem.class)
-                .equalTo(UserItemKeys.UID, getUser().getUid()).findFirst();
-
-        boolean isAdmin = false;
-        if (thisUser != null && thisUser.isAdmin())
-            isAdmin = true;
-
-        adminsList.addChangeListener(adminUsers -> {
-            adapter.setAdmin(true);
-            adapter.notifyDataSetChanged();
-            progressBar.setVisibility(View.GONE);
-        });
-        usersList.addChangeListener(userItems -> {
-            adapter.notifyDataSetChanged();
-            if (adapter.getItemCount() > 0) {
-                progressBar.setIndeterminate(false);
-                progressBar.setProgress(100);
-                progressBar.setVisibility(View.GONE);
-            }
-        });
-        adapter = new NewChatAdapter(adminsList, usersList, this);
-        adapter.setAdmin(isAdmin);
+        NewChatAdapter adapter = new NewChatAdapter(adminsList, usersList, this);
         userRV.setLayoutManager(new LinearLayoutManager(this));
         userRV.setHasFixedSize(true);
         userRV.setAdapter(adapter);
@@ -99,27 +72,26 @@ public class NewChatActivity extends BaseActivity {
         adminsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
+                adminsList.clear();
                 for (final DataSnapshot child : dataSnapshot.getChildren()) {
-                    if (child.getValue() == null) continue;
                     final String uid = child.getKey();
+                    if (uid == null || uid.equals(getUser().getUid())) continue;
                     final String name = child.child(UserItemKeys.NAME).getValue(String.class);
                     final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
                     final String photoUrl = child.child(UserItemKeys.PHOTO_URL)
                             .getValue(String.class);
                     final String desc = child.child(UserItemKeys.DESC).getValue(String.class);
-                    UserItem ui = database
-                            .where(UserItem.class).equalTo(UserItemKeys.UID, uid).findFirst();
-                    database.beginTransaction();
-                    if (ui == null) {
-                        ui = database.createObject(UserItem.class, uid);
-                    }
-                    ui.setAdmin(true);
-                    ui.setDesc(desc == null ? "Admin" : desc);
-                    ui.setEmail(email == null ? "" : email);
-                    ui.setName(name == null ? "" : name);
-                    ui.setPhotoUrl(photoUrl == null ? "" : photoUrl);
-                    database.commitTransaction();
+                    UserItem ui = new UserItem(uid,
+                            name,
+                            email,
+                            photoUrl,
+                            desc,
+                            true);
+                    adminsList.add(ui);
                 }
+                AHC.logd(TAG, "admins are " + adminsList.toString());
+                adapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -135,27 +107,29 @@ public class NewChatActivity extends BaseActivity {
         usersRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-
+                usersList.clear();
                 for (final DataSnapshot child : dataSnapshot.getChildren()) {
                     if (child.getValue() == null) continue;
                     final String uid = child.getKey();
+                    if (uid == null || uid.equals(getUser().getUid())) continue;
                     final String name = child.child(UserItemKeys.NAME).getValue(String.class);
                     final String email = child.child(UserItemKeys.EMAIL).getValue(String.class);
                     final String photoUrl = child.child(UserItemKeys.PHOTO_URL)
                             .getValue(String.class);
-                    UserItem ui = database
-                            .where(UserItem.class).equalTo(UserItemKeys.UID, uid).findFirst();
-                    database.beginTransaction();
-                    if (ui == null) {
-                        ui = database.createObject(UserItem.class, uid);
-                        ui.setAdmin(false);
-                        ui.setDesc("User");
-                    }
-                    ui.setEmail(email == null ? "" : email);
-                    ui.setName(name == null ? "" : name);
-                    ui.setPhotoUrl(photoUrl == null ? "" : photoUrl);
-                    database.commitTransaction();
+                    UserItem ui = new UserItem(uid,
+                            name,
+                            email,
+                            photoUrl,
+                            "User",
+                            false);
+                    usersList.add(ui);
                 }
+                AHC.logd(TAG, "users are " + usersList.toString());
+                if (usersList.removeAll(adminsList))
+                    AHC.logd(TAG, "final users are " + usersList.toString());
+                else AHC.logd(TAG, "no admins were removed from userlist");
+                adapter.notifyDataSetChanged();
+                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override

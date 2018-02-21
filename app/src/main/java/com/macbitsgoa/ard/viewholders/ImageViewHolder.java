@@ -50,7 +50,7 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
         Glide.with(context)
                 .load(uri)
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .apply(RequestOptions.centerCropTransform())
+                .apply(RequestOptions.fitCenterTransform())
                 .into(imageView);
     }
 

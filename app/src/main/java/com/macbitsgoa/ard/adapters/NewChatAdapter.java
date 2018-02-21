@@ -12,6 +12,8 @@ import com.macbitsgoa.ard.models.UserItem;
 import com.macbitsgoa.ard.viewholders.NewChatViewHolder;
 import com.macbitsgoa.ard.viewholders.TextViewHolder;
 
+import java.util.List;
+
 import io.realm.RealmResults;
 
 /**
@@ -20,8 +22,8 @@ import io.realm.RealmResults;
 
 public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private RealmResults<UserItem> admins;
-    private RealmResults<UserItem> users;
+    private List<UserItem> admins;
+    private List<UserItem> users;
     private Activity context;
 
     /**
@@ -34,18 +36,12 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      */
     private static final int USER = 1;
 
-    private boolean isAdmin = false;
-
-    public NewChatAdapter(final RealmResults<UserItem> admins,
-                          final RealmResults<UserItem> users,
+    public NewChatAdapter(final List<UserItem> admins,
+                          final List<UserItem> users,
                           final Activity context) {
         this.admins = admins;
         this.users = users;
         this.context = context;
-    }
-
-    public void setAdmin(final boolean admin) {
-        isAdmin = admin;
     }
 
     @Override
@@ -75,7 +71,7 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemCount() {
         int size = 1 + admins.size();
-        size += isAdmin && !users.isEmpty()? 1 + users.size() : 0;
+        size += !users.isEmpty()? 1 + users.size() : 0;
         return size;
     }
 

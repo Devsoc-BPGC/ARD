@@ -209,7 +209,7 @@ public class HomeService extends BaseIntentService {
                 try {
                     date = dataSnapshot.child(AnnItemKeys.DATE).getValue(Date.class);
                 } catch (DatabaseException e) {
-                    Log.e(TAG, e.toString());
+                    AHC.logd(TAG, e.toString());
                     return;
                 }
                 final String author = dataSnapshot.child(AnnItemKeys.AUTHOR).getValue(String.class);

@@ -1,5 +1,8 @@
 package com.macbitsgoa.ard.models;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.firebase.auth.FirebaseUser;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -46,16 +49,22 @@ public class UserItem extends RealmObject {
     private boolean admin;
 
     public UserItem() {
+        this.uid = "";
+        email = "";
+        photoUrl = "";
+        name = "";
         desc = "";
+        admin = false;
     }
 
-    public UserItem(String uid, String name, String email, String photoUrl, String desc, boolean admin) {
+    public UserItem(@NonNull String uid, @Nullable String name, @Nullable String email,
+                    @Nullable String photoUrl, @Nullable String desc, boolean admin) {
         this.uid = uid;
-        this.name = name;
-        this.email = email;
-        this.photoUrl = photoUrl;
-        this.desc = desc;
-        this.admin = admin;
+        setName(name);
+        setEmail(email);
+        setPhotoUrl(photoUrl);
+        setDesc(desc);
+        setAdmin(admin);
     }
 
     public boolean isAdmin() {
@@ -66,49 +75,65 @@ public class UserItem extends RealmObject {
         this.admin = admin;
     }
 
+    @NonNull
     public String getUid() {
         return uid;
     }
 
     public void setUid(String uid) {
-        this.uid = uid;
+        this.uid = uid == null ? "" : uid;
     }
 
+    @NonNull
     public String getDesc() {
         return desc;
     }
 
     public void setDesc(String desc) {
-        this.desc = desc;
+        this.desc = desc == null ? "" : desc;
     }
 
+    @NonNull
     public String getName() {
         return name;
     }
 
     public void setName(final String name) {
-        this.name = name;
+        this.name = name == null ? "" : name;
     }
 
+    @NonNull
     public String getEmail() {
         return email;
     }
 
     public void setEmail(final String email) {
-        this.email = email;
+        this.email = email == null ? "" : email;
     }
 
+    @NonNull
     public String getPhotoUrl() {
         return photoUrl;
     }
 
-    public void setPhotoUrl(final String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setPhotoUrl(@Nullable final String photoUrl) {
+        this.photoUrl = photoUrl == null ? "" : photoUrl;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof UserItem && ((UserItem) obj).getUid().equals(this.uid);
     }
 
     @Override
     public String toString() {
-        return "name=" + getName() + AHC.SEPARATOR + "email=" + getEmail() + AHC.SEPARATOR + "photoUrl="
-                + getPhotoUrl();
+        return "UserItem{"
+                + "uid='" + uid + '\''
+                + ", name='" + name + '\''
+                + ", email='" + email + '\''
+                + ", photoUrl='" + photoUrl + '\''
+                + ", desc='" + desc + '\''
+                + ", admin=" + admin
+                + '}';
     }
 }

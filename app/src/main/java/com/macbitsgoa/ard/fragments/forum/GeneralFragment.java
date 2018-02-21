@@ -40,7 +40,7 @@ public class GeneralFragment extends BaseFragment {
     /**
      * Section key code.
      */
-    public static final String SECTION = "sectionKey";
+    public static final String SECTION_KEY = "sectionKey";
 
     /**
      * Recyclerview to display faqs.
@@ -75,7 +75,7 @@ public class GeneralFragment extends BaseFragment {
     public static GeneralFragment newInstance(@NonNull final String fragmentId) {
         final GeneralFragment fragment = new GeneralFragment();
         final Bundle args = new Bundle();
-        args.putString(SECTION, fragmentId);
+        args.putString(SECTION_KEY, fragmentId);
         fragment.setArguments(args);
         return fragment;
     }
@@ -96,7 +96,7 @@ public class GeneralFragment extends BaseFragment {
         super.onStart();
 
         faqItems = database.where(FaqItem.class)
-                .equalTo("section", getArguments().getString(SECTION)).findAll();
+                .equalTo("section", getArguments().getString(SECTION_KEY)).findAll();
         faqItems.addChangeListener(newResults -> {
             if (forumAdapter != null) {
                 populateAdapter();

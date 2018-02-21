@@ -7,7 +7,6 @@ import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -20,6 +19,7 @@ import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.services.NotificationService;
 import com.macbitsgoa.ard.types.PostType;
+import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,6 +72,7 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
      */
     private RecyclerView.OnItemTouchListener onItemTouchListener;
 
+    //boolean to indicate whether user is in this activity.
     public static boolean isActive = false;
 
     @Override
@@ -94,27 +95,27 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
         nmc.cancel(NotificationService.ANN_NOTIF_CODE);
 
         //Generate data
-        final List<TypeItem> data = new ArrayList<>();
+        final List<TypeItem> annItemsList = new ArrayList<>();
         anns = database.where(AnnItem.class)
                 .findAllSorted(AnnItemKeys.DATE, Sort.DESCENDING);
         for (final AnnItem ai : anns) {
-            data.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
+            annItemsList.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
         }
 
-        if (data.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+        if (annItemsList.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
         else emptyListTV.setVisibility(View.INVISIBLE);
 
         //Init adapter
-        final HomeAdapter homeAdapter = new HomeAdapter(data, this);
+        final HomeAdapter homeAdapter = new HomeAdapter(annItemsList, this);
 
         //Setup on change listener
         anns.addChangeListener(annItems -> {
-            data.clear();
+            annItemsList.clear();
             nmc.cancel(NotificationService.ANN_NOTIF_CODE);
             for (final AnnItem ais : annItems) {
-                data.add(new TypeItem(ais, PostType.ANNOUNCEMENT));
+                annItemsList.add(new TypeItem(ais, PostType.ANNOUNCEMENT));
             }
-            if (data.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+            if (annItemsList.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
             else emptyListTV.setVisibility(View.INVISIBLE);
             homeAdapter.notifyDataSetChanged();
         });
@@ -160,7 +161,7 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
     public void onItemClick(final View view, final int position) {
         final AnnItem ai = anns.get(position);
         if (ai.getKey() == null) {
-            Log.e(TAG, "Key was null, was item deleted?");
+            AHC.logd(TAG, "Key was null, was item deleted?");
             return;
         }
         final Intent intent = new Intent(this, PostDetailsActivity.class);

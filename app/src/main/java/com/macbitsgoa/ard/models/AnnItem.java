@@ -41,6 +41,11 @@ public class AnnItem extends RealmObject {
     private boolean read;
 
     /**
+     * Variable to store info of whether this announcement was sent as notification or not.
+     */
+    private boolean notified;
+
+    /**
      * Date of original posting.
      * Update date can also be added later.
      */
@@ -51,15 +56,18 @@ public class AnnItem extends RealmObject {
         data = "";
         author = "Admin";
         date = Calendar.getInstance().getTime();
+        read = false;
+        notified = false;
     }
 
 
     public AnnItem(final String key, @NonNull final String data, @NonNull final String author,
-                   final boolean read, @NonNull final Date date) {
+                   final boolean read, final boolean notified, @NonNull final Date date) {
         this.key = key;
         this.data = data;
         this.author = author;
         this.read = read;
+        this.notified = notified;
         this.date = date;
     }
 
@@ -106,6 +114,14 @@ public class AnnItem extends RealmObject {
         this.read = read;
     }
 
+    public boolean isNotified() {
+        return notified;
+    }
+
+    public void setNotified(boolean notified) {
+        this.notified = notified;
+    }
+
     @Override
     public String toString() {
         return "AnnItem{"
@@ -113,6 +129,7 @@ public class AnnItem extends RealmObject {
                 + ", data='" + data + '\''
                 + ", author='" + author + '\''
                 + ", read=" + read
+                + ", notified=" + notified
                 + ", date=" + date
                 + '}';
     }

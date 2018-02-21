@@ -154,8 +154,6 @@ public class ForumFragment extends BaseFragment {
                     .size() != 0)
                 viewPagerAdapter.addFragment(gf, fragmentTitle);
         }
-        viewPager.setOffscreenPageLimit(viewPagerAdapter.getCount() - 1);
-
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
 
