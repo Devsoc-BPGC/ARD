@@ -24,13 +24,20 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     private RealmResults<UserItem> users;
     private Activity context;
 
+    /**
+     * Used for title "Admin" and "User"
+     */
     private static final int TEXT = 0;
+    /**
+     * This user is not to be confused with users/admins.
+     * It is a key pointing to the fact that current item is a user, whether admin or not.
+     */
     private static final int USER = 1;
 
-    boolean isAdmin = false;
+    private boolean isAdmin = false;
 
     public NewChatAdapter(final RealmResults<UserItem> admins,
-                          @Nullable final RealmResults<UserItem> users,
+                          final RealmResults<UserItem> users,
                           final Activity context) {
         this.admins = admins;
         this.users = users;
@@ -54,8 +61,8 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         if (generalHolder.getItemViewType() == TEXT) {
             final TextViewHolder holder = (TextViewHolder) generalHolder;
             if (position == admins.size() + 1)
-                holder.setText("User(s)");
-            else holder.setText("Admin(s)");
+                holder.setText("Users");
+            else holder.setText("Admins");
         } else {
             final NewChatViewHolder holder = (NewChatViewHolder) generalHolder;
             UserItem ui;
@@ -68,7 +75,7 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemCount() {
         int size = 1 + admins.size();
-        size += isAdmin ? 1 + users.size() : 0;
+        size += isAdmin && !users.isEmpty()? 1 + users.size() : 0;
         return size;
     }
 

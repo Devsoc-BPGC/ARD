@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -21,7 +22,19 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.realm.RealmResults;
 
+/**
+ * Activity to show users to talk to.
+ * Database rules prevent non admin users to read other users name/details.
+ *
+ * @author Vikramaditya Kukreja
+ * @author Rushikesh Jogdand
+ */
 public class NewChatActivity extends BaseActivity {
+
+    /**
+     * Tag for this class.
+     */
+    public static final String TAG = NewChatActivity.class.getSimpleName();
 
     //----------------------------------------------------------------------------------------------
     @BindView(R.id.pb_activity_new_chat)
@@ -83,8 +96,6 @@ public class NewChatActivity extends BaseActivity {
         userRV.setHasFixedSize(true);
         userRV.setAdapter(adapter);
 
-        //TODO normal users shouldn't be able to see other non admins
-
         adminsRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
@@ -103,7 +114,7 @@ public class NewChatActivity extends BaseActivity {
                         ui = database.createObject(UserItem.class, uid);
                     }
                     ui.setAdmin(true);
-                    ui.setDesc(desc == null ? "" : desc);
+                    ui.setDesc(desc == null ? "Admin" : desc);
                     ui.setEmail(email == null ? "" : email);
                     ui.setName(name == null ? "" : name);
                     ui.setPhotoUrl(photoUrl == null ? "" : photoUrl);
@@ -113,7 +124,12 @@ public class NewChatActivity extends BaseActivity {
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
-
+                AHC.logd(TAG, "Database error for admins in "
+                        + NewChatActivity.class.getSimpleName());
+                AHC.logd(TAG, databaseError.toString());
+                Toast.makeText(NewChatActivity.this,
+                        "Could not get admin data. Try again later!",
+                        Toast.LENGTH_SHORT).show();
             }
         });
         usersRef.addValueEventListener(new ValueEventListener() {
@@ -133,8 +149,8 @@ public class NewChatActivity extends BaseActivity {
                     if (ui == null) {
                         ui = database.createObject(UserItem.class, uid);
                         ui.setAdmin(false);
+                        ui.setDesc("User");
                     }
-                    ui.setDesc("");
                     ui.setEmail(email == null ? "" : email);
                     ui.setName(name == null ? "" : name);
                     ui.setPhotoUrl(photoUrl == null ? "" : photoUrl);
@@ -144,7 +160,9 @@ public class NewChatActivity extends BaseActivity {
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
-
+                AHC.logd(TAG, "Database error for users in "
+                        + NewChatActivity.class.getSimpleName());
+                AHC.logd(TAG, databaseError.toString());
             }
         });
     }

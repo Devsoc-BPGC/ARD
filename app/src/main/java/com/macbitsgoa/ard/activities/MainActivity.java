@@ -19,6 +19,7 @@ import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.interfaces.ForumFragmentListener;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.services.MessagingService;
+import com.macbitsgoa.ard.types.MainActivityType;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,19 +45,12 @@ public class MainActivity extends BaseActivity
     BottomNavigationView bottomNavigationView;
 
     /**
-     * MainActivity Sections.
-     */
-    enum MaSection {
-        FAQ, HOME, CHAT;
-    }
-
-    /**
-     * Key {@link MainActivity.MaSection}
+     * Key {@link MainActivityType}
      * Value : Access order (lower is more recent).
      */
-    HashMap<MaSection, Integer> sectionsHistory = new HashMap<>();
+    HashMap<Integer, Integer> sectionsHistory = new HashMap<>();
 
-    private static MaSection currentSection = MaSection.HOME;
+    private static int currentSection = MainActivityType.HOME;
 
     /**
      * Fragment manager used to handle the 3 fragments.
@@ -119,8 +113,8 @@ public class MainActivity extends BaseActivity
 
         launchFragment(currentSection);
         final int menuId;
-        if (currentSection == MaSection.FAQ) menuId = R.id.bottom_nav_forum;
-        else if (currentSection == MaSection.HOME) menuId = R.id.bottom_nav_home;
+        if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
+        else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
         else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
@@ -137,18 +131,18 @@ public class MainActivity extends BaseActivity
         final int id = item.getItemId();
 
         if (id == R.id.bottom_nav_forum) {
-            launchFragment(MaSection.FAQ);
+            launchFragment(MainActivityType.FORUM);
         } else if (id == R.id.bottom_nav_home) {
-            launchFragment(MaSection.HOME);
+            launchFragment(MainActivityType.HOME);
             homeFragment.scrollToTop();
         } else {
-            launchFragment(MaSection.CHAT);
+            launchFragment(MainActivityType.CHAT);
         }
         return true;
     }
 
-    private void launchFragment(@NonNull MaSection section) {
-        for (Map.Entry<MaSection, Integer> entry : sectionsHistory.entrySet()) {
+    private void launchFragment(int section) {
+        for (Map.Entry<Integer, Integer> entry : sectionsHistory.entrySet()) {
             entry.setValue(entry.getValue() + 1);
         }
         sectionsHistory.put(currentSection, 0);
@@ -157,8 +151,8 @@ public class MainActivity extends BaseActivity
         sectionsHistory.remove(currentSection);
 
         BaseFragment baseFragment;
-        if (currentSection == MaSection.FAQ) baseFragment = forumFragment;
-        else if (currentSection == MaSection.HOME) baseFragment = homeFragment;
+        if (currentSection == MainActivityType.FORUM) baseFragment = forumFragment;
+        else if (currentSection == MainActivityType.HOME) baseFragment = homeFragment;
         else baseFragment = chatFragment;
         fragmentManager.beginTransaction().replace(R.id.frame_content_main, baseFragment).commit();
     }
@@ -167,31 +161,31 @@ public class MainActivity extends BaseActivity
     public void onBackPressed() {
         if (sectionsHistory.isEmpty()) {
             // Home should be last section before exit.
-            if (currentSection == MaSection.HOME) {
+            if (currentSection == MainActivityType.HOME) {
                 finish();
                 return;
             } else {
-                sectionsHistory.put(MaSection.HOME, 0);
+                sectionsHistory.put(MainActivityType.HOME, 0);
             }
         }
 
-        Map.Entry<MaSection, Integer> e = sectionsHistory.entrySet().iterator().next();
+        Map.Entry<Integer, Integer> e = sectionsHistory.entrySet().iterator().next();
         int minVal = e.getValue();
-        MaSection lastSection = e.getKey();
+        int lastSection = e.getKey();
 
-        for (Map.Entry<MaSection, Integer> entry : sectionsHistory.entrySet()) {
+        for (Map.Entry<Integer, Integer> entry : sectionsHistory.entrySet()) {
             if (entry.getValue() < minVal) {
                 minVal = entry.getValue();
                 lastSection = entry.getKey();
             }
         }
 
-        MaSection staleSection = currentSection;
+        int staleSection = currentSection;
 
         launchFragment(lastSection);
         final int menuId;
-        if (currentSection == MaSection.FAQ) menuId = R.id.bottom_nav_forum;
-        else if (currentSection == MaSection.HOME) menuId = R.id.bottom_nav_home;
+        if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
+        else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
         else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);

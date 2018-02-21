@@ -277,7 +277,7 @@ public class AHC {
      */
     public static <T> void fill(@Nullable List<TypeItem> list,
                                 @NonNull final List<T> additions, final int type) {
-        if(list == null) list = new ArrayList<>();
+        if (list == null) list = new ArrayList<>();
         for (final T addition : additions) {
             final TypeItem ti = new TypeItem(addition, type);
             list.add(ti);
@@ -293,5 +293,17 @@ public class AHC {
      */
     public static String getMimeType(final Context context, final Uri uri) {
         return context.getContentResolver().getType(uri);
+    }
+
+    /**
+     * Void method to print debug logs.
+     *
+     * @param tag     Tag to use for message.
+     * @param message Message to print.
+     */
+    public static void logd(@NonNull final String tag, @NonNull final String message) {
+        if (BuildConfig.DEBUG) {
+            Log.d(tag, message);
+        }
     }
 }

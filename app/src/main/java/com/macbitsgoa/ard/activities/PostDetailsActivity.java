@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
@@ -47,7 +46,7 @@ public class PostDetailsActivity extends BaseActivity {
     Toolbar toolbar;
 
     /**
-     * Recyclerview used to display comments.
+     * Recyclerview used to display post content.
      */
     @BindView(R.id.rv_content_post_details_post)
     RecyclerView recyclerView;
@@ -56,12 +55,7 @@ public class PostDetailsActivity extends BaseActivity {
      * Framelayout to display when there is an error.
      */
     @BindView(R.id.frameLayout_content_post_details_empty)
-    FrameLayout frameLayout;
-
-    /**
-     * Items to display.
-     */
-    private List<TypeItem> postItems;
+    FrameLayout errorLayout;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -88,8 +82,10 @@ public class PostDetailsActivity extends BaseActivity {
 
         String key = getIntent().getStringExtra(HomeItemKeys.KEY);
 
+        List<TypeItem> postItems;
         if (key == null) {
             //KEY fields are same in both classes and extra chars are required to differentiate
+            //if key is null, then it is possible we passed a different key
             key = getIntent().getStringExtra(AnnItemKeys.SECONDARY_KEY);
             postItems = handleAnnItem(key);
         } else {
@@ -101,6 +97,7 @@ public class PostDetailsActivity extends BaseActivity {
 
     /**
      * Method to take over if key is of HomeItem class.
+     *
      * @param key Homeitem key to search for
      * @return {@link TypeItem} list to display data.
      */
@@ -113,11 +110,11 @@ public class PostDetailsActivity extends BaseActivity {
         final List<TypeItem> pItems = new ArrayList<>();
 
         if (post == null) {
-            frameLayout.addView(View.inflate(this, R.layout.frame_error, null));
-            frameLayout.setVisibility(View.VISIBLE);
+            errorLayout.addView(View.inflate(this, R.layout.frame_error, null));
+            errorLayout.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
         } else {
-            frameLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
 
             int i = 0;
@@ -135,7 +132,7 @@ public class PostDetailsActivity extends BaseActivity {
                     j++;
                 }
             }
-
+            //add remaining items if any
             for (; i < texts.size(); i++)
                 pItems.add(new TypeItem(texts.get(i), HomeType.TEXT_ITEM));
             for (; j < images.size(); j++)
@@ -150,11 +147,11 @@ public class PostDetailsActivity extends BaseActivity {
                 .findFirst();
         final List<TypeItem> pItems = new ArrayList<>();
         if (ai == null) {
-            frameLayout.addView(View.inflate(this, R.layout.frame_error, null));
-            frameLayout.setVisibility(View.VISIBLE);
+            errorLayout.addView(View.inflate(this, R.layout.frame_error, null));
+            errorLayout.setVisibility(View.VISIBLE);
             recyclerView.setVisibility(View.GONE);
         } else {
-            frameLayout.setVisibility(View.GONE);
+            errorLayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
             pItems.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
         }

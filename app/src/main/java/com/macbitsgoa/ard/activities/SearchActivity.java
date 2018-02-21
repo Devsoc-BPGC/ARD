@@ -12,7 +12,7 @@ public class SearchActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_activity_search);
+        Toolbar toolbar = findViewById(R.id.toolbar_activity_search);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
