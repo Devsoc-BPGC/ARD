@@ -73,7 +73,7 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
     public void onClick(View v) {
         Intent intent = new Intent(context, ChatActivity.class);
         intent.putExtra("title", item.getName());
-        intent.putExtra("senderId", item.getId());
+        intent.putExtra(MessageItemKeys.OTHER_USER_ID, item.getId());
         intent.putExtra("photoUrl", item.getPhotoUrl());
         context.startActivity(intent);
     }
@@ -86,11 +86,16 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
                 .setItems(new String[]{"Delete",}, (dialog, which) -> {
                     Realm database = Realm.getDefaultInstance();
                     database.executeTransaction(realm -> {
-                        RealmResults<MessageItem> mis = realm.where(MessageItem.class).equalTo(MessageItemKeys.SENDER_ID, item.getId()).findAll();
+                        RealmResults<MessageItem> mis = realm
+                                .where(MessageItem.class)
+                                .equalTo(MessageItemKeys.OTHER_USER_ID, item.getId()).findAll();
                         for (MessageItem mi : mis) mi.deleteFromRealm();
-                        RealmResults<DocumentItem> dis = realm.where(DocumentItem.class).equalTo(MessageItemKeys.SENDER_ID, item.getId()).findAll();
+                        RealmResults<DocumentItem> dis = realm
+                                .where(DocumentItem.class)
+                                .equalTo(MessageItemKeys.OTHER_USER_ID, item.getId()).findAll();
                         for (DocumentItem di : dis) di.deleteFromRealm();
-                        ChatsItem ci = realm.where(ChatsItem.class).equalTo(ChatItemKeys.DB_ID, item.getId()).findFirst();
+                        ChatsItem ci = realm.where(ChatsItem.class)
+                                .equalTo(ChatItemKeys.DB_ID, item.getId()).findFirst();
                         if (ci == null) return;
                         dr.child(item.getId()).removeValue();
                         ci.deleteFromRealm();

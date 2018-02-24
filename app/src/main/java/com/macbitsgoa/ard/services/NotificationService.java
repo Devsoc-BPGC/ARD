@@ -150,13 +150,13 @@ public class NotificationService extends BaseIntentService {
         final RealmResults<MessageItem> unreadMessagesUsers = database.where(MessageItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                 .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
-                .distinct(MessageItemKeys.SENDER_ID);
+                .distinct(MessageItemKeys.OTHER_USER_ID);
 
         final List<ChatsItem> chatsItems = new ArrayList<>();
         for (final MessageItem mi : unreadMessagesUsers) {
             final ChatsItem ci = database
                     .where(ChatsItem.class)
-                    .equalTo("id", mi.getSenderId())
+                    .equalTo(ChatItemKeys.DB_ID, mi.getOtherUserId())
                     .findFirst();
             if (ci == null) continue;
             //TODO handle null case. is it req?
@@ -164,7 +164,7 @@ public class NotificationService extends BaseIntentService {
         }
         for (final ChatsItem ci : chatsItems) {
             final RealmResults<MessageItem> unreadMessages = database.where(MessageItem.class)
-                    .equalTo(MessageItemKeys.SENDER_ID, ci.getId())
+                    .equalTo(MessageItemKeys.OTHER_USER_ID, ci.getId())
                     .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                     .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
                     .findAllSorted(new String[]{"messageRcvdTime", "messageTime"},
@@ -172,7 +172,7 @@ public class NotificationService extends BaseIntentService {
             if (unreadMessages.size() == 0) continue;
             final Intent piIntent = new Intent(this, ChatActivity.class);
             piIntent.putExtra("title", ci.getName());
-            piIntent.putExtra(MessageItemKeys.SENDER_ID, ci.getId());
+            piIntent.putExtra(MessageItemKeys.OTHER_USER_ID, ci.getId());
             piIntent.putExtra("photoUrl", ci.getPhotoUrl());
 
             final PendingIntent pi = PendingIntent
@@ -224,7 +224,7 @@ public class NotificationService extends BaseIntentService {
             } else nmc.notify(ci.getId().hashCode(), builder.build());
 
             final Intent notificationBC = new Intent(ChatItemKeys.NOTIFICATION_ACTION);
-            notificationBC.putExtra(MessageItemKeys.SENDER_ID, ci.getId());
+            notificationBC.putExtra(MessageItemKeys.OTHER_USER_ID, ci.getId());
             sendBroadcast(notificationBC);
         }
     }

@@ -1,14 +1,11 @@
 package com.macbitsgoa.ard.models;
 
-import android.support.annotation.Nullable;
-
-import com.macbitsgoa.ard.types.MessageStatusType;
-
-import java.util.Date;
+import com.macbitsgoa.ard.keys.MessageItemKeys;
 
 import io.realm.RealmObject;
+import io.realm.RealmResults;
+import io.realm.annotations.LinkingObjects;
 import io.realm.annotations.PrimaryKey;
-import io.realm.annotations.Required;
 
 /**
  * Class to represent a file document.
@@ -16,47 +13,55 @@ import io.realm.annotations.Required;
  * @author Vikramadiyta Kukreja
  */
 public class DocumentItem extends RealmObject {
-    @Required
-    private Date actualTime;
-
+    /**
+     * Id of document.
+     */
     @PrimaryKey
     private String id;
 
-    @Nullable
-    private String firebaseUrl;
-
-    @Nullable
-    private String localUri;
-
-    @Nullable
-    private String mimeType;
-
-    private boolean received;
-
-    @Required
-    private Date rcvdSentTime;
-
-    @Required
-    private String senderId;
-
-    private String thumbnailUrl;
+    /**
+     * Url of remote copy.
+     */
+    private String remoteUrl;
 
     /**
-     * 1 of 4 values to indicate the message status.
-     *
-     * @see MessageStatusType#MSG_WAIT
-     * @see MessageStatusType#MSG_SENT
-     * @see MessageStatusType#MSG_RCVD
-     * @see MessageStatusType#MSG_READ
+     * URI of local image as string.
      */
-    private int status;
+    private String localUri;
 
-    public Date getActualTime() {
-        return actualTime;
+    /**
+     * Mime type.
+     */
+    private String mimeType;
+
+    /**
+     * Remote thumbnail url.
+     */
+    private String remoteThumbnailUrl;
+
+    /**
+     * Local thumbnail url.
+     */
+    private String localThumbnailUri;
+
+    /**
+     * Back link to the message owning this document.
+     */
+    @LinkingObjects(MessageItemKeys.DB_DOCUMENTS)
+    private final RealmResults<MessageItem> parentMessages = null;
+
+    public DocumentItem() {
+        remoteThumbnailUrl = "";
     }
 
-    public void setActualTime(Date actualTime) {
-        this.actualTime = actualTime;
+    public DocumentItem(String id, String remoteUrl, String localUri, String mimeType,
+                        String remoteThumbnailUrl, String localThumbnailUri) {
+        this.id = id;
+        this.remoteUrl = remoteUrl;
+        this.localUri = localUri;
+        this.mimeType = mimeType;
+        this.remoteThumbnailUrl = remoteThumbnailUrl;
+        this.localThumbnailUri = localThumbnailUri;
     }
 
     public String getId() {
@@ -67,70 +72,51 @@ public class DocumentItem extends RealmObject {
         this.id = id;
     }
 
-    @Nullable
-    public String getFirebaseUrl() {
-        return firebaseUrl;
+    public String getRemoteUrl() {
+        return remoteUrl;
     }
 
-    public void setFirebaseUrl(@Nullable final String firebaseUrl) {
-        this.firebaseUrl = firebaseUrl;
+    public void setRemoteUrl(String remoteUrl) {
+        this.remoteUrl = remoteUrl;
     }
 
-    @Nullable
     public String getLocalUri() {
         return localUri;
     }
 
-    public void setLocalUri(@Nullable final String localUri) {
+    public void setLocalUri(String localUri) {
         this.localUri = localUri;
     }
 
-    @Nullable
     public String getMimeType() {
         return mimeType;
     }
 
-    public void setMimeType(@Nullable final String mimeType) {
+    public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    public boolean isReceived() {
-        return received;
+    public String getRemoteThumbnailUrl() {
+        return remoteThumbnailUrl;
     }
 
-    public void setReceived(final boolean received) {
-        this.received = received;
+    public void setRemoteThumbnailUrl(String remoteThumbnailUrl) {
+        this.remoteThumbnailUrl = remoteThumbnailUrl;
     }
 
-    public Date getRcvdSentTime() {
-        return rcvdSentTime;
+    public String getLocalThumbnailUri() {
+        return localThumbnailUri;
     }
 
-    public void setRcvdSentTime(final Date rcvdSentTime) {
-        this.rcvdSentTime = rcvdSentTime;
+    public void setLocalThumbnailUri(String localThumbnailUrl) {
+        this.localThumbnailUri = localThumbnailUrl;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public MessageItem getParentMessage() {
+        return parentMessages.get(0);
     }
 
-    public void setSenderId(final String senderId) {
-        this.senderId = senderId;
-    }
-
-    public int getStatus() {
-        return status;
-    }
-
-    public void setStatus(@MessageStatusType.MessageStatus final int status) {
-        this.status = status;
-    }
-
-    public String getThumbnailUrl() {
-        return thumbnailUrl;
-    }
-
-    public void setThumbnailUrl(String thumbnailUrl) {
-        this.thumbnailUrl = thumbnailUrl;
+    public RealmResults<MessageItem> getParentMessages() {
+        return parentMessages;
     }
 }

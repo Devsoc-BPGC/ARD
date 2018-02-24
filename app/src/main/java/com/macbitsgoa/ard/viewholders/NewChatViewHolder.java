@@ -12,6 +12,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.ChatActivity;
+import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.UserItem;
 
 import butterknife.BindView;
@@ -42,7 +43,7 @@ public class NewChatViewHolder extends RecyclerView.ViewHolder {
         itemView.setOnClickListener(v -> {
             final Intent intent = new Intent(activity, ChatActivity.class);
             intent.putExtra("title", ui.getName());
-            intent.putExtra("senderId", ui.getUid());
+            intent.putExtra(MessageItemKeys.OTHER_USER_ID, ui.getUid());
             intent.putExtra("photoUrl", ui.getPhotoUrl());
             activity.startActivity(intent);
             activity.finish();

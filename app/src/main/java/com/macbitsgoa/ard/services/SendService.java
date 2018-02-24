@@ -9,7 +9,6 @@ import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
-import com.macbitsgoa.ard.types.MessageType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
@@ -78,7 +77,7 @@ public class SendService extends BaseIntentService {
         final RealmList<MessageItem> notSentMessages = new RealmList<>();
         notSentMessages.addAll(database.where(MessageItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_WAIT)
-                .equalTo(MessageItemKeys.MESSAGE_TYPE, MessageType.TEXT)
+                .isEmpty(MessageItemKeys.DB_DOCUMENTS)
                 .findAll());
         for (int i = 0; i < notSentMessages.size(); i++) {
             sendMessage(notSentMessages.get(i));
@@ -90,15 +89,12 @@ public class SendService extends BaseIntentService {
      * messages that haven't yet been added to database.
      *
      * @param messageData Message Data to send.
-     * @param receiverId  Receiving user's unique user id.
+     * @param otherUserId  Receiving user's unique user id.
      */
-    private void sendMessage(final String messageData, final String receiverId) {
+    private void sendMessage(final String messageData, final String otherUserId) {
 
         //Get current system time and include this is in message id
-        final Date messageTime = Calendar.getInstance().getTime();
-        final String messageId = "" + messageTime.getTime()
-                + messageTime.hashCode()
-                + messageData.hashCode();
+        final String messageId = AHC.generateUniqueId(messageData);
 
         //Init an empty message item, with defaults loaded.
         final MessageItem mi = new MessageItem();
@@ -106,8 +102,7 @@ public class SendService extends BaseIntentService {
         //As we are sending message, this is false.
         mi.setMessageRcvd(false);
         mi.setMessageData(messageData);
-        //Here sender is always the other user.
-        mi.setSenderId(receiverId);
+        mi.setOtherUserId(otherUserId);
 
         sendMessage(mi);
     }
@@ -120,7 +115,7 @@ public class SendService extends BaseIntentService {
     private void sendMessage(final MessageItem mItem) {
         final String messageId = mItem.getMessageId();
         final String messageData = mItem.getMessageData();
-        final String receiverId = mItem.getSenderId();
+        final String receiverId = mItem.getOtherUserId();
         final String latestMessage = messageData.substring(0, messageData.length() % 50);
         final Date messageTime = mItem.getMessageTime();
 
@@ -134,7 +129,7 @@ public class SendService extends BaseIntentService {
                 mi.setMessageTime(messageTime);
                 mi.setMessageRcvdTime(Calendar.getInstance().getTime());
                 mi.setMessageData(messageData);
-                mi.setSenderId(receiverId);
+                mi.setOtherUserId(receiverId);
                 mi.setMessageStatus(MessageStatusType.MSG_WAIT);
             }
         });
@@ -151,7 +146,7 @@ public class SendService extends BaseIntentService {
 
         final DatabaseReference sendMessageRef = getRootReference()
                 .child(AHC.FDR_CHAT)
-                .child(mItem.getSenderId())
+                .child(mItem.getOtherUserId())
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
 
@@ -170,7 +165,7 @@ public class SendService extends BaseIntentService {
         senderMap.put(ChatItemKeys.FDR_PHOTO_URL, getUser().getPhotoUrl().toString());
         senderMap.put(ChatItemKeys.FDR_DATE, messageTime);
 
-        sendMessageRef.child(ChatItemKeys.MESSAGES).child(messageId).setValue(messageMap);
+        sendMessageRef.child(ChatItemKeys.FDR_MESSAGES).child(messageId).setValue(messageMap);
         sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
 
         Log.e(TAG, "Calling notify service");

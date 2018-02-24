@@ -150,11 +150,11 @@ public class ChatFragment extends BaseFragment {
             for (final ChatsItem cItem : allChats) {
                 if (r
                         .where(MessageItem.class)
-                        .equalTo(MessageItemKeys.SENDER_ID, cItem.getId())
+                        .equalTo(MessageItemKeys.OTHER_USER_ID, cItem.getId())
                         .findAll().isEmpty()
                         && r
                         .where(DocumentItem.class)
-                        .equalTo(MessageItemKeys.SENDER_ID, cItem.getId())
+                        .equalTo(MessageItemKeys.OTHER_USER_ID, cItem.getId())
                         .findAll().isEmpty())
                     cItem.deleteFromRealm();
             }

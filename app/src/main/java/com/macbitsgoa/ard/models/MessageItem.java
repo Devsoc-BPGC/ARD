@@ -1,11 +1,12 @@
 package com.macbitsgoa.ard.models;
 
 import com.macbitsgoa.ard.types.MessageStatusType;
-import com.macbitsgoa.ard.types.MessageType;
+import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
 import java.util.Date;
 
+import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
 import io.realm.annotations.Required;
@@ -45,7 +46,7 @@ public class MessageItem extends RealmObject {
      * Uid of other user. Similar to {@link UserItem#getUid()}.
      */
     @Required
-    private String senderId;
+    private String otherUserId;
 
     /**
      * Actual message time from sender.
@@ -60,33 +61,30 @@ public class MessageItem extends RealmObject {
     private Date messageRcvdTime;
 
     /**
-     * Defines what sort of message it is. Eg. text or document.
-     * One of {@link com.macbitsgoa.ard.types.MessageType}.
+     * List of extras if any, otherwise an empty list.
      */
-    private int messageType;
-
-    private String mimeType;
-    private String localUri;
-
+    private RealmList<DocumentItem> documents;
 
     public MessageItem() {
+        setMessageData(AHC.DOCUMENT_LITERAL);
         setMessageStatus(MessageStatusType.MSG_WAIT);
-        setMessageType(MessageType.TEXT);
         setMessageTime(Calendar.getInstance().getTime());
         setMessageRcvdTime(getMessageTime());
+        setDocuments(new RealmList<>());
+        setMessageRcvd(false);
     }
 
-    public MessageItem(final String messageId, final int messageStatus, final boolean messageRcvd,
-                       final String messageData, final String senderId, final Date messageTime,
-                       final Date messageRcvdTime, final int messageType) {
+    public MessageItem(String messageId, int messageStatus, boolean messageRcvd, String messageData,
+                       String otherUserId, Date messageTime, Date messageRcvdTime,
+                       RealmList<DocumentItem> documents) {
         this.messageId = messageId;
         this.messageStatus = messageStatus;
         this.messageRcvd = messageRcvd;
         this.messageData = messageData;
-        this.senderId = senderId;
+        this.otherUserId = otherUserId;
         this.messageTime = messageTime;
         this.messageRcvdTime = messageRcvdTime;
-        this.messageType = messageType;
+        this.documents = documents;
     }
 
     public String getMessageId() {
@@ -105,12 +103,12 @@ public class MessageItem extends RealmObject {
         this.messageData = messageData;
     }
 
-    public String getSenderId() {
-        return senderId;
+    public String getOtherUserId() {
+        return otherUserId;
     }
 
-    public void setSenderId(final String senderId) {
-        this.senderId = senderId;
+    public void setOtherUserId(final String otherUserId) {
+        this.otherUserId = otherUserId;
     }
 
     public Date getMessageTime() {
@@ -153,43 +151,37 @@ public class MessageItem extends RealmObject {
             this.messageStatus = messageStatus;
     }
 
-    public int getMessageType() {
-        return messageType;
+    public boolean hasAttachments() {
+        return !documents.isEmpty();
     }
 
-    public void setMessageType(int messageType) {
-        this.messageType = messageType;
+    public DocumentItem getDocument() {
+        return documents.get(0);
     }
 
-    public String getMimeType() {
-        return mimeType;
+    public RealmList<DocumentItem> getDocuments() {
+        return documents;
     }
 
-    public void setMimeType(String mimeType) {
-        this.mimeType = mimeType;
+    public void setDocuments(RealmList<DocumentItem> documents) {
+        this.documents = documents;
     }
 
-    public String getLocalUri() {
-        return localUri;
-    }
-
-    public void setLocalUri(String localUri) {
-        this.localUri = localUri;
+    public void addDocument(DocumentItem di) {
+        documents.add(di);
     }
 
     @Override
     public String toString() {
         return "MessageItem{"
-                + "messageId='" + messageId + '\''
+                + "messageId=" + messageId
                 + ", messageStatus=" + messageStatus
                 + ", messageRcvd=" + messageRcvd
-                + ", messageData='" + messageData + '\''
-                + ", senderId='" + senderId + '\''
+                + ", messageData=" + messageData
+                + ", otherUserId=" + otherUserId
                 + ", messageTime=" + messageTime
                 + ", messageRcvdTime=" + messageRcvdTime
-                + ", messageType=" + messageType
-                + ", mimeType=" + mimeType
-                + ", localUri=" + localUri
+                + ", documents=" + documents
                 + '}';
     }
 }

@@ -113,7 +113,7 @@ public class MessagingService extends BaseIntentService {
 
                     final Queue<DataSnapshot> newMessagesQ = new LinkedList<>();
                     for (final DataSnapshot child : newChatDS
-                            .child(ChatItemKeys.MESSAGES)
+                            .child(ChatItemKeys.FDR_MESSAGES)
                             .getChildren()) {
                         newMessagesQ.add(child);
                     }
@@ -137,14 +137,14 @@ public class MessagingService extends BaseIntentService {
 
                         MessageItem mi = database.where(MessageItem.class)
                                 .equalTo(MessageItemKeys.MESSAGE_ID, messageId)
-                                .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                                .equalTo(MessageItemKeys.OTHER_USER_ID, senderId)
                                 .findFirst();
                         database.beginTransaction();
                         if (mi == null) {
                             mi = database.createObject(MessageItem.class, messageId);
                         }
                         mi.setMessageData(messageData);
-                        mi.setSenderId(senderId);
+                        mi.setOtherUserId(senderId);
                         mi.setMessageTime(messageTime);
                         mi.setMessageRcvdTime(Calendar.getInstance().getTime());
                         mi.setMessageRcvd(true);
@@ -156,7 +156,7 @@ public class MessagingService extends BaseIntentService {
                                 .setValue(MessageStatusType.MSG_RCVD);
                         newMessageDS.getRef().removeValue();
                         final Intent broadcastIntent = new Intent(ChatItemKeys.NEW_MESSAGE_ARRIVED);
-                        broadcastIntent.putExtra(MessageItemKeys.SENDER_ID, senderId);
+                        broadcastIntent.putExtra(MessageItemKeys.OTHER_USER_ID, senderId);
                         sendBroadcast(broadcastIntent);
                     }
 
@@ -187,7 +187,7 @@ public class MessagingService extends BaseIntentService {
 
                     final int newMessageCount = database
                             .where(MessageItem.class)
-                            .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                            .equalTo(MessageItemKeys.OTHER_USER_ID, senderId)
                             .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                             .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
                             .findAll().size();
@@ -219,7 +219,7 @@ public class MessagingService extends BaseIntentService {
                     //no new messages from this chat but it is still
                     //lingering in database
                     if (database.where(MessageItem.class)
-                            .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                            .equalTo(MessageItemKeys.OTHER_USER_ID, senderId)
                             .findAll().isEmpty())
                         database.executeTransaction(r -> {
                             r.where(ChatsItem.class)
@@ -228,7 +228,7 @@ public class MessagingService extends BaseIntentService {
                                     .deleteFromRealm();
                         });
 
-                    //dataSnapshot.child(senderId).child(ChatItemKeys.MESSAGES).getRef().removeValue();
+                    //dataSnapshot.child(senderId).child(ChatItemKeys.FDR_MESSAGES).getRef().removeValue();
                     //dataSnapshot.child(senderId).child(ChatItemKeys.MESSAGE_STATUS).getRef().removeValue();
 
                     createNotification();

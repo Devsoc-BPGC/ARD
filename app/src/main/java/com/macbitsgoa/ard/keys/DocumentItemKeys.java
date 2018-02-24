@@ -7,15 +7,15 @@ package com.macbitsgoa.ard.keys;
 public class DocumentItemKeys {
 
     /**
-     * Key pointing to actual time field.
+     * Key pointing to remote url of document.
      */
-    public static final String ACTUAL_TIME = "actualTime";
+    public static final String REMOTE_URL = "remoteUrl";
 
     /**
-     * Key pointing to firebase url of document.
+     * Key pointing to document id.
      */
-    public static final String FIREBASE_URL = "firebaseUrl";
-    public static final String ID = "id";
+    public static final String DOCUMENT_ID = "id";
+
     /**
      * Key pointing to mime type of document.
      */

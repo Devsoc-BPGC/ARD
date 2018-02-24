@@ -51,6 +51,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.realm.OrderedCollectionChangeSet;
+import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -119,10 +120,7 @@ public class ChatActivity extends BaseActivity {
 
     public static String otherUserId = null;
 
-    List<Object> messages;
-
-    RealmResults<DocumentItem> documentMessages;
-    RealmResults<MessageItem> textMessages;
+    RealmResults<MessageItem> messageItems;
 
     ChatMsgAdapter chatMsgAdapter;
 
@@ -137,7 +135,7 @@ public class ChatActivity extends BaseActivity {
         getWindow().setBackgroundDrawable(new CenterCropDrawable(ContextCompat.getDrawable(this, R.drawable.bg_chat_activity)));
         setContentView(R.layout.activity_chat);
 
-        otherUserId = getIntent().getStringExtra(MessageItemKeys.SENDER_ID);
+        otherUserId = getIntent().getStringExtra(MessageItemKeys.OTHER_USER_ID);
         if (otherUserId == null) return;
         theirStatus = onlineStatus.child(otherUserId);
         chatsReference = chatsReference.child(otherUserId)
@@ -158,8 +156,8 @@ public class ChatActivity extends BaseActivity {
                 AHC.logd(TAG, "Received action " + intent.getAction());
                 if (intent == null
                         || intent.getAction() == null
-                        || intent.getStringExtra(MessageItemKeys.SENDER_ID) == null
-                        || !intent.getStringExtra(MessageItemKeys.SENDER_ID).equals(otherUserId)) {
+                        || intent.getStringExtra(MessageItemKeys.OTHER_USER_ID) == null
+                        || !intent.getStringExtra(MessageItemKeys.OTHER_USER_ID).equals(otherUserId)) {
                     return;
                 }
                 switch (intent.getAction()) {
@@ -223,9 +221,8 @@ public class ChatActivity extends BaseActivity {
             ChatsItem chat = r.where(ChatsItem.class)
                     .equalTo(ChatItemKeys.DB_ID, otherUserId).findFirst();
             if (chat == null) {
-                String latestMessage = getLatestMessage(otherUserId);
                 chat = r.createObject(ChatsItem.class, otherUserId);
-                chat.setLatest(latestMessage);
+                chat.setLatest("");
                 chat.setUpdate(null);
                 chat.setName(getIntent().getStringExtra("title"));
                 chat.setPhotoUrl(getIntent().getStringExtra("photoUrl"));
@@ -233,18 +230,6 @@ public class ChatActivity extends BaseActivity {
             chat.setUnreadCount(0);
             notifyOfReadStatus();
         });
-    }
-
-    private String getLatestMessage(String otherUserId) {
-        MessageItem mi = database.where(MessageItem.class)
-                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
-                .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING)
-                .first();
-        if (mi == null) return "";
-        else {
-            if (mi.getMessageType() == MessageType.TEXT) return mi.getMessageData();
-            else return "Document";
-        }
     }
 
     private void notifyOfReadStatus() {
@@ -266,18 +251,11 @@ public class ChatActivity extends BaseActivity {
         chatsRV.setLayoutManager(llm);
 
         updateCounts();
-        messages = new ArrayList<>();
-        textMessages = database
+        messageItems = database
                 .where(MessageItem.class)
-                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
+                .equalTo(MessageItemKeys.OTHER_USER_ID, otherUserId)
                 .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
-        documentMessages = database
-                .where(DocumentItem.class)
-                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
-                .findAllSorted(DocumentItemKeys.RCVD_SENT_TIME, Sort.DESCENDING);
-        fillAndNotify();
-        textMessages.addChangeListener((messageItems, changeSet) -> {
-            fillAndNotify();
+        messageItems.addChangeListener((messageItems, changeSet) -> {
             // `null`  means the async query returns the first time.
             if (changeSet == null && chatMsgAdapter != null) {
                 chatMsgAdapter.notifyDataSetChanged();
@@ -303,42 +281,14 @@ public class ChatActivity extends BaseActivity {
             nmc.cancel(otherUserId.hashCode());
             chatsRV.scrollToPosition(0);
         });
-        documentMessages.addChangeListener((documentItems, changeSet) -> {
-            fillAndNotify();
-            if (changeSet == null && chatMsgAdapter != null) chatMsgAdapter.notifyDataSetChanged();
-            nmc.cancel(otherUserId.hashCode());
-        });
 
-        chatMsgAdapter = new ChatMsgAdapter(messages, this);
+        chatMsgAdapter = new ChatMsgAdapter(messageItems, this);
         chatsRV.setAdapter(chatMsgAdapter);
 
         final IntentFilter intf = new IntentFilter();
         intf.addAction(ChatItemKeys.NOTIFICATION_ACTION);
         intf.addAction(ChatItemKeys.NEW_MESSAGE_ARRIVED);
         registerReceiver(newMessageReceiver, intf);
-    }
-
-    private void fillAndNotify() {
-        if (messages == null) messages = new ArrayList<>();
-        messages.clear();
-        if (textMessages == null || documentMessages == null) return;
-        int i = 0;
-        int j = 0;
-        while (i < textMessages.size() && j < documentMessages.size()) {
-            if (textMessages.get(i).getMessageRcvdTime().compareTo(documentMessages.get(j).getRcvdSentTime()) <= 0) {
-                messages.add(textMessages.get(i));
-                i++;
-            } else {
-                messages.add(documentMessages.get(j));
-                j++;
-            }
-        }
-
-        for (; i < textMessages.size(); i++)
-            messages.add(textMessages.get(i));
-        for (; j < documentMessages.size(); j++)
-            messages.add(documentMessages.get(j));
-
     }
 
     @Override
@@ -353,8 +303,7 @@ public class ChatActivity extends BaseActivity {
         visible = false;
         super.onStop();
         unregisterReceiver(newMessageReceiver);
-        textMessages.removeAllChangeListeners();
-        documentMessages.removeAllChangeListeners();
+        messageItems.removeAllChangeListeners();
         myStatus.removeValue();
     }
 
@@ -416,7 +365,7 @@ public class ChatActivity extends BaseActivity {
                         Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, SendDocumentService.class);
                 intent.setData(uri);
-                intent.putExtra(MessageItemKeys.RECEIVER_ID, otherUserId);
+                intent.putExtra(MessageItemKeys.OTHER_USER_ID, otherUserId);
                 startService(intent);
             } else {
                 Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();

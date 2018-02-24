@@ -5,10 +5,12 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -152,6 +154,11 @@ public class AHC {
      * Action for alarm receiver.
      */
     public static final String ALARM_RECEIVER_ACTION_UPDATE = "ard.action.alarm";
+
+    /**
+     * Default latest message set data as "📎 Document".
+     */
+    public static final String DOCUMENT_LITERAL = "\uD83D\uDCCE Document";
 
     /**
      * Method to get pixel value corresponding to input dp.
@@ -339,5 +346,18 @@ public class AHC {
                 .child(FDR_USERS)
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                 .child("token").setValue(token);
+    }
+
+    /**
+     * Create a unique id with given String data.
+     *
+     * @param data String data to use.
+     * @return String of unique id.
+     */
+    public static String generateUniqueId(final String data) {
+        final Date time = Calendar.getInstance().getTime();
+        return "" + time.getTime()
+                + time.hashCode()
+                + data.hashCode();
     }
 }

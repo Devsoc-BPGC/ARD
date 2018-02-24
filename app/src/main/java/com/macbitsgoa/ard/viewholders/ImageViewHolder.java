@@ -40,17 +40,27 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
     public void setImage(final String url) {
         setImage(Uri.parse(url));
     }
+
     /**
      * Set image url.
      *
      * @param uri URI to set as image.
      */
     public void setImage(final Uri uri) {
+        setImage(uri, RequestOptions.fitCenterTransform());
+    }
+
+    /**
+     * Set image url.
+     *
+     * @param uri URI to set as image.
+     */
+    public void setImage(final Uri uri, RequestOptions rqop) {
         this.uri = uri;
         Glide.with(context)
                 .load(uri)
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .apply(RequestOptions.fitCenterTransform())
+                .apply(rqop)
                 .into(imageView);
     }
 

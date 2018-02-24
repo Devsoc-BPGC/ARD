@@ -1,6 +1,8 @@
 package com.macbitsgoa.ard.services;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
@@ -13,25 +15,25 @@ import com.macbitsgoa.ard.keys.DocumentItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.DocumentItem;
+import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
-import com.macbitsgoa.ard.types.MessageType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
 import io.realm.Realm;
 import io.realm.RealmList;
+import io.realm.Sort;
 
 /**
  * Service to save documents on cloud and use the generated links as message data.
  */
-
 public class SendDocumentService extends BaseIntentService {
 
     public static final String TAG = SendDocumentService.class.getSimpleName();
+    private Uri fileUri;
 
     public SendDocumentService() {
         super(TAG);
@@ -40,74 +42,128 @@ public class SendDocumentService extends BaseIntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
-        if (intent == null || intent.getData() == null || !intent.hasExtra(MessageItemKeys.RECEIVER_ID)) {
+        if (intent == null
+                || intent.getData() == null
+                || !intent.hasExtra(MessageItemKeys.OTHER_USER_ID)) {
             AHC.logd(TAG, "Null intent was passed, sending all unsent documents");
             sendAll();
         } else {
             AHC.logi(TAG, "Sending document " + intent.toString());
-            sendDoucment(intent.getData(), intent.getStringExtra(MessageItemKeys.RECEIVER_ID));
+            saveDocument(intent.getData(), intent.getStringExtra(MessageItemKeys.OTHER_USER_ID));
         }
-    }
-
-    private String getMessageId(final String messageData) {
-        final Date messageTime = Calendar.getInstance().getTime();
-        return "" + messageTime.getTime()
-                + messageTime.hashCode()
-                + messageData.hashCode();
     }
 
     /**
      * Method to upload document to firebase and prepare its url.
      *
-     * @param data       Uri to save on firebase.
-     * @param receiverId receiver's id.
+     * @param data        Uri to save on firebase.
+     * @param otherUserId receiver's id.
      */
-    private void sendDoucment(final Uri data, final String receiverId) {
-        final String messageId = getMessageId(data.getPath());
-        StorageReference sRef = getStorageRef().child(getUser().getUid()).child(receiverId).child(messageId);
+    private void saveDocument(final Uri data, final String otherUserId) {
+        String documentId = AHC.generateUniqueId(data.getPath());
+        String messageId = AHC.generateUniqueId(data.toString());
+        writeToDatabase(data, messageId, documentId, otherUserId);
+        uploadDocument(data, otherUserId, messageId, documentId);
+    }
+
+    /**
+     * Method to upload document to firebase and prepare its url.
+     *
+     * @param data        Uri to save on firebase.
+     * @param otherUserId receiver's id.
+     * @param messageId   parent message id.
+     * @param documentId  document id to use.
+     */
+    private void uploadDocument(Uri data, String otherUserId, String messageId, String documentId) {
+        StorageReference sRef = getStorageRef()
+                .child(getUser().getUid())
+                .child(otherUserId)
+                .child(documentId);
         UploadTask uploadTask = sRef.putFile(data);
         // Register observers to listen for when the download is done or if it fails
         uploadTask.addOnFailureListener(exception -> {
             // Handle unsuccessful uploads
+            Toast.makeText(this,
+                    "Upload failed. Will try again later", Toast.LENGTH_SHORT).show();
         }).addOnSuccessListener(taskSnapshot -> {
-            // taskSnapshot.getMetadata() contains file metadata such as size, content-type, and download URL.
-            Toast.makeText(this, "Document uploaded on server. Sending to user", Toast.LENGTH_SHORT).show();
-            Uri downloadUrl = taskSnapshot.getDownloadUrl();
-            sendDocument(downloadUrl.toString(), data, receiverId);
+            // taskSnapshot.getMetadata() contains file metadata such as size, content-type,
+            // and download URL.
+            Toast.makeText(this,
+                    "Document uploaded on server. Sending to user", Toast.LENGTH_SHORT).show();
+            Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
+            updateDocumentRemoteUrl(downloadUrl.toString(), messageId);
         }).addOnProgressListener(taskSnapshot -> {
             if (taskSnapshot.getBytesTransferred() != 0)
                 Toast.makeText(SendDocumentService.this,
-                        taskSnapshot.getBytesTransferred()
-                                + " bytes uploaded", Toast.LENGTH_SHORT).show();
+                        taskSnapshot.getBytesTransferred()/1000
+                                + " Kbytes uploaded", Toast.LENGTH_SHORT).show();
         });
     }
 
     /**
-     * Method to create a temporary {@link DocumentItem} object.
+     * Save document information in database.
+     *
+     * @param data        Uri string of file
+     * @param messageId   Parent id to use.
+     * @param documentId  Document id.
+     * @param otherUserId Other user info.
+     */
+    private void writeToDatabase(final Uri data, final String messageId,
+                                 final String documentId, String otherUserId) {
+        Realm database = Realm.getDefaultInstance();
+        database.executeTransaction(realm -> {
+            //Generate parent message id
+            //Create document item to be attached to parent message
+            DocumentItem di = realm
+                    .createObject(DocumentItem.class, messageId + documentId);
+            di.setMimeType(AHC.getMimeType(SendDocumentService.this, data));
+            di.setLocalUri(data.toString());
+
+            //Create parent message
+            MessageItem mi = realm.createObject(MessageItem.class, messageId);
+            mi.addDocument(di);
+            mi.setOtherUserId(otherUserId);
+        });
+        database.executeTransaction(realm -> {
+            ChatsItem ci = realm.where(ChatsItem.class).equalTo(ChatItemKeys.DB_ID, otherUserId)
+                    .findFirst();
+            if (ci == null) {
+                ci = realm.createObject(ChatsItem.class, otherUserId);
+                //TODO
+            }
+            ci.setUnreadCount(0);
+            ci.setLatest(AHC.DOCUMENT_LITERAL);
+            //TODO A little late value. Fix this also
+            ci.setUpdate(Calendar.getInstance().getTime());
+        });
+        database.close();
+    }
+
+    /**
+     * Method to update {@link DocumentItem} object's remote url.
      *
      * @param firebaseUrl url in firebase.
-     * @param localUri    Uri of local file.
-     * @param receiverId  Other user's unique id.
+     * @param messageId   unique message id.
      */
-    private void sendDocument(final String firebaseUrl, final Uri localUri, final String receiverId) {
-
-        //Get current system time and include this is in message id
-        final Date messageTime = Calendar.getInstance().getTime();
-        final String messageId = getMessageId(firebaseUrl);
-
-        final DocumentItem dItem = new DocumentItem();
-        dItem.setId(messageId);
-        dItem.setReceived(false);
-        dItem.setActualTime(messageTime);
-        dItem.setRcvdSentTime(Calendar.getInstance().getTime());
-        dItem.setSenderId(receiverId);
-        dItem.setStatus(MessageStatusType.MSG_WAIT);
-        dItem.setFirebaseUrl(firebaseUrl);
-        dItem.setMimeType(AHC.getMimeType(this, localUri));
-        dItem.setLocalUri(localUri.toString());
-        dItem.setThumbnailUrl("http://pngimages.net/sites/default/files/document-png-image-65553.png");
-
-        sendDocument(dItem);
+    private void updateDocumentRemoteUrl(final String firebaseUrl, final String messageId) {
+        Realm database = Realm.getDefaultInstance();
+        database.executeTransaction(realm -> {
+            final DocumentItem dItem = realm.where(MessageItem.class)
+                    .equalTo(MessageItemKeys.MESSAGE_ID, messageId)
+                    .findFirst()
+                    .getDocument();
+            if (dItem == null) {
+                Log.e(TAG, "Document not found. Probable write fail");
+                return;
+            }
+            dItem.setRemoteUrl(firebaseUrl);
+            dItem.getParentMessage().setMessageStatus(MessageStatusType.MSG_SENT);
+        });
+        sendDocument(database
+                .where(MessageItem.class)
+                .equalTo(MessageItemKeys.MESSAGE_ID, messageId)
+                .findFirst());
+        database.close();
     }
 
     /**
@@ -115,12 +171,12 @@ public class SendDocumentService extends BaseIntentService {
      * any unsent messages.
      */
     private void sendAll() {
-        final RealmList<DocumentItem> notSentMessages = new RealmList<>();
+        final RealmList<MessageItem> notSentMessages = new RealmList<>();
         Realm database = Realm.getDefaultInstance();
-        notSentMessages.addAll(database.where(DocumentItem.class)
+        notSentMessages.addAll(database.where(MessageItem.class)
                 .equalTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_WAIT)
-                .equalTo(MessageItemKeys.MESSAGE_TYPE, MessageType.DOCUMENT)
-                .findAll());
+                .isNotEmpty(MessageItemKeys.DB_DOCUMENTS)
+                .findAllSorted(MessageItemKeys.DB_MESSAGE_TIME, Sort.ASCENDING));
         for (int i = 0; i < notSentMessages.size(); i++) {
             sendDocument(notSentMessages.get(i));
         }
@@ -130,64 +186,55 @@ public class SendDocumentService extends BaseIntentService {
     /**
      * Sends a single message using information from the {@link DocumentItem} object.
      *
-     * @param documentItem message item object to extact information from.
+     * @param messageItem message item object to extact information from.
      */
-    private void sendDocument(final DocumentItem documentItem) {
-        final String messageId = documentItem.getId();
-        final String receiverId = documentItem.getSenderId();
-        final String latestMessage = "\uD83D\uDCCE Document";
-        final Date messageTime = documentItem.getActualTime();
-
+    private void sendDocument(final MessageItem messageItem) {
+        if (messageItem == null) return;
         final Realm database = Realm.getDefaultInstance();
-
-        //First write to local database if not already done so.
-        database.executeTransaction(r -> {
-            DocumentItem mi = r.where(DocumentItem.class)
-                    .equalTo(DocumentItemKeys.ID, messageId).findFirst();
-            if (mi == null) {
-                r.copyToRealm(documentItem);
-                final ChatsItem ci = r.where(ChatsItem.class)
-                        .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
-                if (ci != null) {
-                    ci.setLatest(latestMessage);
-                    ci.setUpdate(messageTime);
-                }
-            }
-        });
-
         if (getUser() == null) return;
-
         final DatabaseReference sendMessageRef = getRootReference()
                 .child(AHC.FDR_CHAT)
-                .child(documentItem.getSenderId())
+                .child(messageItem.getOtherUserId())
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
 
-        if (Log.isLoggable(TAG, Log.DEBUG))
-            Log.d(TAG, "Sending document with id " + documentItem.getId());
+        AHC.logd(TAG, "Sending document with message id " + messageItem.getMessageId());
 
         //Add new document
-        final Map<String, Object> documentMap = new HashMap<>();
-        documentMap.put(DocumentItemKeys.FIREBASE_URL, documentItem.getFirebaseUrl());
-        documentMap.put(DocumentItemKeys.MIME_TYPE, documentItem.getMimeType());
-        documentMap.put(DocumentItemKeys.ACTUAL_TIME, documentItem.getActualTime());
-        documentMap.put(DocumentItemKeys.THUMBNAIL_URL, documentItem.getThumbnailUrl());
+        final Map<String, Map<String, String>> documentsMap = new HashMap<>();
+
+        final Map<String, String> documentMap = new HashMap<>();
+        documentMap.put(DocumentItemKeys.REMOTE_URL, messageItem.getDocument().getRemoteUrl());
+        documentMap.put(DocumentItemKeys.MIME_TYPE, messageItem.getDocument().getMimeType());
+        documentMap.put(DocumentItemKeys.THUMBNAIL_URL, messageItem.getDocument().getRemoteThumbnailUrl());
+
+        documentsMap.put("0", documentMap);
+
+        final Map<String, Object> messageMap = new HashMap<>();
+        messageMap.put(MessageItemKeys.FDR_DATA, messageItem.getMessageData());
+        messageMap.put(MessageItemKeys.FDR_DATE, messageItem.getMessageTime());
+        messageMap.put(MessageItemKeys.FDR_DOCUMENTS, documentsMap);
 
         //Update latest sender information
         final Map<String, Object> senderMap = new HashMap<>();
         senderMap.put(ChatItemKeys.FDR_ID, getUser().getUid());
         senderMap.put(ChatItemKeys.FDR_NAME, getUser().getDisplayName());
-        senderMap.put(ChatItemKeys.FDR_LATEST, latestMessage);
+        senderMap.put(ChatItemKeys.FDR_LATEST, messageItem.getMessageData());
         senderMap.put(ChatItemKeys.FDR_PHOTO_URL, getUser().getPhotoUrl().toString());
-        senderMap.put(ChatItemKeys.FDR_DATE, messageTime);
+        senderMap.put(ChatItemKeys.FDR_DATE, messageItem.getMessageTime());
 
-        sendMessageRef.child(ChatItemKeys.FDR_DOCUMENTS).child(messageId).setValue(documentMap);
-        sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
+        sendMessageRef
+                .child(ChatItemKeys.FDR_MESSAGES)
+                .child(messageItem.getMessageId())
+                .setValue(messageMap);
+        sendMessageRef
+                .child(ChatItemKeys.SENDER)
+                .setValue(senderMap);
 
         database.close();
 
-        Log.e(TAG, "Calling notify service");
-        notifyStatus(receiverId);
+        AHC.logd(TAG, "Calling notify service");
+        notifyStatus(messageItem.getOtherUserId());
     }
 
     /**

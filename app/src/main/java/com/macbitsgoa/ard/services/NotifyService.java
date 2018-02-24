@@ -44,7 +44,7 @@ public class NotifyService extends BaseIntentService {
         final RealmList<MessageItem> notifyList = new RealmList<>();
         notifyList.addAll(database
                 .where(MessageItem.class)
-                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
+                .equalTo(MessageItemKeys.OTHER_USER_ID, otherUserId)
                 .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                 .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
                 .findAll());

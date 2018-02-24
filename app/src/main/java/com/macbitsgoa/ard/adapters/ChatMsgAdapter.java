@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.adapters;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
 import android.view.Gravity;
@@ -12,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
@@ -19,7 +21,7 @@ import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.ChatMsgViewHolder;
 import com.macbitsgoa.ard.viewholders.ImageViewHolder;
 
-import java.util.List;
+import io.realm.RealmResults;
 
 import static com.macbitsgoa.ard.viewholders.ChatMsgViewHolder.MAX_WIDTH_FRACTION;
 
@@ -34,11 +36,12 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     public static final int SENDER = 1;
     public static final int DOCUMENT = 2;
 
-    private List<Object> messages;
+    private RealmResults<MessageItem> messages;
 
     private Context context;
 
-    public ChatMsgAdapter(final List<Object> messageItems, final Context context) {
+    public ChatMsgAdapter(@NonNull final RealmResults<MessageItem> messageItems,
+                          @NonNull final Context context) {
         this.messages = messageItems;
         this.context = context;
     }
@@ -72,33 +75,37 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
-        if (holder.getItemViewType() == RECEIVER || holder.getItemViewType() == SENDER) {
-            ChatMsgViewHolder cmvh = (ChatMsgViewHolder) holder;
-            cmvh.populate((MessageItem) messages.get(position));
-            if(position < getItemCount() - 1 && getItemViewType(position + 1) == holder.getItemViewType()) {
-                cmvh.emptySpace.setVisibility(View.GONE);
-            } else cmvh.emptySpace.setVisibility(View.VISIBLE);
-        } else {
-            DocumentItem di = (DocumentItem) messages.get(position);
-            if (di.getLocalUri() != null && di.getMimeType().contains("image"))
-                ((ImageViewHolder) holder).setImage(Uri.parse(di.getLocalUri()));
+        MessageItem mi = messages.get(position);
+        if (mi.hasAttachments()) {
+            DocumentItem di = mi.getDocuments().get(0);
+            if (!di.getLocalUri().equals("") && di.getMimeType().contains("image"))
+                ((ImageViewHolder) holder)
+                        .setImage(Uri.parse(di.getLocalUri()),
+                                RequestOptions.centerCropTransform());
             else {
                 AHC.logd(TAG, "Localuri was " + di.getLocalUri());
-                ((ImageViewHolder) holder).setImage("http://pngimages.net/sites/default/files/document-png-image-65553.png");
+                ((ImageViewHolder) holder)
+                        .setImage("http://pngimages.net/sites/default/files/document-png-image-65553.png");
             }
+        } else if (holder.getItemViewType() == RECEIVER || holder.getItemViewType() == SENDER) {
+            ChatMsgViewHolder cmvh = (ChatMsgViewHolder) holder;
+            cmvh.populate(mi);
+            if (position < getItemCount() - 1 && getItemViewType(position + 1)
+                    == holder.getItemViewType()) {
+                cmvh.emptySpace.setVisibility(View.GONE);
+            } else cmvh.emptySpace.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public int getItemViewType(final int position) {
-        if (messages.get(position) instanceof DocumentItem) return DOCUMENT;
-        MessageItem mi = (MessageItem) messages.get(position);
-        return mi.isMessageRcvd() ? SENDER : RECEIVER;
+        if (messages.get(position).hasAttachments()) return DOCUMENT;
+        return messages.get(position).isMessageRcvd() ? SENDER : RECEIVER;
     }
 
     @Override
     public int getItemCount() {
-        return messages == null ? 0 : messages.size();
+        return messages.size();
     }
 
     @Override

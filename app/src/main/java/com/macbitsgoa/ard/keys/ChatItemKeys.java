@@ -7,8 +7,17 @@ package com.macbitsgoa.ard.keys;
 public class ChatItemKeys {
 
     public static final String MESSAGE_STATUS = "messageStatus";
+
+    /**
+     * Key for Firebase node of private messages. Group messages will have different node.
+     */
     public static final String PRIVATE_MESSAGES = "0";
-    public static final String MESSAGES = "messages";
+
+    /**
+     * Key for Firebase node of messages. This node is where all messages are sent to a user.
+     */
+    public static final String FDR_MESSAGES = "messages";
+
     public static final String SENDER = "sender";
     public static final String ONLINE = "online";
     public static final String SENT_STATUS = "sentMessages";
