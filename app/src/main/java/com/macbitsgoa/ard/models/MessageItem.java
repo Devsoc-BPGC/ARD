@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.models;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.types.MessageType;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import io.realm.RealmObject;
@@ -25,11 +26,6 @@ public class MessageItem extends RealmObject {
 
     /**
      * 1 of 4 values to indicate the message status.
-     *
-     * @see MessageStatusType#MSG_WAIT
-     * @see MessageStatusType#MSG_SENT
-     * @see MessageStatusType#MSG_RCVD
-     * @see MessageStatusType#MSG_READ
      */
     private int messageStatus;
 
@@ -74,7 +70,10 @@ public class MessageItem extends RealmObject {
 
 
     public MessageItem() {
-
+        setMessageStatus(MessageStatusType.MSG_WAIT);
+        setMessageType(MessageType.TEXT);
+        setMessageTime(Calendar.getInstance().getTime());
+        setMessageRcvdTime(getMessageTime());
     }
 
     public MessageItem(final String messageId, final int messageStatus, final boolean messageRcvd,
@@ -142,8 +141,16 @@ public class MessageItem extends RealmObject {
         return messageStatus;
     }
 
+    /**
+     * Set new message status. Value will be updated if new status is greater than the
+     * current status.
+     *
+     * @param messageStatus New status to update.
+     * @see com.macbitsgoa.ard.types.MessageStatusType.MessageStatus
+     */
     public void setMessageStatus(@MessageStatusType.MessageStatus final int messageStatus) {
-        this.messageStatus = messageStatus;
+        if (messageStatus > this.messageStatus)
+            this.messageStatus = messageStatus;
     }
 
     public int getMessageType() {

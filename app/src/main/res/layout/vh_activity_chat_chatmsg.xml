@@ -4,13 +4,21 @@
     android:id="@+id/ll_chatmsg_root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="end">
+    android:gravity="end"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/viewHolder_chatmsg_space"
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
 
     <LinearLayout
         android:id="@+id/ll_chatmsg_msg_box"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="2dp"
         android:background="@drawable/bg_chat_rcv"
         android:baselineAligned="true"
         android:orientation="horizontal"

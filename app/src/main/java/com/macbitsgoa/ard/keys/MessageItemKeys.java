@@ -23,6 +23,15 @@ public class MessageItemKeys {
     public static final String MESSAGE_RECEIVED = "messageRcvd";
     public static final String SENDER_ID = "senderId";
     public static final String RECEIVER_ID = "receiverId";
+
+    /**
+     * Key for other user.
+     */
+    public static final String OTHER_USER_ID= "otherUserId";
+
+    /**
+     * Key for {}
+     */
     public static final String MESSAGE_ID = "messageId";
     public static final String MESSAGE_DATA = "messageData";
     public static final String MESSAGE_RECEIVED_TIME = "messageRcvdTime";

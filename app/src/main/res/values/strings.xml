@@ -30,6 +30,7 @@
     <string name="bottom_nav_forum_activity_main">Forum</string>
     <string name="bottom_nav_home_activity_main">Home</string>
     <string name="bottom_nav_chat_activity_main">Chat</string>
+    <string name="bottom_nav_more_activity_main">More</string>
 
     <!-- Faq fragment tab layout titles -->
     <string name="tabLayout_forum_general">General</string>

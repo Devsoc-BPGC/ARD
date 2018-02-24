@@ -49,16 +49,21 @@ public class SendService extends BaseIntentService {
         super.onHandleIntent(intent);
         database = Realm.getDefaultInstance();
         if (intent == null) {
-            Log.d(TAG, "Null intent was passed, sending all unsent messages");
+            AHC.logd(TAG, "Null intent was passed for send service," +
+                    " sending all unsent messages");
             sendAll();
         } else {
-            Log.e(TAG, intent.toString());
+            AHC.logd(TAG, "Calling intent for " + TAG + "\n" + intent.toString());
+            //Get message data and receiver id in intent
             final String messageData = intent.getStringExtra(MessageItemKeys.MESSAGE_DATA);
-            final String receiverId = intent.getStringExtra(MessageItemKeys.RECEIVER_ID);
+            final String receiverId = intent.getStringExtra(MessageItemKeys.OTHER_USER_ID);
             if (messageData == null || receiverId == null) {
-                Log.e(TAG, "No extras sent in intent");
+                Log.e(TAG, "No extras sent in intent, messageData was "
+                        + messageData + " and receiver id was " + receiverId);
                 sendAll();
             } else {
+                AHC.logd(TAG, "Sending message " + messageData
+                        + " to receiver " + receiverId);
                 sendMessage(messageData, receiverId);
             }
         }
@@ -81,10 +86,11 @@ public class SendService extends BaseIntentService {
     }
 
     /**
-     * Method to create a temporary {@link MessageItem} object.
+     * Method to create a temporary {@link MessageItem} object. This method is called for all
+     * messages that haven't yet been added to database.
      *
      * @param messageData Message Data to send.
-     * @param receiverId  Other user's unique id.
+     * @param receiverId  Receiving user's unique user id.
      */
     private void sendMessage(final String messageData, final String receiverId) {
 
@@ -94,14 +100,14 @@ public class SendService extends BaseIntentService {
                 + messageTime.hashCode()
                 + messageData.hashCode();
 
+        //Init an empty message item, with defaults loaded.
         final MessageItem mi = new MessageItem();
         mi.setMessageId(messageId);
+        //As we are sending message, this is false.
         mi.setMessageRcvd(false);
-        mi.setMessageTime(messageTime);
-        mi.setMessageRcvdTime(Calendar.getInstance().getTime());
         mi.setMessageData(messageData);
+        //Here sender is always the other user.
         mi.setSenderId(receiverId);
-        mi.setMessageStatus(MessageStatusType.MSG_WAIT);
 
         sendMessage(mi);
     }
@@ -132,7 +138,6 @@ public class SendService extends BaseIntentService {
                 mi.setMessageStatus(MessageStatusType.MSG_WAIT);
             }
         });
-
         database.executeTransaction(r -> {
             final ChatsItem ci = r.where(ChatsItem.class)
                     .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();

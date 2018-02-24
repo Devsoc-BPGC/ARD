@@ -5,20 +5,16 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.MimeTypeMap;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
-import com.macbitsgoa.ard.models.TypeItem;
-import com.macbitsgoa.ard.types.MessageType;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.ChatMsgViewHolder;
 import com.macbitsgoa.ard.viewholders.ImageViewHolder;
@@ -28,6 +24,11 @@ import java.util.List;
 import static com.macbitsgoa.ard.viewholders.ChatMsgViewHolder.MAX_WIDTH_FRACTION;
 
 public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ImageViewHolder.ImageClickListener {
+
+    /**
+     * Tag for this class.
+     */
+    public static final String TAG = ChatMsgAdapter.class.getSimpleName();
 
     public static final int RECEIVER = 0;
     public static final int SENDER = 1;
@@ -72,13 +73,17 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         if (holder.getItemViewType() == RECEIVER || holder.getItemViewType() == SENDER) {
-            ((ChatMsgViewHolder) holder).populate((MessageItem) messages.get(position));
+            ChatMsgViewHolder cmvh = (ChatMsgViewHolder) holder;
+            cmvh.populate((MessageItem) messages.get(position));
+            if(position < getItemCount() - 1 && getItemViewType(position + 1) == holder.getItemViewType()) {
+                cmvh.emptySpace.setVisibility(View.GONE);
+            } else cmvh.emptySpace.setVisibility(View.VISIBLE);
         } else {
             DocumentItem di = (DocumentItem) messages.get(position);
             if (di.getLocalUri() != null && di.getMimeType().contains("image"))
                 ((ImageViewHolder) holder).setImage(Uri.parse(di.getLocalUri()));
             else {
-Log.e("ts","localuri was "+di.getLocalUri());
+                AHC.logd(TAG, "Localuri was " + di.getLocalUri());
                 ((ImageViewHolder) holder).setImage("http://pngimages.net/sites/default/files/document-png-image-65553.png");
             }
         }
@@ -93,7 +98,6 @@ Log.e("ts","localuri was "+di.getLocalUri());
 
     @Override
     public int getItemCount() {
-        Log.e("Tag", "size is 0 ");
         return messages == null ? 0 : messages.size();
     }
 
@@ -101,7 +105,7 @@ Log.e("ts","localuri was "+di.getLocalUri());
     public void onImageClick(final Uri uri) {
         //nothing needed as of now
         if (uri == null) {
-            Log.e("tag", "null uri for image");
+            AHC.logd(TAG, "Null uri for image");
             return;
         }
         Intent intent = new Intent(Intent.ACTION_VIEW);

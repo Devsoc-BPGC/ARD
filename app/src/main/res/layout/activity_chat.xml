@@ -24,61 +24,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/include" />
 
-    <RelativeLayout
-        android:id="@+id/rl_activity_chat_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="12dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@+id/include_activity_chat_message"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <RelativeLayout
-            android:id="@+id/rl_activity_chat_updates"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:elevation="8dp"
-            android:visibility="gone">
-
-            <ImageView
-                android:id="@+id/imgView_activity_chat_updates"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentTop="true"
-                android:src="@drawable/ic_circle" />
-
-            <TextView
-
-                android:id="@+id/tv_activity_chat_number"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_alignBottom="@+id/imgView_activity_chat_updates"
-                android:layout_alignEnd="@+id/imgView_activity_chat_updates"
-                android:layout_alignStart="@+id/imgView_activity_chat_updates"
-                android:layout_alignTop="@+id/imgView_activity_chat_updates"
-                android:gravity="center"
-                android:text="1"
-                android:textColor="@color/white"
-                android:textSize="12sp" />
-        </RelativeLayout>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab_activity_chat_scroll"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="8dp"
-            android:onClick="onClick"
-            android:src="@drawable/ic_down"
-            app:backgroundTint="@color/white"
-            app:elevation="4dp"
-            app:fabSize="mini" />
-    </RelativeLayout>
-
-
     <include
         android:id="@+id/include_activity_chat_message"
         layout="@layout/frame_comment"

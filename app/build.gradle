@@ -30,8 +30,8 @@ ext {
     rxJava2Ver = "2.1.6"
     supportVer = "27.0.1"
     targetSdkVer = 26
-    verCode = 2
-    verName = "1.0-beta"
+    verCode = 3
+    verName = "1.1-beta"
     vPagerIndVer = "1.0.2"
 }
 

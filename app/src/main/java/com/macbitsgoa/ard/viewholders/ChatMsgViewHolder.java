@@ -14,6 +14,9 @@ import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
 
     /**
@@ -27,6 +30,11 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
 
     private ImageView status;
 
+    /**
+     * Used to add extra margin between chat messages.
+     */
+    public View emptySpace;
+
     public ChatMsgViewHolder(final View itemView) {
         super(itemView);
         bindViews(itemView);
@@ -36,6 +44,7 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
         time = view.findViewById(R.id.textView_viewHolder_chatmsg_time);
         message = view.findViewById(R.id.textView_viewHolder_chatmsg_msg);
         status = view.findViewById(R.id.imgView_vh_activity_chatmsg_tick);
+        emptySpace = view.findViewById(R.id.viewHolder_chatmsg_space);
     }
 
     public void populate(@NonNull final MessageItem messageItem) {

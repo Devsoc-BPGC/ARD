@@ -14,6 +14,8 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.models.TypeItem;
 
@@ -115,6 +117,11 @@ public class AHC {
      * Reference to home fragment node.
      */
     public static final String FDR_CHAT = "chats";
+
+    /**
+     * Reference to online ref node.
+     */
+    public static final String FDR_ONLINE = "online";
 
     /**
      * Animation multiplier for Fragment Home.
@@ -221,7 +228,7 @@ public class AHC {
      */
     public static void setNextAlarm(final Context context, final Class className,
                                     final int requestCode, final int delayMinutes) {
-        Log.i(TAG, "Setting next alarm for given class name " + className.getSimpleName());
+        AHC.logd(TAG, "Setting next alarm for given class name " + className.getSimpleName());
         final Calendar calendar = Calendar.getInstance();
         calendar.add(Calendar.MINUTE, delayMinutes);
         //Create a new PendingIntent and add it to the AlarmManager
@@ -296,6 +303,18 @@ public class AHC {
     }
 
     /**
+     * Void method to print info logs.
+     *
+     * @param tag     Tag to use for message.
+     * @param message Message to print.
+     */
+    public static void logi(@NonNull final String tag, @NonNull final String message) {
+        if (BuildConfig.DEBUG) {
+            Log.i(tag, message);
+        }
+    }
+
+    /**
      * Void method to print debug logs.
      *
      * @param tag     Tag to use for message.
@@ -305,5 +324,20 @@ public class AHC {
         if (BuildConfig.DEBUG) {
             Log.d(tag, message);
         }
+    }
+
+    /**
+     * Persist token to firebase database for use with FCM.
+     *
+     * @param token The current token to be updated on server.
+     */
+    public static void sendRegistrationToServer(final String token) {
+        if (FirebaseAuth.getInstance().getCurrentUser() == null
+                || FirebaseAuth.getInstance().getCurrentUser().getUid() == null) return;
+        FirebaseDatabase.getInstance()
+                .getReference(BuildConfig.BUILD_TYPE)
+                .child(FDR_USERS)
+                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                .child("token").setValue(token);
     }
 }

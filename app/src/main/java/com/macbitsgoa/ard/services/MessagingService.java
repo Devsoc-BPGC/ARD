@@ -44,20 +44,20 @@ public class MessagingService extends BaseIntentService {
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
         super.onHandleIntent(intent);
-        final DatabaseReference messagesRef = getRootReference()
+        final DatabaseReference pmReference = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(getUser().getUid())
                 .child(ChatItemKeys.PRIVATE_MESSAGES);
-        final DatabaseReference sentMessageStatusRef = getRootReference()
+        final DatabaseReference sentMessagesStatusRef = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(getUser().getUid())
                 .child(ChatItemKeys.SENT_STATUS);
 
-        final ValueEventListener messagesRefVEL = getEventListener();
-        final ValueEventListener sendListener = getSentMsgStatusVEL();
+        final ValueEventListener pmRefListener = getEventListener();
+        final ValueEventListener sentMessagesStatusListener = getSentMsgStatusVEL();
 
-        messagesRef.addValueEventListener(messagesRefVEL);
-        sentMessageStatusRef.addValueEventListener(sendListener);
+        pmReference.addValueEventListener(pmRefListener);
+        sentMessagesStatusRef.addValueEventListener(sentMessagesStatusListener);
 
         try {
             Thread.sleep(1000 * 60 * 5);
@@ -65,7 +65,7 @@ public class MessagingService extends BaseIntentService {
             e.printStackTrace();
         } finally {
             AHC.setNextAlarm(this, MessagingService.class, REQUEST_CODE, 0);
-            messagesRef.removeEventListener(messagesRefVEL);
+            pmReference.removeEventListener(pmRefListener);
         }
     }
 
@@ -206,7 +206,7 @@ public class MessagingService extends BaseIntentService {
                         java.lang.NullPointerException: Attempt to invoke virtual method 'long java.util.Date.getTime()' on a null object reference
                         at com.macbitsgoa.ard.services.MessagingService$1.onDataChange(MessagingService.java:204)
                         */
-                        if (update!=null && update.getTime() >= ci.getUpdate().getTime()) {
+                        if (update != null && update.getTime() >= ci.getUpdate().getTime()) {
                             ci.setLatest(latest);
                             ci.setUpdate(update);
                         }
@@ -269,15 +269,12 @@ public class MessagingService extends BaseIntentService {
                             .findFirst();
                     if (mi != null) {
                         database.beginTransaction();
-                        if (mi.getMessageStatus() == MessageStatusType.MSG_WAIT) {
-                            Log.d(TAG, "msg status updated");
-                            mi.setMessageStatus(MessageStatusType.MSG_SENT);
-                            child.getRef().removeValue();
-                        }
+                        mi.setMessageStatus(MessageStatusType.MSG_SENT);
                         database.commitTransaction();
                     } else {
-                        Log.e(TAG, "Sent message not in database");
+                        AHC.logd(TAG, "Sent message not in database");
                     }
+                    child.getRef().removeValue();
                 }
                 database.close();
             }

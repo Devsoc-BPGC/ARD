@@ -18,14 +18,11 @@ import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -38,7 +35,6 @@ import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
-import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendDocumentService;
@@ -68,20 +64,35 @@ public class ChatActivity extends BaseActivity {
     public static final String TAG = ChatActivity.class.getSimpleName();
 
     /**
-     * Request code for selecting a document to share via chat.
+     * Request code for selecting a document from Files API to share via chat.
      */
     private static final int DOCUMENT_READ_REQUEST_CODE = 452;
 
     //----------------------------------------------------------------------------------------------
+    /**
+     * Reference to the "chats" node on Firebase.
+     */
+    DatabaseReference chatsReference = getRootReference().child(AHC.FDR_CHAT);
 
-    FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+    /**
+     * Reference to "online" node on Firebase.
+     */
+    DatabaseReference onlineStatus = getRootReference().child(AHC.FDR_ONLINE);
 
-    DatabaseReference writeRef = getRootReference().child("chats");
-    DatabaseReference onlineStatus = getRootReference().child("online");
-    DatabaseReference myStatus = onlineStatus.child(user.getUid());
+    /**
+     * Get current user's online status reference.
+     */
+    DatabaseReference myStatus = onlineStatus.child(getUser().getUid());
+
+    /**
+     * Other user's online status.
+     */
     DatabaseReference theirStatus;
-    DatabaseReference readStatus = writeRef;
+    DatabaseReference theirReadStatusRef = chatsReference;
 
+    /**
+     * Current session id. Used for online status.
+     */
     String sessionId;
     public static boolean visible = false;
 
@@ -106,16 +117,7 @@ public class ChatActivity extends BaseActivity {
     @BindView(R.id.fab_frame_comment_send)
     FloatingActionButton sendFab;
 
-    @BindView(R.id.rl_activity_chat_icon)
-    RelativeLayout rlIcons;
-
-    @BindView(R.id.rl_activity_chat_updates)
-    RelativeLayout rlUpdates;
-
-    @BindView(R.id.tv_activity_chat_number)
-    TextView updateNumber;
-
-    public static String senderId = null;
+    public static String otherUserId = null;
 
     List<Object> messages;
 
@@ -131,14 +133,17 @@ public class ChatActivity extends BaseActivity {
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //Set screen background
         getWindow().setBackgroundDrawable(new CenterCropDrawable(ContextCompat.getDrawable(this, R.drawable.bg_chat_activity)));
         setContentView(R.layout.activity_chat);
 
-        senderId = getIntent().getStringExtra(MessageItemKeys.SENDER_ID);
-        if (senderId == null || user == null) return;
-        theirStatus = onlineStatus.child(senderId);
-        writeRef = writeRef.child(senderId).child(ChatItemKeys.PRIVATE_MESSAGES).child(user.getUid());
-        readStatus = writeRef.child(ChatItemKeys.MESSAGE_STATUS);
+        otherUserId = getIntent().getStringExtra(MessageItemKeys.SENDER_ID);
+        if (otherUserId == null) return;
+        theirStatus = onlineStatus.child(otherUserId);
+        chatsReference = chatsReference.child(otherUserId)
+                .child(ChatItemKeys.PRIVATE_MESSAGES)
+                .child(getUser().getUid());
+        theirReadStatusRef = chatsReference.child(ChatItemKeys.MESSAGE_STATUS);
 
         ButterKnife.bind(this);
         setupUI();
@@ -150,24 +155,25 @@ public class ChatActivity extends BaseActivity {
         newMessageReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                Log.e(TAG, "received action " + intent.getAction());
+                AHC.logd(TAG, "Received action " + intent.getAction());
                 if (intent == null
                         || intent.getAction() == null
                         || intent.getStringExtra(MessageItemKeys.SENDER_ID) == null
-                        || !intent.getStringExtra(MessageItemKeys.SENDER_ID).equals(senderId)) {
+                        || !intent.getStringExtra(MessageItemKeys.SENDER_ID).equals(otherUserId)) {
                     return;
                 }
                 switch (intent.getAction()) {
                     case ChatItemKeys.NOTIFICATION_ACTION:
                         //Cancel ongoing notifications for this user
-                        Log.e(TAG, "Cancelling notification " + senderId.hashCode());
-                        nmc.cancel(senderId.hashCode());
+                        AHC.logd(TAG, "Cancelling notification " + otherUserId.hashCode());
+                        nmc.cancel(otherUserId.hashCode());
                         break;
                     case ChatItemKeys.NEW_MESSAGE_ARRIVED:
                         //Fire up intent to notify
                         notifyOfReadStatus();
                         break;
                     default:
+                        break;
                 }
             }
         };
@@ -184,7 +190,8 @@ public class ChatActivity extends BaseActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                AHC.logd(TAG, "Error reading other user's read status of my messages");
+                Log.e(TAG, databaseError.toString());
             }
         });
     }
@@ -214,10 +221,11 @@ public class ChatActivity extends BaseActivity {
         //Remove any unread count if present
         database.executeTransactionAsync(r -> {
             ChatsItem chat = r.where(ChatsItem.class)
-                    .equalTo("id", senderId).findFirst();
+                    .equalTo(ChatItemKeys.DB_ID, otherUserId).findFirst();
             if (chat == null) {
-                chat = r.createObject(ChatsItem.class, senderId);
-                chat.setLatest("");
+                String latestMessage = getLatestMessage(otherUserId);
+                chat = r.createObject(ChatsItem.class, otherUserId);
+                chat.setLatest(latestMessage);
                 chat.setUpdate(null);
                 chat.setName(getIntent().getStringExtra("title"));
                 chat.setPhotoUrl(getIntent().getStringExtra("photoUrl"));
@@ -227,9 +235,21 @@ public class ChatActivity extends BaseActivity {
         });
     }
 
+    private String getLatestMessage(String otherUserId) {
+        MessageItem mi = database.where(MessageItem.class)
+                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
+                .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING)
+                .first();
+        if (mi == null) return "";
+        else {
+            if (mi.getMessageType() == MessageType.TEXT) return mi.getMessageData();
+            else return "Document";
+        }
+    }
+
     private void notifyOfReadStatus() {
         final Intent notifyIntent = new Intent(ChatActivity.this, NotifyService.class);
-        notifyIntent.putExtra("receiverId", senderId);
+        notifyIntent.putExtra(MessageItemKeys.OTHER_USER_ID, otherUserId);
         startService(notifyIntent);
     }
 
@@ -238,7 +258,7 @@ public class ChatActivity extends BaseActivity {
         super.onStart();
         visible = true;
         sessionId = Calendar.getInstance().getTime().toString();
-        myStatus = onlineStatus.child(user.getUid()).child(sessionId);
+        myStatus = onlineStatus.child(getUser().getUid()).child(sessionId);
         myStatus.setValue(true);
         myStatus.onDisconnect().removeValue();
 
@@ -249,44 +269,44 @@ public class ChatActivity extends BaseActivity {
         messages = new ArrayList<>();
         textMessages = database
                 .where(MessageItem.class)
-                .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
                 .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
         documentMessages = database
                 .where(DocumentItem.class)
-                .equalTo(MessageItemKeys.SENDER_ID, senderId)
+                .equalTo(MessageItemKeys.SENDER_ID, otherUserId)
                 .findAllSorted(DocumentItemKeys.RCVD_SENT_TIME, Sort.DESCENDING);
         fillAndNotify();
         textMessages.addChangeListener((messageItems, changeSet) -> {
             fillAndNotify();
             // `null`  means the async query returns the first time.
-            if (changeSet == null && chatMsgAdapter!=null) {
+            if (changeSet == null && chatMsgAdapter != null) {
                 chatMsgAdapter.notifyDataSetChanged();
                 return;
+            }
+            // For deletions, the adapter has to be notified in reverse order.
+            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+            for (int i = deletions.length - 1; i >= 0; i--) {
+                OrderedCollectionChangeSet.Range range = deletions[i];
+                chatMsgAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+            for (OrderedCollectionChangeSet.Range range : insertions) {
+                chatMsgAdapter.notifyItemRangeInserted(range.startIndex, range.length);
             }
 
             OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
             for (OrderedCollectionChangeSet.Range range : modifications) {
-                //chatMsgAdapter.notifyItemRangeChanged(range.startIndex, range.length);
-            }
-            OrderedCollectionChangeSet.Range[] additions = changeSet.getInsertionRanges();
-            for (OrderedCollectionChangeSet.Range range : modifications) {
-                //chatMsgAdapter.notifyItemRangeInserted(range.startIndex, range.length);
+                chatMsgAdapter.notifyItemRangeChanged(range.startIndex, range.length);
             }
             //Cancel any ongoing notification from this user
-            nmc.cancel(senderId.hashCode());
-
-            //TODO update read status of new messages somewhere
-            if (llm.findFirstCompletelyVisibleItemPosition() < 5) {
-                chatsRV.scrollToPosition(0);
-                rlIcons.setVisibility(View.GONE);
-                updateNumber.setText("0");
-                rlUpdates.setVisibility(View.GONE);
-            }
+            nmc.cancel(otherUserId.hashCode());
+            chatsRV.scrollToPosition(0);
         });
         documentMessages.addChangeListener((documentItems, changeSet) -> {
             fillAndNotify();
-            if(changeSet == null && chatMsgAdapter != null) chatMsgAdapter.notifyDataSetChanged();
-            nmc.cancel(senderId.hashCode());
+            if (changeSet == null && chatMsgAdapter != null) chatMsgAdapter.notifyDataSetChanged();
+            nmc.cancel(otherUserId.hashCode());
         });
 
         chatMsgAdapter = new ChatMsgAdapter(messages, this);
@@ -296,40 +316,6 @@ public class ChatActivity extends BaseActivity {
         intf.addAction(ChatItemKeys.NOTIFICATION_ACTION);
         intf.addAction(ChatItemKeys.NEW_MESSAGE_ARRIVED);
         registerReceiver(newMessageReceiver, intf);
-
-        //TODO improve this
-          /*  chatsRV.addOnScrollListener(new RecyclerView.OnScrollListener() {
-            @Override
-            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-                super.onScrollStateChanged(recyclerView, newState);
-                if (newState == RecyclerView.SCROLL_STATE_SETTLING || newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-                    LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    int pos = llm.findFirstCompletelyVisibleItemPosition();
-                    if (pos > 5) rlIcons.setVisibility(View.VISIBLE);
-                    else {
-                        rlIcons.setVisibility(View.GONE);
-                        rlUpdates.setVisibility(View.GONE);
-                    }
-                }
-
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    LinearLayoutManager llm = (LinearLayoutManager) recyclerView.getLayoutManager();
-                    int pos = llm.findFirstCompletelyVisibleItemPosition();
-                    if (pos > 5) rlIcons.setVisibility(View.VISIBLE);
-                    else {
-                        rlIcons.setVisibility(View.GONE);
-                        rlUpdates.setVisibility(View.GONE);
-                    }
-                }
-
-            }
-
-            @Override
-            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                super.onScrolled(recyclerView, dx, dy);
-            }
-        });
-    */
     }
 
     private void fillAndNotify() {
@@ -356,6 +342,13 @@ public class ChatActivity extends BaseActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        nmc.cancel(otherUserId.hashCode());
+        //TODO check if notify service is required here
+    }
+
+    @Override
     protected void onStop() {
         visible = false;
         super.onStop();
@@ -365,45 +358,29 @@ public class ChatActivity extends BaseActivity {
         myStatus.removeValue();
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        nmc.cancel(senderId.hashCode());
+    @OnClick(R.id.ll_frame_chat_toolbar_icons)
+    public void backPressed() {
+        onBackPressed();
     }
 
-    //TODO fix read status
-    @Override
-    public void onClick(final View v) {
-        super.onClick(v);
-        final int viewId = v.getId();
-        if (viewId == R.id.ll_frame_chat_toolbar_icons) {
-            onBackPressed();
-        } else if (viewId == R.id.fab_activity_chat_scroll) {
-            chatsRV.scrollToPosition(0);
-            rlIcons.setVisibility(View.GONE);
-            rlUpdates.setVisibility(View.GONE);
-        } else if (viewId == R.id.fab_frame_comment_send) {
-            //Get user message from edittext
-            final String messageData = message.getText().toString().trim();
-            //If length of EditText is 0, do nothing
-            if (messageData.length() == 0) return;
+    @OnClick(R.id.fab_frame_comment_send)
+    public void sendMessage() {
+        //Get user message from edittext
+        final String messageData = message.getText().toString().trim();
+        //If length of EditText is 0, do nothing
+        if (messageData.length() == 0) return;
 
-            final Intent mIntent = new Intent(this, SendService.class);
-            mIntent.putExtra(MessageItemKeys.MESSAGE_DATA, messageData);
-            mIntent.putExtra(MessageItemKeys.RECEIVER_ID, senderId);
-            startService(mIntent);
-            updateCounts();
+        final Intent mIntent = new Intent(this, SendService.class);
+        mIntent.putExtra(MessageItemKeys.MESSAGE_DATA, messageData);
+        mIntent.putExtra(MessageItemKeys.OTHER_USER_ID, otherUserId);
+        startService(mIntent);
+        updateCounts();
 
-            //Clear EditText after extracting it's value
-            message.getText().clear();
-
-            chatsRV.scrollToPosition(0);
-
-            rlUpdates.setVisibility(View.GONE);
-            rlIcons.setVisibility(View.GONE);
-        }
+        //Clear EditText after extracting it's value
+        message.getText().clear();
+        //Go to start of chat
+        chatsRV.scrollToPosition(0);
     }
-
 
     /**
      * Fires an intent to spin up the "file chooser" UI and select an image.
@@ -434,12 +411,12 @@ public class ChatActivity extends BaseActivity {
         if (requestCode == DOCUMENT_READ_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
             if (resultData != null) {
                 final Uri uri = resultData.getData();
-                Log.i(TAG, "Uri: " + uri.toString());
+                AHC.logi(TAG, "Uri: " + uri.toString());
                 Toast.makeText(this, "File will be uploaded shortly",
                         Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(this, SendDocumentService.class);
                 intent.setData(uri);
-                intent.putExtra(MessageItemKeys.RECEIVER_ID, senderId);
+                intent.putExtra(MessageItemKeys.RECEIVER_ID, otherUserId);
                 startService(intent);
             } else {
                 Toast.makeText(this, "File not found", Toast.LENGTH_SHORT).show();

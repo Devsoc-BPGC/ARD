@@ -10,6 +10,8 @@ import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.ChatFragment;
@@ -20,6 +22,7 @@ import com.macbitsgoa.ard.interfaces.ForumFragmentListener;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.types.MainActivityType;
+import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -79,6 +82,7 @@ public class MainActivity extends BaseActivity
             startActivity(new Intent(this, AuthActivity.class));
             finish();
         }
+        AHC.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

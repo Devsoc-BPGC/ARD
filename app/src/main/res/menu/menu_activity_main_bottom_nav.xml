@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
     <item
         android:id="@+id/bottom_nav_forum"
-        android:orderInCategory="0"
         android:icon="@drawable/ic_forum_24dp"
+        android:orderInCategory="0"
         android:title="@string/bottom_nav_forum_activity_main" />
     <item
         android:id="@+id/bottom_nav_home"
-        android:orderInCategory="1"
         android:icon="@drawable/ic_home_24dp"
+        android:orderInCategory="1"
         android:title="@string/bottom_nav_home_activity_main" />
     <item
         android:id="@+id/bottom_nav_chat"
-        android:orderInCategory="2"
         android:icon="@drawable/ic_chat_24dp"
-        android:title="@string/bottom_nav_chat_activity_main" />
-
+        android:orderInCategory="2"
+        android:title="@string/bottom_nav_chat_activity_main"
+        android:tooltipText="@string/bottom_nav_chat_activity_main"
+        tools:targetApi="o" />
+    <!-- <item
+        android:id="@+id/bottom_nav_more"
+        android:icon="@drawable/ic_more_vert"
+        android:orderInCategory="3"
+        android:title="@string/bottom_nav_more_activity_main"
+        android:tooltipText="@string/bottom_nav_more_activity_main"
+        tools:targetApi="o" /> -->
 </menu>

@@ -217,8 +217,8 @@ public class NotificationService extends BaseIntentService {
 
             //TODO improve not showing notif for current uesr
             if (ChatActivity.visible) {
-                if (ChatActivity.senderId != null
-                        && !ChatActivity.senderId.equals(ci.getId())) {
+                if (ChatActivity.otherUserId != null
+                        && !ChatActivity.otherUserId.equals(ci.getId())) {
                     nmc.notify(ci.getId().hashCode(), builder.build());
                 }
             } else nmc.notify(ci.getId().hashCode(), builder.build());

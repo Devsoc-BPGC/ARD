@@ -41,10 +41,10 @@ public class SendDocumentService extends BaseIntentService {
     protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
         if (intent == null || intent.getData() == null || !intent.hasExtra(MessageItemKeys.RECEIVER_ID)) {
-            Log.d(TAG, "Null intent was passed, sending all unsent messages");
+            AHC.logd(TAG, "Null intent was passed, sending all unsent documents");
             sendAll();
         } else {
-            Log.i(TAG, "Sending document " + intent.toString());
+            AHC.logi(TAG, "Sending document " + intent.toString());
             sendDoucment(intent.getData(), intent.getStringExtra(MessageItemKeys.RECEIVER_ID));
         }
     }

@@ -13,7 +13,15 @@ import java.lang.annotation.RetentionPolicy;
 public class MessageStatusType {
 
     /**
-     * Only allow fields to be used instead of pure numbers
+     * Only allow fields to be used instead of pure numbers.
+     *
+     * Has to be one of -
+     * <ul>
+     *  <li> {@link MessageStatusType#MSG_WAIT} </li>
+     *  <li> {@link MessageStatusType#MSG_SENT} </li>
+     *  <li> {@link MessageStatusType#MSG_RCVD} </li>
+     *  <li> {@link MessageStatusType#MSG_READ} </li>
+     * </ul>
      */
     @IntDef({MSG_WAIT, MSG_SENT, MSG_RCVD, MSG_READ})
     @Retention(RetentionPolicy.SOURCE)
