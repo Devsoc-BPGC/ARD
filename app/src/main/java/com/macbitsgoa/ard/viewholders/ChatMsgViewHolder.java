@@ -14,9 +14,6 @@ import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
-import butterknife.BindView;
-import butterknife.ButterKnife;
-
 public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
 
     /**
@@ -48,7 +45,7 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
     }
 
     public void populate(@NonNull final MessageItem messageItem) {
-        time.setText(AHC.getSimpleDayAndTime(messageItem.getMessageTime()));
+        time.setText(AHC.getSimpleDayOrTime(messageItem.getMessageTime()));
         message.setText(messageItem.getMessageData());
 
         if (getItemViewType() == ChatMsgAdapter.RECEIVER) {

@@ -78,16 +78,19 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         MessageItem mi = messages.get(position);
         if (mi.hasAttachments()) {
             DocumentItem di = mi.getDocuments().get(0);
-            if (!di.getLocalUri().equals("") && di.getMimeType().contains("image"))
-                ((ImageViewHolder) holder)
-                        .setUri(Uri.parse(di.getLocalUri()),
-                                Uri.parse(di.getLocalUri()),
+            if (!di.getLocalUri().equals("") && di.getMimeType().contains("image")) {
+                ImageViewHolder imvh = (ImageViewHolder) holder;
+                String imageUrl = di.getLocalThumbnailUri();
+                if(imageUrl == null) imageUrl = di.getLocalUri();
+                if(imageUrl == null) imageUrl = di.getRemoteThumbnailUrl();
+                if(imageUrl == null) imageUrl = di.getRemoteUrl();
+
+                imvh.setUri(Uri.parse(di.getLocalUri()),
+                                Uri.parse(imageUrl),
                                 RequestOptions.centerCropTransform());
-            else {
-                AHC.logd(TAG, "Localuri was " + di.getLocalUri());
+            } else {
                 ((ImageViewHolder) holder)
-                        .setUri(di.getLocalUri(),
-                                "http://pngimages.net/sites/default/files/document-png-image-65553.png");
+                        .setUri(di.getLocalUri(), AHC.getImageUrlFromMimeType(di.getMimeType()));
             }
         } else if (holder.getItemViewType() == RECEIVER || holder.getItemViewType() == SENDER) {
             ChatMsgViewHolder cmvh = (ChatMsgViewHolder) holder;

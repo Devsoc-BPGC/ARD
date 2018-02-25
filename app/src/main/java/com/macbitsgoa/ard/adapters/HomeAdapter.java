@@ -27,7 +27,6 @@ import com.macbitsgoa.ard.models.home.TextItem;
 import com.macbitsgoa.ard.types.HomeType;
 import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
-import com.macbitsgoa.ard.utils.Browser;
 import com.macbitsgoa.ard.viewholders.AnnViewHolder;
 import com.macbitsgoa.ard.viewholders.AnnouncementViewHolder;
 import com.macbitsgoa.ard.viewholders.HomeItemViewHolder;
@@ -116,7 +115,7 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> implements Ima
                 anvh.data.setText(Html.fromHtml(ai.getData()));
                 anvh.extras.setText(Html.fromHtml(ai.getAuthor()
                         + ", "
-                        + AHC.getSimpleDayAndTime(ai.getDate())));
+                        + AHC.getSimpleDayOrTime(ai.getDate())));
                 if (ai.isRead()) anvh.newTag.setVisibility(View.INVISIBLE);
                 else anvh.newTag.setVisibility(View.VISIBLE);
                 break;

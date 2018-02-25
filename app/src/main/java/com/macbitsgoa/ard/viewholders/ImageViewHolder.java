@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
+import com.macbitsgoa.ard.R;
 
 /**
  * General image viewholder class with convenience method to set image url.
@@ -69,8 +70,8 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
     /**
      * Set image url.
      *
-     * @param uri      URI to set as image.
-     * @param imageUri Image to set as view
+     * @param uri      URI to open when clicked by user.
+     * @param imageUri Image to set as view.
      * @param rqop     Glide requestoptions to use.
      */
     public void setUri(final Uri uri, final Uri imageUri, RequestOptions rqop) {
@@ -78,7 +79,7 @@ public class ImageViewHolder extends RecyclerView.ViewHolder {
         Glide.with(context)
                 .load(imageUri)
                 .transition(DrawableTransitionOptions.withCrossFade())
-                .apply(rqop)
+                .apply(rqop.error(R.drawable.ic_attach_file_24dp))
                 .into(imageView);
     }
 

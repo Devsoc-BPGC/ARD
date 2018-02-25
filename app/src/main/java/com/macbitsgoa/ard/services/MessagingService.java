@@ -128,6 +128,7 @@ public class MessagingService extends BaseIntentService {
                                 di.setRemoteThumbnailUrl(documentSnapshot.child(DocumentItemKeys.REMOTE_THUMBNAIL_URL).getValue(String.class));
                                 di.setLocalUri(di.getRemoteUrl());
                                 //TODO set local thumbnail and uri
+                                //TODO download file service required
                                 documentItems.add(di);
                             }
                         }
@@ -185,8 +186,10 @@ public class MessagingService extends BaseIntentService {
                     if (ci == null) {
                         ci = database.createObject(ChatsItem.class, senderId);
                     }
-                    ci.setLatest(latestFromSender);
-                    ci.setUpdate(senderLatestUpdate);
+                    if (senderLatestUpdate.getTime() > ci.getUpdate().getTime()) {
+                        ci.setLatest(latestFromSender);
+                        ci.setUpdate(senderLatestUpdate);
+                    }
                     ci.setName(senderName);
                     ci.setPhotoUrl(senderPhotoUrl);
                     ci.setUnreadCount(newMessageCount);

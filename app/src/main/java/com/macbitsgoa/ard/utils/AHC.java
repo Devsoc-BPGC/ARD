@@ -204,7 +204,7 @@ public class AHC {
      * @param date Date object to use.
      * @return converted string.
      */
-    public static String getSimpleDayAndTime(@Nullable final Date date) {
+    public static String getSimpleDayOrTime(@Nullable final Date date) {
         final long diff = Math.abs(date.getTime() - Calendar.getInstance().getTime().getTime());
         if (diff / (1000 * 60 * 60 * 24) < 1)
             return getSimpleTime(date);
@@ -357,5 +357,10 @@ public class AHC {
         return "" + time.getTime()
                 + time.hashCode()
                 + data.hashCode();
+    }
+
+    public static String getImageUrlFromMimeType(@NonNull final String mimeType) {
+        AHC.logd(TAG, "Requested url for mime type " + mimeType);
+        return "https://ard-bits.firebaseapp.com/assets/icons/" + mimeType + "/icon.png";
     }
 }

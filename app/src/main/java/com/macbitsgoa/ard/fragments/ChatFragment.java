@@ -57,6 +57,9 @@ public class ChatFragment extends BaseFragment {
 
     private DatabaseReference myStatus;
 
+    /**
+     * TextView to show in case of no chats.
+     */
     TextView emptyListTV;
 
     RealmResults<ChatsItem> chats;
@@ -120,7 +123,7 @@ public class ChatFragment extends BaseFragment {
         myStatus.onDisconnect().removeValue();
 
         chats = database.where(ChatsItem.class)
-                .findAllSorted("update", Sort.DESCENDING);
+                .findAllSorted(ChatItemKeys.DB_DATE, Sort.DESCENDING);
 
         deleteEmptyChats();
         if (chats.size() == 0) {
@@ -150,10 +153,6 @@ public class ChatFragment extends BaseFragment {
             for (final ChatsItem cItem : allChats) {
                 if (r
                         .where(MessageItem.class)
-                        .equalTo(MessageItemKeys.OTHER_USER_ID, cItem.getId())
-                        .findAll().isEmpty()
-                        && r
-                        .where(DocumentItem.class)
                         .equalTo(MessageItemKeys.OTHER_USER_ID, cItem.getId())
                         .findAll().isEmpty())
                     cItem.deleteFromRealm();

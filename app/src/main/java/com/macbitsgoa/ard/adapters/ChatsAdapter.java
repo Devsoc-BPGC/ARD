@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.adapters;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,7 +16,6 @@ import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.ChatsViewHolder;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 import io.realm.RealmResults;
 
@@ -24,7 +24,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
     private RealmResults<ChatsItem> chats;
     private Context context;
 
-    public ChatsAdapter(@Nullable final RealmResults<ChatsItem> chats,
+    public ChatsAdapter(@NonNull final RealmResults<ChatsItem> chats,
                         @Nonnull final Context context) {
         this.chats = chats;
         this.context = context;
@@ -48,7 +48,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
                         .error(R.drawable.ic_contact))
                 .transition(DrawableTransitionOptions.withCrossFade(300))
                 .into(holder.image);
-        holder.time.setText(AHC.getSimpleDay(holder.item.getUpdate()));
+        holder.time.setText(AHC.getSimpleDayOrTime(holder.item.getUpdate()));
         holder.name.setText(holder.item.getName());
         holder.latest.setText(holder.item.getLatest());
         if (holder.item.getUnreadCount() == 0) {
@@ -64,6 +64,6 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
 
     @Override
     public int getItemCount() {
-        return chats != null ? chats.size() : 0;
+        return chats.size();
     }
 }

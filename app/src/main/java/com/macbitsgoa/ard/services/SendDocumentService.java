@@ -19,6 +19,9 @@ import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -33,7 +36,6 @@ import io.realm.Sort;
 public class SendDocumentService extends BaseIntentService {
 
     public static final String TAG = SendDocumentService.class.getSimpleName();
-    private Uri fileUri;
 
     public SendDocumentService() {
         super(TAG);
@@ -88,14 +90,39 @@ public class SendDocumentService extends BaseIntentService {
         }).addOnSuccessListener(taskSnapshot -> {
             // taskSnapshot.getMetadata() contains file metadata such as size, content-type,
             // and download URL.
-            Toast.makeText(this,
-                    "Document uploaded on server. Sending to user", Toast.LENGTH_SHORT).show();
-            Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
-            updateDocumentRemoteUrl(downloadUrl.toString(), messageId);
+            if (data.toString().contains("image")) {
+                StorageReference tRef = sRef.getParent().child("thumbs").child(documentId);
+
+                InputStream image_stream = null;
+                try {
+                    image_stream = getContentResolver().openInputStream(data);
+                    Bitmap bitmap = BitmapFactory.decodeStream(image_stream);
+                    bitmap = Bitmap.createScaledBitmap(bitmap,
+                            Math.min(200, bitmap.getWidth()),
+                            Math.min(200, bitmap.getHeight()),
+                            false
+                    );
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                    byte[] byteData = baos.toByteArray();
+                    UploadTask uploadThumbTask = tRef.putBytes(byteData);
+                    uploadThumbTask.addOnCompleteListener(task -> {
+                        Toast.makeText(SendDocumentService.this,
+                                "Document uploaded on server. Sending to user", Toast.LENGTH_SHORT).show();
+                        Uri downloadUrl = taskSnapshot.getMetadata().getDownloadUrl();
+                        updateDocumentRemoteUrl(downloadUrl.toString(),
+                                task.getResult().getDownloadUrl().toString(),
+                                messageId);
+                    });
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                    Toast.makeText(this, "Try again later", Toast.LENGTH_SHORT).show();
+                }
+            }
         }).addOnProgressListener(taskSnapshot -> {
             if (taskSnapshot.getBytesTransferred() != 0)
                 Toast.makeText(SendDocumentService.this,
-                        taskSnapshot.getBytesTransferred()/1000
+                        taskSnapshot.getBytesTransferred() / 1000
                                 + " Kbytes uploaded", Toast.LENGTH_SHORT).show();
         });
     }
@@ -145,7 +172,9 @@ public class SendDocumentService extends BaseIntentService {
      * @param firebaseUrl url in firebase.
      * @param messageId   unique message id.
      */
-    private void updateDocumentRemoteUrl(final String firebaseUrl, final String messageId) {
+    private void updateDocumentRemoteUrl(final String firebaseUrl,
+                                         final String thumbnailUrl,
+                                         final String messageId) {
         Realm database = Realm.getDefaultInstance();
         database.executeTransaction(realm -> {
             final DocumentItem dItem = realm.where(MessageItem.class)
@@ -157,6 +186,7 @@ public class SendDocumentService extends BaseIntentService {
                 return;
             }
             dItem.setRemoteUrl(firebaseUrl);
+            dItem.setRemoteThumbnailUrl(thumbnailUrl);
             dItem.getParentMessage().setMessageStatus(MessageStatusType.MSG_SENT);
         });
         sendDocument(database
