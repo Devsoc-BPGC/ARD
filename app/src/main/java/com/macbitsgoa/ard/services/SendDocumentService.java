@@ -204,9 +204,10 @@ public class SendDocumentService extends BaseIntentService {
         final Map<String, Map<String, String>> documentsMap = new HashMap<>();
 
         final Map<String, String> documentMap = new HashMap<>();
+        documentMap.put(DocumentItemKeys.DOCUMENT_ID, messageItem.getDocument().getId());
         documentMap.put(DocumentItemKeys.REMOTE_URL, messageItem.getDocument().getRemoteUrl());
         documentMap.put(DocumentItemKeys.MIME_TYPE, messageItem.getDocument().getMimeType());
-        documentMap.put(DocumentItemKeys.THUMBNAIL_URL, messageItem.getDocument().getRemoteThumbnailUrl());
+        documentMap.put(DocumentItemKeys.REMOTE_THUMBNAIL_URL, messageItem.getDocument().getRemoteThumbnailUrl());
 
         documentsMap.put("0", documentMap);
 
@@ -246,7 +247,7 @@ public class SendDocumentService extends BaseIntentService {
     private void notifyStatus(final String receiverId) {
         //Update any message read status of this receiver user
         final Intent notifyIntent = new Intent(this, NotifyService.class);
-        notifyIntent.putExtra(MessageItemKeys.RECEIVER_ID, receiverId);
+        notifyIntent.putExtra(MessageItemKeys.OTHER_USER_ID, receiverId);
         startService(notifyIntent);
     }
 }

@@ -134,10 +134,6 @@
             android:name=".activities.AnnActivity"
             android:label="@string/title_activity_ann"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".DocumentSendActivity"
-            android:label="@string/title_activity_document_send"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>

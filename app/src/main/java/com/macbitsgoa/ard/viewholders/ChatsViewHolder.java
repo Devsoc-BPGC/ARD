@@ -17,6 +17,7 @@ import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.ChatActivity;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.DocumentItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.DocumentItem;
@@ -92,7 +93,8 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
                         for (MessageItem mi : mis) mi.deleteFromRealm();
                         RealmResults<DocumentItem> dis = realm
                                 .where(DocumentItem.class)
-                                .equalTo(MessageItemKeys.OTHER_USER_ID, item.getId()).findAll();
+                                .equalTo(DocumentItemKeys.PARENT_MESSAGES
+                                        + "." + MessageItemKeys.MESSAGE_ID, item.getId()).findAll();
                         for (DocumentItem di : dis) di.deleteFromRealm();
                         ChatsItem ci = realm.where(ChatsItem.class)
                                 .equalTo(ChatItemKeys.DB_ID, item.getId()).findFirst();

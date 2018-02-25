@@ -166,7 +166,7 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> implements Ima
             case HomeType.PHOTO_ITEM: {
                 final ImageViewHolder imgvh = (ImageViewHolder) holder;
                 final PhotoItem pi = (PhotoItem) obj;
-                imgvh.setImage(Uri.parse(pi.getPhotoUrl()));
+                imgvh.setUri(pi.getPhotoUrl());
                 break;
             }
         }

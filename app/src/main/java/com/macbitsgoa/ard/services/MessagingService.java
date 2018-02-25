@@ -9,18 +9,19 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.DocumentItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
+import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.Queue;
 
 import io.realm.Realm;
+import io.realm.RealmList;
 
 public class MessagingService extends BaseIntentService {
 
@@ -36,7 +37,6 @@ public class MessagingService extends BaseIntentService {
 
     private final DatabaseReference messageStatusRef = getRootReference().child(AHC.FDR_CHAT);
 
-
     public MessagingService() {
         super(MessagingService.class.getSimpleName());
     }
@@ -44,6 +44,7 @@ public class MessagingService extends BaseIntentService {
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
         super.onHandleIntent(intent);
+        if (getUser() == null) return;
         final DatabaseReference pmReference = getRootReference()
                 .child(AHC.FDR_CHAT)
                 .child(getUser().getUid())
@@ -60,19 +61,13 @@ public class MessagingService extends BaseIntentService {
         sentMessagesStatusRef.addValueEventListener(sentMessagesStatusListener);
 
         try {
-            Thread.sleep(1000 * 60 * 5);
+            Thread.sleep(1000 * 60);
         } catch (final InterruptedException e) {
             e.printStackTrace();
         } finally {
-            AHC.setNextAlarm(this, MessagingService.class, REQUEST_CODE, 0);
+            AHC.setNextAlarm(this, MessagingService.class, REQUEST_CODE, 3);
             pmReference.removeEventListener(pmRefListener);
         }
-    }
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        if (getUser() == null) onDestroy();
     }
 
     /**
@@ -88,35 +83,20 @@ public class MessagingService extends BaseIntentService {
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 database = Realm.getDefaultInstance();
 
-                final Queue<DataSnapshot> newChatsQ = new LinkedList<>();
-                for (final DataSnapshot childShot : dataSnapshot.getChildren()) {
-                    newChatsQ.add(childShot);
-                }
-                while (!newChatsQ.isEmpty()) {
-                    final DataSnapshot newChatDS = newChatsQ.poll();
-                    final DataSnapshot senderChild = newChatDS.child(ChatItemKeys.SENDER);
-                    final String senderId = senderChild
+                for (final DataSnapshot senderSnapshot : dataSnapshot.getChildren()) {
+                    final DataSnapshot senderInfoSnapshot = senderSnapshot.child(ChatItemKeys.SENDER);
+                    final String senderId = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_ID).getValue(String.class);
-                    final String name = senderChild
+                    final String senderName = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_NAME).getValue(String.class);
-                    final String latest = senderChild
+                    final String latestFromSender = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_LATEST).getValue(String.class);
-                    final String photoUrl = senderChild
+                    final String senderPhotoUrl = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_PHOTO_URL).getValue(String.class);
-                    final Date update = senderChild
+                    final Date senderLatestUpdate = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_DATE).getValue(Date.class);
 
-
-                    if (senderId == null
-                            || name == null
-                            || latest == null) continue;
-
-                    final Queue<DataSnapshot> newMessagesQ = new LinkedList<>();
-                    for (final DataSnapshot child : newChatDS
-                            .child(ChatItemKeys.FDR_MESSAGES)
-                            .getChildren()) {
-                        newMessagesQ.add(child);
-                    }
+                    if (senderId == null) continue;
 
                     final DatabaseReference msgStatusWriteRef;
                     //TODO fix sentMessages value listener
@@ -126,63 +106,69 @@ public class MessagingService extends BaseIntentService {
                             .child(getUser().getUid())
                             .child(ChatItemKeys.MESSAGE_STATUS);
 
-                    while (!newMessagesQ.isEmpty()) {
-                        final DataSnapshot newMessageDS = newMessagesQ.poll();
-                        final String messageId = newMessageDS.getKey();
-                        final String messageData = newMessageDS.child(MessageItemKeys.FDR_DATA).getValue(String.class);
-                        final Date messageTime = newMessageDS.child(MessageItemKeys.FDR_DATE).getValue(Date.class);
+                    for (final DataSnapshot messageSnapshot : senderSnapshot
+                            .child(ChatItemKeys.FDR_MESSAGES).getChildren()) {
+                        final String messageId = messageSnapshot.getKey();
+                        final String messageData = messageSnapshot.child(MessageItemKeys.FDR_DATA)
+                                .getValue(String.class);
+                        final Date messageTime = messageSnapshot.child(MessageItemKeys.FDR_DATE)
+                                .getValue(Date.class);
 
                         if (messageData == null || messageTime == null || messageId == null)
                             continue;
 
-                        MessageItem mi = database.where(MessageItem.class)
-                                .equalTo(MessageItemKeys.MESSAGE_ID, messageId)
-                                .equalTo(MessageItemKeys.OTHER_USER_ID, senderId)
-                                .findFirst();
-                        database.beginTransaction();
-                        if (mi == null) {
-                            mi = database.createObject(MessageItem.class, messageId);
+                        RealmList<DocumentItem> documentItems = new RealmList<>();
+                        if (messageSnapshot.hasChild(MessageItemKeys.FDR_DOCUMENTS)) {
+                            DataSnapshot documentsSnapshot = messageSnapshot.child(MessageItemKeys.FDR_DOCUMENTS);
+                            for (DataSnapshot documentSnapshot : documentsSnapshot.getChildren()) {
+                                DocumentItem di = new DocumentItem();
+                                di.setId(documentSnapshot.child(DocumentItemKeys.DOCUMENT_ID).getValue(String.class));
+                                di.setRemoteUrl(documentSnapshot.child(DocumentItemKeys.REMOTE_URL).getValue(String.class));
+                                di.setMimeType(documentSnapshot.child(DocumentItemKeys.MIME_TYPE).getValue(String.class));
+                                di.setRemoteThumbnailUrl(documentSnapshot.child(DocumentItemKeys.REMOTE_THUMBNAIL_URL).getValue(String.class));
+                                di.setLocalUri(di.getRemoteUrl());
+                                //TODO set local thumbnail and uri
+                                documentItems.add(di);
+                            }
                         }
+
+                        MessageItem mi = new MessageItem();
+                        mi.setMessageId(messageId);
                         mi.setMessageData(messageData);
                         mi.setOtherUserId(senderId);
                         mi.setMessageTime(messageTime);
                         mi.setMessageRcvdTime(Calendar.getInstance().getTime());
                         mi.setMessageRcvd(true);
                         mi.setMessageStatus(MessageStatusType.MSG_RCVD);
-                        database.commitTransaction();
-
+                        mi.setDocuments(documentItems);
+                        database.executeTransaction(r -> {
+                            r.insertOrUpdate(mi);
+                        });
                         msgStatusWriteRef
                                 .child(messageId)
                                 .setValue(MessageStatusType.MSG_RCVD);
-                        newMessageDS.getRef().removeValue();
-                        final Intent broadcastIntent = new Intent(ChatItemKeys.NEW_MESSAGE_ARRIVED);
-                        broadcastIntent.putExtra(MessageItemKeys.OTHER_USER_ID, senderId);
-                        sendBroadcast(broadcastIntent);
+                        messageSnapshot.getRef().removeValue();
                     }
+                    final Intent broadcastIntent = new Intent(ChatItemKeys.NEW_MESSAGE_ARRIVED);
+                    broadcastIntent.putExtra(MessageItemKeys.OTHER_USER_ID, senderId);
+                    sendBroadcast(broadcastIntent);
 
-                    final Queue<DataSnapshot> messageStatusQ = new LinkedList<>();
-                    for (final DataSnapshot temp : newChatDS.child(ChatItemKeys.MESSAGE_STATUS).getChildren()) {
-                        messageStatusQ.add(temp);
-                    }
-
-                    while (!messageStatusQ.isEmpty()) {
-                        final DataSnapshot messageStatusDS = messageStatusQ.poll();
+                    //Our message status from other user
+                    for (final DataSnapshot ourMsgStatusSnapshot : senderSnapshot
+                            .child(ChatItemKeys.MESSAGE_STATUS).getChildren()) {
                         final MessageItem mi = database
                                 .where(MessageItem.class)
-                                .equalTo(MessageItemKeys.MESSAGE_ID, messageStatusDS.getKey())
+                                .equalTo(MessageItemKeys.MESSAGE_ID, ourMsgStatusSnapshot.getKey())
                                 .findFirst();
+                        ourMsgStatusSnapshot.getRef().removeValue();
                         if (mi == null) {
                             Log.e(TAG, "Message lost");
                             //If message is lost, we can safely remove this value from firebase
-                            messageStatusDS.getRef().removeValue();
                             continue;
                         }
                         database.beginTransaction();
-                        mi.setMessageStatus(messageStatusDS.getValue(Integer.class));
+                        mi.setMessageStatus(ourMsgStatusSnapshot.getValue(Integer.class));
                         database.commitTransaction();
-                        //Log.e(TAG, "removing read status value");
-                        //TODO work on fixing this
-                        //newChatDS.child(ChatItemKeys.MESSAGE_STATUS).child(messageStatusDS.getKey()).getRef().removeValue();
                     }
 
                     final int newMessageCount = database
@@ -198,21 +184,11 @@ public class MessagingService extends BaseIntentService {
                             .findFirst();
                     if (ci == null) {
                         ci = database.createObject(ChatsItem.class, senderId);
-                    } else {
-                        //TODO something wrong here
-                        /*
-                        01-01 12:17:55.357 25445-25445/com.macbitsgoa.ard.debug:BackgroundServices E/AndroidRuntime: FATAL EXCEPTION: main
-                        Process: com.macbitsgoa.ard.debug:BackgroundServices, PID: 25445
-                        java.lang.NullPointerException: Attempt to invoke virtual method 'long java.util.Date.getTime()' on a null object reference
-                        at com.macbitsgoa.ard.services.MessagingService$1.onDataChange(MessagingService.java:204)
-                        */
-                        if (update != null && update.getTime() >= ci.getUpdate().getTime()) {
-                            ci.setLatest(latest);
-                            ci.setUpdate(update);
-                        }
                     }
-                    ci.setName(name);
-                    ci.setPhotoUrl(photoUrl);
+                    ci.setLatest(latestFromSender);
+                    ci.setUpdate(senderLatestUpdate);
+                    ci.setName(senderName);
+                    ci.setPhotoUrl(senderPhotoUrl);
                     ci.setUnreadCount(newMessageCount);
                     database.commitTransaction();
 
@@ -227,9 +203,6 @@ public class MessagingService extends BaseIntentService {
                                     .findFirst()
                                     .deleteFromRealm();
                         });
-
-                    //dataSnapshot.child(senderId).child(ChatItemKeys.FDR_MESSAGES).getRef().removeValue();
-                    //dataSnapshot.child(senderId).child(ChatItemKeys.MESSAGE_STATUS).getRef().removeValue();
 
                     createNotification();
                 }
@@ -261,8 +234,8 @@ public class MessagingService extends BaseIntentService {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 database = Realm.getDefaultInstance();
-                for (final DataSnapshot child : dataSnapshot.getChildren()) {
-                    final String key = child.getKey();
+                for (final DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
+                    final String key = messageSnapshot.getKey();
                     final MessageItem mi = database
                             .where(MessageItem.class)
                             .equalTo(MessageItemKeys.MESSAGE_ID, key)
@@ -274,7 +247,7 @@ public class MessagingService extends BaseIntentService {
                     } else {
                         AHC.logd(TAG, "Sent message not in database");
                     }
-                    child.getRef().removeValue();
+                    messageSnapshot.getRef().removeValue();
                 }
                 database.close();
             }

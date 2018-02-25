@@ -223,7 +223,7 @@ public class ChatActivity extends BaseActivity {
             if (chat == null) {
                 chat = r.createObject(ChatsItem.class, otherUserId);
                 chat.setLatest("");
-                chat.setUpdate(null);
+                chat.setUpdate(Calendar.getInstance().getTime());
                 chat.setName(getIntent().getStringExtra("title"));
                 chat.setPhotoUrl(getIntent().getStringExtra("photoUrl"));
             }

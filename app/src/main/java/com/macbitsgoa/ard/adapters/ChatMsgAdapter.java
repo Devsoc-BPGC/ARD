@@ -80,12 +80,14 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
             DocumentItem di = mi.getDocuments().get(0);
             if (!di.getLocalUri().equals("") && di.getMimeType().contains("image"))
                 ((ImageViewHolder) holder)
-                        .setImage(Uri.parse(di.getLocalUri()),
+                        .setUri(Uri.parse(di.getLocalUri()),
+                                Uri.parse(di.getLocalUri()),
                                 RequestOptions.centerCropTransform());
             else {
                 AHC.logd(TAG, "Localuri was " + di.getLocalUri());
                 ((ImageViewHolder) holder)
-                        .setImage("http://pngimages.net/sites/default/files/document-png-image-65553.png");
+                        .setUri(di.getLocalUri(),
+                                "http://pngimages.net/sites/default/files/document-png-image-65553.png");
             }
         } else if (holder.getItemViewType() == RECEIVER || holder.getItemViewType() == SENDER) {
             ChatMsgViewHolder cmvh = (ChatMsgViewHolder) holder;
@@ -110,11 +112,11 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
 
     @Override
     public void onImageClick(final Uri uri) {
-        //nothing needed as of now
         if (uri == null) {
             AHC.logd(TAG, "Null uri for image");
             return;
         }
+        AHC.logd(TAG, "Uri for file " + uri);
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setDataAndType(uri, AHC.getMimeType(context, uri));
         intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);

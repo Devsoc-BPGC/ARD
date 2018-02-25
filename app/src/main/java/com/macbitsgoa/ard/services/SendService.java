@@ -181,7 +181,7 @@ public class SendService extends BaseIntentService {
     private void notifyStatus(final String receiverId) {
         //Update any message read status of this receiver user
         final Intent notifyIntent = new Intent(this, NotifyService.class);
-        notifyIntent.putExtra(MessageItemKeys.RECEIVER_ID, receiverId);
+        notifyIntent.putExtra(MessageItemKeys.OTHER_USER_ID, receiverId);
         startService(notifyIntent);
     }
 

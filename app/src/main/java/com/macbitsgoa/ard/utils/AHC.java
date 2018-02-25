@@ -5,12 +5,10 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -302,8 +300,8 @@ public class AHC {
      * Method to return mime type of file as a string.
      *
      * @param context Context object to use.
-     * @param uri     Uri of file.
-     * @return mime type as string.
+     * @param uri     A Uri identifying content (either a list or specific type), using the content:// scheme.
+     * @return A MIME type for the content, or null if the URL is invalid or the type is unknown
      */
     public static String getMimeType(final Context context, final Uri uri) {
         return context.getContentResolver().getType(uri);

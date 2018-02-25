@@ -1,5 +1,6 @@
 package com.macbitsgoa.ard.models;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.Calendar;
@@ -11,16 +12,29 @@ import io.realm.annotations.PrimaryKey;
 public class ChatsItem extends RealmObject {
     @PrimaryKey
     private String id;
+
+    /**
+     * Name of other user.
+     */
+    @NonNull
     private String name;
+
+    @NonNull
     private String latest;
     private String photoUrl;
 
-    @Nullable
+    /**
+     * Latest message time. Should not be null.
+     */
+    @NonNull
     private Date update;
+
+    /**
+     * Current unread count.
+     */
     private int unreadCount;
 
     public ChatsItem() {
-        this.id = null;
         this.name = "";
         this.latest = "";
         this.photoUrl = "";
@@ -28,7 +42,8 @@ public class ChatsItem extends RealmObject {
         this.unreadCount = 0;
     }
 
-    public ChatsItem(final String id, final String name, final String latest, final String photoUrl,
+    public ChatsItem(final String id, @NonNull final String name,
+                     @NonNull final String latest, final String photoUrl,
                      @Nullable final Date update, final int unreadCount) {
         this.id = id;
         this.name = name;
@@ -46,20 +61,22 @@ public class ChatsItem extends RealmObject {
         this.id = id;
     }
 
+    @NonNull
     public String getName() {
         return name;
     }
 
-    public void setName(final String name) {
+    public void setName(@NonNull final String name) {
         this.name = name;
     }
 
+    @NonNull
     public String getLatest() {
         return latest;
     }
 
-    public void setLatest(final String latest) {
-        this.latest = latest;
+    public void setLatest(@Nullable final String latest) {
+        this.latest = latest == null ? "" : latest;
     }
 
     public String getPhotoUrl() {
@@ -70,12 +87,14 @@ public class ChatsItem extends RealmObject {
         this.photoUrl = photoUrl;
     }
 
+    @NonNull
     public Date getUpdate() {
         return update;
     }
 
-    public void setUpdate(final Date update) {
-        this.update = update;
+    public void setUpdate(@Nullable final Date update) {
+        if (update == null) this.update = Calendar.getInstance().getTime();
+        if (update.getTime() > this.update.getTime()) this.update = update;
     }
 
     public int getUnreadCount() {
@@ -89,10 +108,10 @@ public class ChatsItem extends RealmObject {
     @Override
     public String toString() {
         return "ChatsItem{"
-                + "id='" + id + '\''
-                + ", name='" + name + '\''
-                + ", latest='" + latest + '\''
-                + ", photoUrl='" + photoUrl + '\''
+                + "id=" + id
+                + ", name=" + name
+                + ", latest=" + latest
+                + ", photoUrl=" + photoUrl
                 + ", update=" + update
                 + ", unreadCount=" + unreadCount
                 + '}';
