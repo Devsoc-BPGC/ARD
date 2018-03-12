@@ -71,5 +71,5 @@
   ```bash
   git checkout master
   git branch -D fix-issue-N   # deletes the local fix-issue-N branch
-  git push -d fix-issue-N     # deletes the fix-issue-N branch at origin
+  git push -d origin fix-issue-N     # deletes the fix-issue-N branch at origin
   ```
