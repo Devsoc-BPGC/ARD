@@ -20,6 +20,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.helpers.AuthHelperForGoogle;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
@@ -163,6 +164,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
         if (pd != null)
             pd.cancel();
+        FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
         finish();
         startActivity(new Intent(this, MainActivity.class));
     }

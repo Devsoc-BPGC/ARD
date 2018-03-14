@@ -84,7 +84,6 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
                 if(imageUrl == null) imageUrl = di.getLocalUri();
                 if(imageUrl == null) imageUrl = di.getRemoteThumbnailUrl();
                 if(imageUrl == null) imageUrl = di.getRemoteUrl();
-
                 imvh.setUri(Uri.parse(di.getLocalUri()),
                                 Uri.parse(imageUrl),
                                 RequestOptions.centerCropTransform());
