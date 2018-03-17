@@ -36,7 +36,6 @@ import io.realm.Sort;
 
 /**
  * Service to show various section updates. Currently chats and announcements are shown.
- * Announcements that have {@link AnnItem#read} status as {@code false} are include.
  * For chats those that have {@link MessageStatusType} as {@code MessageStatusType.MSG_RCVD} or
  * from other senders is shown.
  *
@@ -54,8 +53,6 @@ public class NotificationService extends BaseIntentService {
      * Request code for alarm manager.
      */
     public static final int RC = 90;
-
-    public static final int ANN_NOTIF_CODE = 193;
 
     /**
      * Realm database.
@@ -81,69 +78,7 @@ public class NotificationService extends BaseIntentService {
         database = Realm.getDefaultInstance();
         nmc = NotificationManagerCompat.from(this);
         chatNotifications();
-        announcementNotifications();
         database.close();
-    }
-
-    /**
-     * Genereate notifications for new announcements.
-     */
-    private void announcementNotifications() {
-        final int pIntentCode = 192;
-
-        ApplicationInfo appInfo = null;
-        try {
-            appInfo = getPackageManager().getApplicationInfo(BuildConfig.APPLICATION_ID, 0);
-        } catch (final PackageManager.NameNotFoundException e) {
-            Log.e(TAG, "Error in getting installed date info, " + e.toString());
-        }
-        final String appFile;
-        long installedTime = Long.MAX_VALUE;
-        if (appInfo != null)
-        {
-            appFile = appInfo.sourceDir;
-            installedTime = new File(appFile).lastModified();
-        }
-
-        if (AnnActivity.isActive || installedTime == Long.MAX_VALUE) return;
-
-        final RealmList<AnnItem> annItems = new RealmList<>();
-        final Date date = new Date(installedTime);
-        Log.e(TAG, "installed date as " + date);
-        annItems.addAll(database.where(AnnItem.class)
-                .equalTo(AnnItemKeys.READ, false).findAll());
-        if (annItems.isEmpty()) return;
-
-        final Intent intent = new Intent(this, AnnActivity.class);
-        final PendingIntent pIntent = PendingIntent.getActivity(this,
-                pIntentCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
-        final NotificationCompat.Builder builder
-                = new NotificationCompat.Builder(this, "Announcements")
-                .setAutoCancel(true)
-                .setContentIntent(pIntent)
-                .setShowWhen(true)
-                .setVibrate(new long[]{Notification.DEFAULT_VIBRATE})
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setTicker("New announcement from ARD");
-
-        if (annItems.size() == 1) {
-            builder.setContentTitle(annItems.get(0).getData())
-                    .setContentText(Html.fromHtml(annItems.get(0).getData()))
-                    .setStyle(new NotificationCompat.BigTextStyle()
-                            .bigText(Html.fromHtml(annItems.get(0).getData()))
-                            .setBigContentTitle("ARD Announcement"));
-
-        } else {
-            final NotificationCompat.InboxStyle is = new NotificationCompat.InboxStyle()
-                    .setBigContentTitle("ARD Announcements");
-            for (int i = 0; i < annItems.size(); i++) {
-                is.addLine(Html.fromHtml(annItems.get(i).getData()));
-            }
-            builder.setContentTitle(annItems.size() + " new announcements")
-                    .setContentText(Html.fromHtml("Latest: " + annItems.get(0).getData()))
-                    .setStyle(is);
-        }
-        nmc.notify(ANN_NOTIF_CODE, builder.build());
     }
 
     private void chatNotifications() {

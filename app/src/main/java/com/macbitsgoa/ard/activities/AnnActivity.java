@@ -17,7 +17,7 @@ import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
-import com.macbitsgoa.ard.services.NotificationService;
+import com.macbitsgoa.ard.services.AnnNotifyService;
 import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -26,7 +26,6 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -72,9 +71,6 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
      */
     private RecyclerView.OnItemTouchListener onItemTouchListener;
 
-    //boolean to indicate whether user is in this activity.
-    public static boolean isActive = false;
-
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -90,9 +86,7 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
         annRV.addOnItemTouchListener(onItemTouchListener);
         annRV.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        //Cancel any ongoing notifications
-        final NotificationManagerCompat nmc = NotificationManagerCompat.from(this);
-        nmc.cancel(NotificationService.ANN_NOTIF_CODE);
+        //TODO cancel ongoing notifications
 
         //Generate data
         final List<TypeItem> annItemsList = new ArrayList<>();
@@ -111,7 +105,7 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
         //Setup on change listener
         anns.addChangeListener(annItems -> {
             annItemsList.clear();
-            nmc.cancel(NotificationService.ANN_NOTIF_CODE);
+            //TODO cancel ongoing notifications
             for (final AnnItem ais : annItems) {
                 annItemsList.add(new TypeItem(ais, PostType.ANNOUNCEMENT));
             }
@@ -122,27 +116,6 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
 
         //set adapter
         annRV.setAdapter(homeAdapter);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        isActive = true;
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        database.executeTransactionAsync(r -> {
-            final RealmList<AnnItem> annItemsUpdate = new RealmList<>();
-            annItemsUpdate.addAll(r.where(AnnItem.class)
-                    .equalTo("read", false)
-                    .findAll());
-            for (final AnnItem ai : annItemsUpdate) {
-                ai.setRead(true);
-            }
-        });
-        isActive = false;
     }
 
     /**

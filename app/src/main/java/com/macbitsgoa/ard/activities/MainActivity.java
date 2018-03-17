@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.ChatFragment;
@@ -83,6 +84,9 @@ public class MainActivity extends BaseActivity
             finish();
         }
         AHC.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
+        FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
+        FirebaseMessaging.getInstance().subscribeToTopic(BuildConfig.BUILD_TYPE);
+        FirebaseMessaging.getInstance().subscribeToTopic("android");
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);

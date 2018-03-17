@@ -24,6 +24,12 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimaryDark" />
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
@@ -33,15 +39,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.macbitsgoa.ard.activities.MainActivity" />
         </activity>
         <activity
             android:name=".activities.AuthActivity"
@@ -100,7 +97,7 @@
             android:description="@string/home_service_desc"
             android:process=":BackgroundServices" />
         <service android:name=".services.SendDocumentService" />
-        <service android:name=".services.FCMMessagingService">
+        <service android:name=".services.FCMService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
@@ -110,6 +107,7 @@
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>
         </service>
+        <service android:name=".services.AnnNotifyService" />
 
         <receiver
             android:name=".services.BootBroadcastReceiver"

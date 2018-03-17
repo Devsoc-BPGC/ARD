@@ -116,8 +116,6 @@ public class HomeAdapter extends RecyclerView.Adapter<ViewHolder> implements Ima
                 anvh.extras.setText(Html.fromHtml(ai.getAuthor()
                         + ", "
                         + AHC.getSimpleDayOrTime(ai.getDate())));
-                if (ai.isRead()) anvh.newTag.setVisibility(View.INVISIBLE);
-                else anvh.newTag.setVisibility(View.VISIBLE);
                 break;
             }
             case HomeType.HOME_ITEM: {

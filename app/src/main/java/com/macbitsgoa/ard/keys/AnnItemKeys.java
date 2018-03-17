@@ -20,11 +20,6 @@ public class AnnItemKeys {
     public static final String SECONDARY_KEY = "annItem";
 
     /**
-     * Key for {@link com.macbitsgoa.ard.types.PostType#ANNOUNCEMENT} field.
-     */
-    public static final String TYPE_KEY = "type";
-
-    /**
      * Key for {@link com.macbitsgoa.ard.models.AnnItem#data} field.
      */
     public static final String DATA = "data";
@@ -39,8 +34,4 @@ public class AnnItemKeys {
      */
     public static final String DATE = "date";
 
-    /**
-     * Key for {@link com.macbitsgoa.ard.models.AnnItem#read} field.
-     */
-    public static final String READ = "read";
 }

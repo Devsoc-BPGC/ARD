@@ -35,12 +35,6 @@ public class AnnViewHolder extends RecyclerView.ViewHolder {
     public TextView data;
 
     /**
-     * Cardview to highligh new unread items.
-     */
-    @BindView(R.id.cv_vh_ann_activity_item)
-    public CardView newTag;
-
-    /**
      * Constructor for {@link com.macbitsgoa.ard.types.PostType#ANNOUNCEMENT} post.
      *
      * @param itemView inflated view.

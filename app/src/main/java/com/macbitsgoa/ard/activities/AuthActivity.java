@@ -67,7 +67,11 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
-
+        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+            final Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
         googleApiClient = setupGoogleApiClient();
         mHelper = new AuthHelperForGoogle(this, FirebaseAuth.getInstance());
 
@@ -164,7 +168,6 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
         if (pd != null)
             pd.cancel();
-        FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
         finish();
         startActivity(new Intent(this, MainActivity.class));
     }
