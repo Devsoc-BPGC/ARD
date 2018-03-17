@@ -14,41 +14,35 @@ import io.realm.annotations.PrimaryKey;
  */
 public class DocumentItem extends RealmObject {
     /**
-     * Id of document.
-     */
-    @PrimaryKey
-    private String id;
-
-    /**
-     * Url of remote copy.
-     */
-    private String remoteUrl;
-
-    /**
-     * URI of local image as string.
-     */
-    private String localUri;
-
-    /**
-     * Mime type.
-     */
-    private String mimeType;
-
-    /**
-     * Remote thumbnail url.
-     */
-    private String remoteThumbnailUrl;
-
-    /**
-     * Local thumbnail url.
-     */
-    private String localThumbnailUri;
-
-    /**
      * Back link to the message owning this document.
      */
     @LinkingObjects(MessageItemKeys.DB_DOCUMENTS)
     private final RealmResults<MessageItem> parentMessages = null;
+    /**
+     * Id of document.
+     */
+    @PrimaryKey
+    private String id;
+    /**
+     * Url of remote copy.
+     */
+    private String remoteUrl;
+    /**
+     * URI of local image as string.
+     */
+    private String localUri;
+    /**
+     * Mime type.
+     */
+    private String mimeType;
+    /**
+     * Remote thumbnail url.
+     */
+    private String remoteThumbnailUrl;
+    /**
+     * Local thumbnail url.
+     */
+    private String localThumbnailUri;
 
     public DocumentItem() {
         remoteThumbnailUrl = "";

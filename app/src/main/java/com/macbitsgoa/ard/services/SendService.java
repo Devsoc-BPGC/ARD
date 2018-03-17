@@ -89,7 +89,7 @@ public class SendService extends BaseIntentService {
      * messages that haven't yet been added to database.
      *
      * @param messageData Message Data to send.
-     * @param otherUserId  Receiving user's unique user id.
+     * @param otherUserId Receiving user's unique user id.
      */
     private void sendMessage(final String messageData, final String otherUserId) {
 
@@ -116,7 +116,7 @@ public class SendService extends BaseIntentService {
         final String messageId = mItem.getMessageId();
         final String messageData = mItem.getMessageData();
         final String receiverId = mItem.getOtherUserId();
-        final String latestMessage = messageData.substring(0, messageData.length() % 50);
+        final String latestMessage = messageData;
         final Date messageTime = mItem.getMessageTime();
 
         //First write to local database

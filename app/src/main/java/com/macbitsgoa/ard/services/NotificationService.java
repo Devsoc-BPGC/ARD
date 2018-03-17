@@ -3,34 +3,24 @@ package com.macbitsgoa.ard.services;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
-import android.text.Html;
 import android.util.Log;
 
-import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.activities.ChatActivity;
-import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
-import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.ChatsItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.types.MessageStatusType;
 import com.macbitsgoa.ard.utils.AHC;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import io.realm.Realm;
-import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
 

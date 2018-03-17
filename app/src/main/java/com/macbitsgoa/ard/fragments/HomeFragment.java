@@ -85,32 +85,27 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
      */
     @BindView(R.id.vp_fragment_home_slideshow)
     public ViewPager viewPagerSlideShow;
-
+    /**
+     * HomeAdapter object.
+     */
+    public HomeAdapter homeAdapter;
     /**
      * Toolbar search view object.
      */
     @BindView(R.id.search_view_fragment_home)
     SearchView searchView;
 
+    //----------------------------------------------------------------------------------------------
     @BindView(R.id.ab_fragment_home)
     AppBarLayout appBarLayout;
-
-    //----------------------------------------------------------------------------------------------
-
-    /**
-     * HomeAdapter object.
-     */
-    public HomeAdapter homeAdapter;
-
+    Handler handler;
+    Runnable update;
     private List<TypeItem> dataSet;
-
     /**
      * Unbinder for ButterKnife.
      */
     private Unbinder unbinder;
-
     private SlideshowAdapter slideshowAdapter;
-
     /**
      * Reference to node {@link AHC#FDR_HOME} to which listener is attached.
      */
@@ -120,19 +115,15 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
      */
     //TODO change to fhr home..and change fdr home to home
     private DatabaseReference slideShowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
-
     private ValueEventListener slideShowEventListener;
-
     /**
      * EventListener for {@link AHC#FDR_HOME} which is required to remove in {@link #onStop()}.
      */
     private ValueEventListener homeEventListener;
-
     /**
      * Item touch listener of RecyclerView.
      */
     private RecyclerView.OnItemTouchListener onItemTouchListener;
-
     /**
      * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
      */
@@ -187,9 +178,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
         homeEventListener = getValueEventListener();
         dbRef.addValueEventListener(homeEventListener);
     }
-
-    Handler handler;
-    Runnable update;
 
     private void setupSlideshow() {
         slideshowAdapter = new SlideshowAdapter();

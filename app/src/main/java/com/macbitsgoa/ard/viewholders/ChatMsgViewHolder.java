@@ -20,17 +20,13 @@ public class ChatMsgViewHolder extends RecyclerView.ViewHolder {
      * Maximum width fraction of {@link #message} of screen size.
      */
     public static final float MAX_WIDTH_FRACTION = 0.6f;
-
-    private TextView time;
-
-    private TextView message;
-
-    private ImageView status;
-
     /**
      * Used to add extra margin between chat messages.
      */
     public View emptySpace;
+    private TextView time;
+    private TextView message;
+    private ImageView status;
 
     public ChatMsgViewHolder(final View itemView) {
         super(itemView);

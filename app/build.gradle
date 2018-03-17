@@ -2,6 +2,7 @@ apply plugin: 'checkstyle'
 apply plugin: 'com.android.application'
 apply plugin: 'jacoco'
 apply plugin: 'realm-android'
+apply plugin: 'io.fabric'
 
 ext {
     androidTestVer = "0.5"
@@ -10,15 +11,16 @@ ext {
     checkstyleVer = '7.7'
     compileSdkVer = 26
     constraintVer = "1.0.2"
+    crashAnalytics = "2.9.1"
     dexMakerVer = "1.2"
     espContVer = "2.2.2"
     espCoreVer = "2.2.2"
     espIntVer = "2.2.2"
     espUIAVer = "2.1.2"
-    firebaseVer = "11.2.0"
+    firebaseVer = "11.8.0"
     flexboxVer = "0.3.1"
     glideVer = "4.0.0-RC0"
-    playServicesVer = "11.2.0"
+    playServicesVer = "11.8.0"
     hamcrestVer = "1.3"
     jacocoVer = "0.7.9"
     junitVer = "4.12"
@@ -30,8 +32,8 @@ ext {
     rxJava2Ver = "2.1.6"
     supportVer = "27.1.0"
     targetSdkVer = 26
-    verCode = 5
-    verName = "1.3-beta"
+    verCode = 6
+    verName = "1.4-beta"
     vPagerIndVer = "1.0.2"
 }
 
@@ -117,21 +119,22 @@ dependencies {
     implementation "com.android.support:cardview-v7:${supportVer}"
     implementation "com.android.support:support-compat:${supportVer}"
 
-    implementation "com.jakewharton:butterknife:${butterknifeVer}"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
-    annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
     implementation "com.google.firebase:firebase-core:${firebaseVer}"
     implementation "com.google.firebase:firebase-database:${firebaseVer}"
     implementation "com.google.firebase:firebase-storage:${firebaseVer}"
     implementation "com.google.firebase:firebase-auth:${firebaseVer}"
     implementation "com.google.android.gms:play-services-auth:${playServicesVer}"
     implementation "com.google.firebase:firebase-messaging:${firebaseVer}"
-
-    implementation "com.github.bumptech.glide:glide:${glideVer}"
-    annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
-    implementation "com.lapism:searchview:${lapismSearchVer}"
     implementation "com.google.android:flexbox:${flexboxVer}"
+    implementation "com.crashlytics.sdk.android:crashlytics:${crashAnalytics}"
+
+    implementation "com.jakewharton:butterknife:${butterknifeVer}"
+    implementation "com.github.bumptech.glide:glide:${glideVer}"
+    implementation "com.lapism:searchview:${lapismSearchVer}"
     implementation "com.github.vivchar:ViewPagerIndicator:${vPagerIndVer}"
+    annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
+    annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
 
     implementation "io.reactivex.rxjava2:rxjava:${rxJava2Ver}"
 

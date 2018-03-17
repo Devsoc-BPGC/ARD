@@ -42,6 +42,7 @@ public class MainActivity extends BaseActivity
         ForumFragmentListener,
         ChatFragmentListener {
 
+    private static int currentSection = MainActivityType.HOME;
     /**
      * Bottom navigation view.
      */
@@ -53,8 +54,6 @@ public class MainActivity extends BaseActivity
      * Value : Access order (lower is more recent).
      */
     HashMap<Integer, Integer> sectionsHistory = new HashMap<>();
-
-    private static int currentSection = MainActivityType.HOME;
 
     /**
      * Fragment manager used to handle the 3 fragments.

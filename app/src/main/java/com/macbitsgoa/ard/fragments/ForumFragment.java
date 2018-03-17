@@ -6,8 +6,11 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -113,7 +116,7 @@ public class ForumFragment extends BaseFragment {
         final View view = inflater.inflate(R.layout.fragment_forum, container, false);
         mListener.updateForumFragment();
         unbinder = ButterKnife.bind(this, view);
-
+        viewPager.setOffscreenPageLimit(3);
         return view;
     }
 
@@ -122,6 +125,7 @@ public class ForumFragment extends BaseFragment {
         super.onStart();
         init();
     }
+
 
     /**
      * All inits can be done here for easy reading.

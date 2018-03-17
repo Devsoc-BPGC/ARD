@@ -12,7 +12,10 @@ import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 
 /**
- * Created by vikramaditya on 17/3/18.
+ * Service to notify Announcement data. Intent should contain author and data strings as extras.
+ * Use keys {@link AnnItemKeys#AUTHOR} and {@link AnnItemKeys#DATA}.
+ *
+ * @author Vikramaditya Kukreja.
  */
 
 public class AnnNotifyService extends BaseIntentService {
@@ -35,7 +38,10 @@ public class AnnNotifyService extends BaseIntentService {
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentText(data)
                 .setAutoCancel(true)
-                .setContentIntent(PendingIntent.getActivity(this, id, new Intent(this, AnnActivity.class), PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(PendingIntent
+                        .getActivity(this, id,
+                                new Intent(this, AnnActivity.class),
+                                PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentTitle("New announcement from ARD")
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
                 .setOnlyAlertOnce(true)

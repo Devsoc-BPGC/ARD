@@ -225,12 +225,6 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         mListener = listener;
     }
 
-    public void setText(@Nullable final CharSequence text) {
-        mRelayout = true;
-        mTv.setText(text);
-        setVisibility(TextUtils.isEmpty(text) ? View.GONE : View.VISIBLE);
-    }
-
     public void setText(@Nullable final CharSequence text,
                         @NonNull final SparseBooleanArray collapsedStatus, final int position) {
         mCollapsedStatus = collapsedStatus;
@@ -254,6 +248,12 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
             return "";
         }
         return mTv.getText();
+    }
+
+    public void setText(@Nullable final CharSequence text) {
+        mRelayout = true;
+        mTv.setText(text);
+        setVisibility(TextUtils.isEmpty(text) ? View.GONE : View.VISIBLE);
     }
 
     private void init(final AttributeSet attrs) {
@@ -305,6 +305,16 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         return textHeight + padding;
     }
 
+    public interface OnExpandStateChangeListener {
+        /**
+         * Called when the expand/collapse animation has been finished
+         *
+         * @param textView   - TextView being expanded/collapsed
+         * @param isExpanded - true if the TextView has been expanded
+         */
+        void onExpandStateChanged(TextView textView, boolean isExpanded);
+    }
+
     class ExpandCollapseAnimation extends Animation {
         private final View mTargetView;
         private final int mStartHeight;
@@ -339,15 +349,5 @@ public class ExpandableTextView extends LinearLayout implements View.OnClickList
         public boolean willChangeBounds() {
             return true;
         }
-    }
-
-    public interface OnExpandStateChangeListener {
-        /**
-         * Called when the expand/collapse animation has been finished
-         *
-         * @param textView   - TextView being expanded/collapsed
-         * @param isExpanded - true if the TextView has been expanded
-         */
-        void onExpandStateChanged(TextView textView, boolean isExpanded);
     }
 }

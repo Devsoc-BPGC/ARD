@@ -12,10 +12,10 @@ import android.support.annotation.Nullable;
 
 /**
  * Drawable decorator which draws the target drawable similarly to an ImageView with scaleType=centerCrop
- *
+ * <p>
  * Example usage:
- *     final Drawable bg = getResources().getDrawable(R.drawable.screen);
- *     getWindow().setBackgroundDrawable(new CenterCropDrawable(bg));
+ * final Drawable bg = getResources().getDrawable(R.drawable.screen);
+ * getWindow().setBackgroundDrawable(new CenterCropDrawable(bg));
  */
 public class CenterCropDrawable extends Drawable {
 
@@ -44,7 +44,7 @@ public class CenterCropDrawable extends Drawable {
         inverse.mapRect(sourceRect);
 
         target.setBounds(Math.round(sourceRect.left), Math.round(sourceRect.top),
-                         Math.round(sourceRect.right), Math.round(sourceRect.bottom));
+                Math.round(sourceRect.right), Math.round(sourceRect.bottom));
 
         super.setBounds(left, top, right, bottom);
     }

@@ -30,28 +30,22 @@ import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ChatMsgAdapter;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
-import com.macbitsgoa.ard.keys.DocumentItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
-import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.NotifyService;
 import com.macbitsgoa.ard.services.SendDocumentService;
 import com.macbitsgoa.ard.services.SendService;
-import com.macbitsgoa.ard.types.MessageType;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.CenterCropDrawable;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import io.realm.OrderedCollectionChangeSet;
-import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -70,56 +64,43 @@ public class ChatActivity extends BaseActivity {
     private static final int DOCUMENT_READ_REQUEST_CODE = 452;
 
     //----------------------------------------------------------------------------------------------
+    public static boolean visible = false;
+    public static String otherUserId = null;
     /**
      * Reference to the "chats" node on Firebase.
      */
     DatabaseReference chatsReference = getRootReference().child(AHC.FDR_CHAT);
-
     /**
      * Reference to "online" node on Firebase.
      */
     DatabaseReference onlineStatus = getRootReference().child(AHC.FDR_ONLINE);
-
     /**
      * Get current user's online status reference.
      */
     DatabaseReference myStatus = onlineStatus.child(getUser().getUid());
-
     /**
      * Other user's online status.
      */
     DatabaseReference theirStatus;
     DatabaseReference theirReadStatusRef = chatsReference;
-
     /**
      * Current session id. Used for online status.
      */
     String sessionId;
-    public static boolean visible = false;
-
     @BindView(R.id.recyclerView_activity_chat)
     RecyclerView chatsRV;
-
     @BindView(R.id.ll_frame_chat_toolbar_icon)
     ImageView icon;
-
     @BindView(R.id.imgBtn_frame_comment_doc)
     ImageButton uploadDocImgBtn;
-
     @BindView(R.id.tv_frame_chat_toolbar_title)
     TextView title;
-
     @BindView(R.id.tv_frame_chat_toolbar_subtitle)
     TextView subtitle;
-
     @BindView(R.id.editText_frame_comment_message)
     EditText message;
-
     @BindView(R.id.fab_frame_comment_send)
     FloatingActionButton sendFab;
-
-    public static String otherUserId = null;
-
     RealmResults<MessageItem> messageItems;
 
     ChatMsgAdapter chatMsgAdapter;

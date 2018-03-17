@@ -34,6 +34,10 @@ public class UserItemKeys {
      * Field {@link UserItem#photoUrl} (photo url of user).
      */
     public static final String PHOTO_URL = "photoUrl";
+    /**
+     * Phone number of user.
+     */
+    public static final String PHONE_NUMBER = "phoneNumber";
 
     /**
      * Field {@link UserItem#photoUrl} (photo url of user).

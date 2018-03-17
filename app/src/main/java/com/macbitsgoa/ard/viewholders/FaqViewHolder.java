@@ -3,7 +3,6 @@ package com.macbitsgoa.ard.viewholders;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.TextView;

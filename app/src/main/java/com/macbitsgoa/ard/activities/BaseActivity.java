@@ -61,7 +61,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
         if (FirebaseAuth.getInstance().getCurrentUser() == null && !(this instanceof AuthActivity)) {
             startActivity(new Intent(this, AuthActivity.class));
         }
-        AHC.setNextAlarm(this, HomeService.class, HomeService.REQUEST_CODE, 0);
         AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
         database = Realm.getDefaultInstance();
     }
@@ -70,7 +69,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         database.close();
-        AHC.setNextAlarm(this, HomeService.class, HomeService.REQUEST_CODE, 0);
         AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
     }
 

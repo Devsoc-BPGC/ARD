@@ -2,7 +2,6 @@ package com.macbitsgoa.ard.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,7 +16,6 @@ import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
-import com.macbitsgoa.ard.services.AnnNotifyService;
 import com.macbitsgoa.ard.types.PostType;
 import com.macbitsgoa.ard.utils.AHC;
 

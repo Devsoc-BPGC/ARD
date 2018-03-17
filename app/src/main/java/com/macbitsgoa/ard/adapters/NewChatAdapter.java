@@ -1,9 +1,7 @@
 package com.macbitsgoa.ard.adapters;
 
 import android.app.Activity;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.ViewGroup;
 
@@ -14,17 +12,11 @@ import com.macbitsgoa.ard.viewholders.TextViewHolder;
 
 import java.util.List;
 
-import io.realm.RealmResults;
-
 /**
  * Created by vikramaditya on 29/10/17.
  */
 
 public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    private List<UserItem> admins;
-    private List<UserItem> users;
-    private Activity context;
 
     /**
      * Used for title "Admin" and "User"
@@ -35,6 +27,9 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
      * It is a key pointing to the fact that current item is a user, whether admin or not.
      */
     private static final int USER = 1;
+    private List<UserItem> admins;
+    private List<UserItem> users;
+    private Activity context;
 
     public NewChatAdapter(final List<UserItem> admins,
                           final List<UserItem> users,
@@ -71,7 +66,7 @@ public class NewChatAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     @Override
     public int getItemCount() {
         int size = 1 + admins.size();
-        size += !users.isEmpty()? 1 + users.size() : 0;
+        size += !users.isEmpty() ? 1 + users.size() : 0;
         return size;
     }
 

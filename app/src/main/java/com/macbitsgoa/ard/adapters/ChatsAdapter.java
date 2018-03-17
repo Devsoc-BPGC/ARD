@@ -30,8 +30,9 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
         this.context = context;
     }
 
+    @NonNull
     @Override
-    public ChatsViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+    public ChatsViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         final View view = inflater.inflate(R.layout.vh_chat_fragment_chats,
                 parent, false);
@@ -39,7 +40,7 @@ public class ChatsAdapter extends RecyclerView.Adapter<ChatsViewHolder> {
     }
 
     @Override
-    public void onBindViewHolder(final ChatsViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final ChatsViewHolder holder, final int position) {
         holder.item = chats.get(position);
         Glide.with(context)
                 .load(holder.item.getPhotoUrl())

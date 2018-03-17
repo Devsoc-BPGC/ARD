@@ -25,7 +25,7 @@ public class ForumAdapter extends RecyclerView.Adapter<FaqViewHolder> {
     /**
      * Item list to use as data source.
      */
-    private List<TypeItem> items;
+    private List<FaqItem> items;
 
     /**
      * Maintains expanded text info.
@@ -36,23 +36,24 @@ public class ForumAdapter extends RecyclerView.Adapter<FaqViewHolder> {
      * Constructor for items of {@link TypeItem} class. Automatically initialises a sparse boolean
      * array to maintain clicked items info.
      *
-     * @param items NonNull list of {@link TypeItem}.
+     * @param items List of {@link FaqItem}.
      */
-    public ForumAdapter(@NonNull final List<TypeItem> items) {
+    public ForumAdapter(@NonNull final List<FaqItem> items) {
         this.items = items;
         sba = new SparseBooleanArray(getItemCount());
     }
 
+    @NonNull
     @Override
-    public FaqViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+    public FaqViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         final View view = inflater.inflate(R.layout.vh_fg_forum_general, parent, false);
         return new FaqViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(final FaqViewHolder holder, final int position) {
-        final FaqItem fi = (FaqItem) items.get(position).getData();
+    public void onBindViewHolder(@NonNull final FaqViewHolder holder, final int position) {
+        final FaqItem fi = items.get(position);
         holder.setQuestionTV(fi.getQuestion());
         holder.setAnswerTV(fi.getAnswer(), sba);
     }

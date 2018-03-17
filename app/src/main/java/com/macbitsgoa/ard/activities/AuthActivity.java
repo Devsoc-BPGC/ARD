@@ -20,7 +20,6 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.helpers.AuthHelperForGoogle;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
@@ -56,7 +55,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      */
     @BindView(R.id.btn_content_auth_google)
     public Button googleSignInButton;
-
+    ProgressDialog pd;
     /**
      * Google API Client for login purposes.
      */
@@ -67,7 +66,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
-        if(FirebaseAuth.getInstance().getCurrentUser() != null) {
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             final Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);
             finish();
@@ -135,8 +134,6 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
             pd.cancel();
     }
 
-    ProgressDialog pd;
-
     /**
      * Launch Google Sign screen.
      *
@@ -188,6 +185,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         final String uid = firebaseUser.getUid();
         final String name = firebaseUser.getDisplayName();
         final String email = firebaseUser.getEmail();
+        final String phoneNumber = firebaseUser.getPhoneNumber();
         final String photoUrl;
         final Uri uri = firebaseUser.getPhotoUrl();
         if (uri == null) {
@@ -199,6 +197,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         userDb.child(UserItemKeys.NAME).setValue(name);
         userDb.child(UserItemKeys.EMAIL).setValue(email);
         userDb.child(UserItemKeys.PHOTO_URL).setValue(photoUrl);
+        userDb.child(UserItemKeys.PHONE_NUMBER).setValue(phoneNumber);
         return true;
     }
 }

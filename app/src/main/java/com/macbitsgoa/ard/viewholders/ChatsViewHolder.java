@@ -49,11 +49,13 @@ public class ChatsViewHolder extends RecyclerView.ViewHolder
     @BindView(R.id.textView_vh_cf_chats_time)
     public TextView time;
 
-    public ChatsItem item;
+    @BindView(R.id.imgView_vh_cf_chats_status)
+    public ImageView status;
 
-    private Context context;
+    public ChatsItem item;
     DatabaseReference dr;
     StorageReference sr;
+    private Context context;
 
     public ChatsViewHolder(View itemView, final Context context) {
         super(itemView);

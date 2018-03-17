@@ -19,6 +19,7 @@ import com.macbitsgoa.ard.models.UserItem;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import butterknife.BindView;
@@ -37,20 +38,29 @@ public class NewChatActivity extends BaseActivity {
      * Tag for this class.
      */
     public static final String TAG = NewChatActivity.class.getSimpleName();
+    /**
+     * Database reference to admin list in Firebase.
+     */
+    private final DatabaseReference adminsRef = getRootReference().child(AHC.FDR_ADMINS);
 
-    //----------------------------------------------------------------------------------------------
+    /**
+     * Database reference to user list in Firebase.
+     */
+    private final DatabaseReference usersRef = getRootReference().child(AHC.FDR_USERS);
+
+    /**
+     * Progress loader during downloading information.
+     */
     @BindView(R.id.pb_activity_new_chat)
     ProgressBar progressBar;
 
+    /**
+     * Recyclerview to display user list.
+     */
     @BindView(R.id.rv_activity_new_chat)
     RecyclerView userRV;
-
     @BindView(R.id.toolbar_activity_new_chat)
     Toolbar toolbar;
-
-    //----------------------------------------------------------------------------------------------
-    private final DatabaseReference adminsRef = getRootReference().child(AHC.FDR_ADMINS);
-    private final DatabaseReference usersRef = getRootReference().child(AHC.FDR_USERS);
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -89,7 +99,8 @@ public class NewChatActivity extends BaseActivity {
                             true);
                     adminsList.add(ui);
                 }
-                AHC.logd(TAG, "admins are " + adminsList.toString());
+                Collections.sort(adminsList);
+                AHC.logd(TAG, "Admins are " + adminsList.toString());
                 adapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.INVISIBLE);
             }
@@ -124,10 +135,11 @@ public class NewChatActivity extends BaseActivity {
                             false);
                     usersList.add(ui);
                 }
-                AHC.logd(TAG, "users are " + usersList.toString());
+                AHC.logd(TAG, "All users are " + usersList.toString());
+                Collections.sort(usersList);
                 if (usersList.removeAll(adminsList))
-                    AHC.logd(TAG, "final users are " + usersList.toString());
-                else AHC.logd(TAG, "no admins were removed from userlist");
+                    AHC.logd(TAG, "Final non admin users are " + usersList.toString());
+                else AHC.logd(TAG, "No admins were removed from userlist");
                 adapter.notifyDataSetChanged();
                 progressBar.setVisibility(View.INVISIBLE);
             }

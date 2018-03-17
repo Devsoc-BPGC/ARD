@@ -21,7 +21,6 @@ import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.keys.ChatItemKeys;
 import com.macbitsgoa.ard.keys.MessageItemKeys;
 import com.macbitsgoa.ard.models.ChatsItem;
-import com.macbitsgoa.ard.models.DocumentItem;
 import com.macbitsgoa.ard.models.MessageItem;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.services.SendService;
@@ -46,23 +45,18 @@ import io.realm.Sort;
 public class ChatFragment extends BaseFragment {
 
     /**
+     * TextView to show in case of no chats.
+     */
+    TextView emptyListTV;
+    RealmResults<ChatsItem> chats;
+    /**
      * Used to communicate with {@link com.macbitsgoa.ard.activities.MainActivity}. to notify it
      * of updates.
      */
     private ChatFragmentListener mListener;
-
     private RecyclerView recyclerView;
-
     private ChatsAdapter chatsAdapter;
-
     private DatabaseReference myStatus;
-
-    /**
-     * TextView to show in case of no chats.
-     */
-    TextView emptyListTV;
-
-    RealmResults<ChatsItem> chats;
 
     /**
      * Use this factory method to create a new instance of

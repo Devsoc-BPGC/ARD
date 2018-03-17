@@ -15,11 +15,9 @@ import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.FCMKeys;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
-import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.FaqItem;
-import com.macbitsgoa.ard.models.SlideshowItem;
 import com.macbitsgoa.ard.models.UserItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.utils.AHC;
@@ -108,7 +106,7 @@ public class FCMService extends FirebaseMessagingService {
                 fi.deleteFromRealm();
             }
             UserItem ui = r.where(UserItem.class).equalTo(UserItemKeys.UID, id).findFirst();
-            if(ui != null) {
+            if (ui != null) {
                 AHC.logd(TAG, "Found user item with same id to delete.");
                 ui.deleteFromRealm();
             }

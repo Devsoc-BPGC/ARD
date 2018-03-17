@@ -1,6 +1,5 @@
 package com.macbitsgoa.ard.models.home;
 
-import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import io.realm.RealmObject;
