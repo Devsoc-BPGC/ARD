@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -331,15 +332,22 @@ public class AHC {
         return "https://ard-bits.firebaseapp.com/assets/icons/" + mimeType + "/icon.png";
     }
 
-    public static void startService(final Context context,
-                                   final Class<? extends JobService> serviceClass,
-                                   final String tag) {
+    public static void startService(@NonNull final Context context,
+                                    @NonNull final Class<? extends JobService> serviceClass,
+                                    @NonNull final String tag) {
+        startService(context, serviceClass, tag, new Bundle());
+    }
+
+    public static void startService(@NonNull final Context context,
+                                    @NonNull final Class<? extends JobService> serviceClass,
+                                    @NonNull final String tag, @NonNull final Bundle extras) {
         final FirebaseJobDispatcher fjd = getJobDispatcher(context);
         final Job.Builder jobBuilder = fjd.newJobBuilder()
                 .setService(serviceClass)
                 .setTag(tag)
                 .setTrigger(Trigger.NOW)
                 .setRecurring(false)
+                .setExtras(extras)
                 .setReplaceCurrent(false)
                 .setLifetime(Lifetime.FOREVER)
                 .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR);

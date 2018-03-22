@@ -1,7 +1,6 @@
 package com.macbitsgoa.ard.fragments;
 
 import android.support.v4.app.Fragment;
-import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -17,7 +16,7 @@ import io.realm.Realm;
  * Created by vikramaditya on 26/10/17.
  */
 
-public class BaseFragment extends Fragment implements View.OnClickListener {
+public class BaseFragment extends Fragment {
 
     protected Realm database;
 
@@ -31,7 +30,8 @@ public class BaseFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * Subclasses should call this at the start.
+     * Subclasses should call super at the start.
+     * Realm database member is opened here.
      */
     @Override
     public void onStart() {
@@ -40,16 +40,12 @@ public class BaseFragment extends Fragment implements View.OnClickListener {
     }
 
     /**
-     * Subclasses should call this method at the end.
+     * Subclasses should call super method at the end.
+     * Realm database member is closed here.
      */
     @Override
     public void onStop() {
         super.onStop();
         database.close();
-    }
-
-    @Override
-    public void onClick(final View v) {
-
     }
 }

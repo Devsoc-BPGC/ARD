@@ -18,6 +18,7 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.home.HomeItem;
+import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.HomeItemViewHolder;
 import com.macbitsgoa.ard.viewholders.ImageViewHolder;
 
@@ -82,7 +83,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeItemViewHolder> implem
             hivh.imageCount.setText(String.format(Locale.ENGLISH, numberFormat, hi.getImages().size()));
             Glide.with(context)
                     .load(hi.getImages().get(0).getPhotoUrl())
-                    .transition(DrawableTransitionOptions.withCrossFade())
+                    .transition(DrawableTransitionOptions.withCrossFade(500))
                     .apply(RequestOptions.centerCropTransform())
                     .into(hivh.imageView);
 

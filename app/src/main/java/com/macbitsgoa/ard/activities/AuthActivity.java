@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -27,6 +28,7 @@ import com.macbitsgoa.ard.helpers.AuthHelperForGoogle;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.utils.AHC;
+import com.macbitsgoa.ard.utils.CenterCropDrawable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -70,6 +72,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new CenterCropDrawable(ContextCompat.getDrawable(this, R.drawable.auth_bg)));
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
         versionTV.setText(BuildConfig.VERSION_NAME);

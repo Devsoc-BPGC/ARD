@@ -236,7 +236,7 @@ public class ChatActivity extends BaseActivity {
         messageItems = database
                 .where(MessageItem.class)
                 .equalTo(MessageItemKeys.OTHER_USER_ID, otherUserId)
-                .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
+                .findAllSortedAsync(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
         messageItems.addChangeListener((messageItems, changeSet) -> {
             AHC.logd(TAG, "Calling NotifyService in chat change listener");
             notifyOfReadStatus();

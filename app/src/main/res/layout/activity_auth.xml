@@ -54,6 +54,7 @@
         android:layout_height="0dp"
         android:gravity="bottom|center_horizontal"
         android:padding="16dp"
+        android:textColor="@color/white"
         android:id="@+id/tv_activity_auth_version"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"

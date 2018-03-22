@@ -29,13 +29,13 @@ public class HomeItem extends RealmObject {
      * Author info string.
      */
     @NonNull
-    private String author;
+    private String author = AHC.DEFAULT_AUTHOR;
 
     /**
      * Date of update/creation.
      */
     @NonNull
-    private Date date;
+    private Date date = Calendar.getInstance().getTime();
 
     /**
      * List containing sub sections as defined in Firebase.
@@ -53,10 +53,8 @@ public class HomeItem extends RealmObject {
      * Constructor with no args.
      */
     public HomeItem() {
-        author = "Admin";
         images = new RealmList<>();
         texts = new RealmList<>();
-        date = Calendar.getInstance().getTime();
     }
 
     /**
@@ -93,9 +91,8 @@ public class HomeItem extends RealmObject {
     }
 
     public void setAuthor(@Nullable final String author) {
-        this.author = author;
-        if (this.author == null || this.author.length() == 0) {
-            this.author = AHC.DEFAULT_AUTHOR;
+        if (author != null && author.length() != 0) {
+            this.author = author;
         }
     }
 
@@ -104,8 +101,10 @@ public class HomeItem extends RealmObject {
         return date;
     }
 
-    public void setDate(@NonNull final Date date) {
-        this.date = date;
+    public void setDate(@Nullable Date date) {
+        if (date != null) {
+            this.date = date;
+        }
     }
 
     @NonNull

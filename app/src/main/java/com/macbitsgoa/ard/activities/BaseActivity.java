@@ -34,7 +34,7 @@ import io.realm.Realm;
  * @author Vikramaditya Kukreja
  */
 @SuppressLint("Registered")
-public class BaseActivity extends AppCompatActivity implements View.OnClickListener {
+public class BaseActivity extends AppCompatActivity {
 
     /**
      * Realm database object. This object is initialised in {@link BaseActivity}'s
@@ -137,17 +137,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     /**
-     * Empty onClick overriden methods for all activities implementing {@link View.OnClickListener}
-     * inteface.
-     *
-     * @param v View that was clicked.
-     */
-    @Override
-    public void onClick(final View v) {
-
-    }
-
-    /**
      * Show simple snack. Default duration is {@link Snackbar#LENGTH_SHORT}.
      * Text color is {@link Color#WHITE} and background color is {@link Color#BLACK}.
      *
@@ -167,7 +156,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
      * <li>{@link Snackbar#LENGTH_LONG}</li>
      * <li>{@link Snackbar#LENGTH_INDEFINITE}</li>
      * </ul>
-     * </p>
      *
      * @param message Message to be displayed.
      * @param length  Int value to be used as length.
@@ -186,7 +174,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
      * <li>{@link Snackbar#LENGTH_LONG}</li>
      * <li>{@link Snackbar#LENGTH_INDEFINITE}</li>
      * </ul>
-     * </p>
      *
      * @param view    View to be used.
      * @param message Message to be displayed.
@@ -208,7 +195,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
      * <li>{@link Snackbar#LENGTH_LONG}</li>
      * <li>{@link Snackbar#LENGTH_INDEFINITE}</li>
      * </ul>
-     * </p>
      *
      * @param view            View to be used.
      * @param message         Message to be displayed.

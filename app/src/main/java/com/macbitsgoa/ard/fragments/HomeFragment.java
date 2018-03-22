@@ -47,7 +47,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.realm.OrderedCollectionChangeSet;
-import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -115,24 +114,34 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     private SlideshowAdapter slideshowAdapter;
 
     /**
-     * Reference to slide show image data.
-     */
-    private DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
-
-    /**
-     * Value event listener for {@link #imageSlideshowRef}.
-     */
-    private ValueEventListener imageSlideShowVEL;
-
-    /**
      * Firebase database reference to home content.
      */
     private DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
 
     /**
+     * Firebase database reference to announcement content.
+     */
+    private DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
+
+    /**
+     * Reference to slide show image data.
+     */
+    private DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
+
+    /**
      * Value event listener for {@link #homeRef}.
      */
     private ValueEventListener homeRefVEL;
+
+    /**
+     * Value event listener for {@link #annRef}.
+     */
+    private ValueEventListener annRefVEL;
+
+    /**
+     * Value event listener for {@link #imageSlideshowRef}.
+     */
+    private ValueEventListener imageSlideShowVEL;
 
     /**
      * Item touch listener of RecyclerView.
@@ -149,28 +158,26 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_home, container, false);
         unbinder = ButterKnife.bind(this, view);
-        init();
         return view;
-    }
-
-    /**
-     * View updates and listeners can be done here.
-     */
-    private void init() {
-        homeRV.setHasFixedSize(true);
-        homeRV.setLayoutManager(new LinearLayoutManager(getContext()));
-        onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
-        homeRV.addOnItemTouchListener(onItemTouchListener);
-        homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
-        appBarLayout.addOnOffsetChangedListener(this);
-        database = Realm.getDefaultInstance();
     }
 
     @Override
     public void onStart() {
         super.onStart();
+        appBarLayout.addOnOffsetChangedListener(this);
+        scrollToTop();
+
         //adter super call, database is ready
-        homeItems = database.where(HomeItem.class).findAllSorted(HomeItemKeys.DATE, Sort.DESCENDING);
+        homeItems = database.where(HomeItem.class).findAllSortedAsync(HomeItemKeys.DATE, Sort.DESCENDING);
+        homeAdapter = new HomeAdapter(homeItems, getContext());
+
+        homeRV.setHasFixedSize(true);
+        homeRV.setLayoutManager(new LinearLayoutManager(getContext()));
+        onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
+        homeRV.addOnItemTouchListener(onItemTouchListener);
+        homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        homeRV.setAdapter(homeAdapter);
+
         homeItems.addChangeListener((collection, changeSet) -> {
             // `null`  means the async query returns the first time.
             if (changeSet == null) {
@@ -199,10 +206,14 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
                 //emptyTextView.setVisibility(View.GONE);
             }
         });
-        homeAdapter = new HomeAdapter(homeItems, getContext());
-        homeRV.setAdapter(homeAdapter);
+
         homeRefVEL = getHomeRefVEL();
-        homeRef.addValueEventListener(homeRefVEL);
+        annRefVEL = getAnnRefVEL();
+        imageSlideShowVEL = getImageSlideShowVEL();
+
+        homeRef.orderByChild(HomeItemKeys.DATE + "/time").limitToLast(5).addValueEventListener(homeRefVEL);
+        annRef.addValueEventListener(annRefVEL);
+        imageSlideshowRef.addValueEventListener(imageSlideShowVEL);
 
         setupAnnouncementSlideshow();
         appBarLayout.offsetTopAndBottom(appBarOffset);
@@ -220,6 +231,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         //Remove firebase database listeners
         imageSlideshowRef.removeEventListener(imageSlideShowVEL);
         homeRef.removeEventListener(homeRefVEL);
+        annRef.removeEventListener(annRefVEL);
 
         //Remove database change listener
         homeItems.removeAllChangeListeners();
@@ -235,7 +247,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         super.onDestroyView();
         homeRV.removeOnItemTouchListener(onItemTouchListener);
         unbinder.unbind();
-        database.close();
     }
 
     @Override
@@ -289,10 +300,8 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         slideshowVP.addOnPageChangeListener(vopl);
         handler.postDelayed(update, 7500);
         slideshowVP.setAdapter(slideshowAdapter);
-        imageSlideShowVEL = getImageSlideShowVEL();
         pagerIndicator.setupWithViewPager(slideshowVP);
         pagerIndicator.addOnPageChangeListener(vopl);
-        imageSlideshowRef.addValueEventListener(imageSlideShowVEL);
     }
 
     private void setupAnnouncementSlideshow() {
@@ -307,14 +316,40 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         });
     }
 
+    private ValueEventListener getHomeRefVEL() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                AHC.logd(TAG, "query snapshot is " + dataSnapshot.toString());
+                HomeService.saveHomeSnapshotToRealm(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Database access error." + databaseError.toString());
+            }
+        };
+    }
+
+    private ValueEventListener getAnnRefVEL() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                HomeService.saveAnnSnapshotToRealm(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Database access error." + databaseError.toString());
+            }
+        };
+    }
+
     private ValueEventListener getImageSlideShowVEL() {
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                //If no data is present avoid deleting any existing slideshow image data
-                Log.e(TAG, dataSnapshot.toString());
-                if (dataSnapshot.getChildrenCount() == 0) return;
-
+                if (dataSnapshot == null) return;
                 //Delete old values
                 database.executeTransaction(r -> database.delete(SlideshowItem.class));
                 for (final DataSnapshot cs :
@@ -341,20 +376,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         };
     }
 
-    private ValueEventListener getHomeRefVEL() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                HomeService.saveHomeSnapshotToRealm(dataSnapshot);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Database access error." + databaseError.toString());
-            }
-        };
-    }
-
     public void scrollToTop() {
         //App crashes on removing this check
         //TODO fix required
@@ -368,6 +389,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         if (annSlideshowRunable == null) annSlideshowRunable = new Runnable() {
             @Override
             public void run() {
+                if (adapter.getCount() == 0) return;
                 int viewpagerpos = annVP.getCurrentItem();
                 viewpagerpos++;
                 viewpagerpos %= adapter.getCount();

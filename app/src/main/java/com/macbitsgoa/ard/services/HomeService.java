@@ -1,5 +1,6 @@
 package com.macbitsgoa.ard.services;
 
+import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.firebase.jobdispatcher.JobParameters;
@@ -75,7 +76,8 @@ public class HomeService extends BaseJobService {
         };
     }
 
-    public static void saveHomeSnapshotToRealm(final DataSnapshot dataSnapshot) {
+    public static void saveHomeSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
+        if (dataSnapshot == null) return;
         final Realm database = Realm.getDefaultInstance();
         for (DataSnapshot child : dataSnapshot.getChildren()) {
             final String key = child.getKey();
@@ -90,6 +92,8 @@ public class HomeService extends BaseJobService {
                 if (hi == null) {
                     hi = r.createObject(HomeItem.class, key);
                     AHC.logd(TAG, "Creating new home item");
+                } else if (hi.getDate().getTime() == date.getTime()){
+                    return;
                 }
                 hi.setAuthor(author);
                 hi.setDate(date);
@@ -131,32 +135,7 @@ public class HomeService extends BaseJobService {
         return new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getValue() == null) return;
-                final Realm database = Realm.getDefaultInstance();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final String key = child.getKey();
-                    final String data = child.child(AnnItemKeys.DATA).getValue(String.class);
-                    final Date date = child.child(AnnItemKeys.DATE).getValue(Date.class);
-                    final String author = child.child(AnnItemKeys.AUTHOR).getValue(String.class);
-                    if (data == null || date == null || data.length() == 0) {
-                        continue;
-                    }
-                    database.executeTransaction(r -> {
-                        AnnItem annItem = r.where(AnnItem.class)
-                                .equalTo(AnnItemKeys.KEY, key)
-                                .findFirst();
-                        if (annItem == null) {
-                            annItem = r.createObject(AnnItem.class, key);
-                        } else {
-                            if (annItem.getDate().getTime() == date.getTime())
-                                return;
-                        }
-                        annItem.setAuthor(author);
-                        annItem.setDate(date);
-                        annItem.setData(data);
-                    });
-                }
-                database.close();
+                saveAnnSnapshotToRealm(dataSnapshot);
                 completedAnn = true;
                 checkJobStatus();
             }
@@ -167,6 +146,35 @@ public class HomeService extends BaseJobService {
                 completedAnn = true;
             }
         };
+    }
+
+    public static void saveAnnSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
+        if (dataSnapshot == null) return;
+        final Realm database = Realm.getDefaultInstance();
+        for (final DataSnapshot child : dataSnapshot.getChildren()) {
+            final String key = child.getKey();
+            final String data = child.child(AnnItemKeys.DATA).getValue(String.class);
+            final Date date = child.child(AnnItemKeys.DATE).getValue(Date.class);
+            final String author = child.child(AnnItemKeys.AUTHOR).getValue(String.class);
+            if (data == null || date == null || data.length() == 0) {
+                continue;
+            }
+            database.executeTransaction(r -> {
+                AnnItem annItem = r.where(AnnItem.class)
+                        .equalTo(AnnItemKeys.KEY, key)
+                        .findFirst();
+                if (annItem == null) {
+                    annItem = r.createObject(AnnItem.class, key);
+                } else {
+                    if (annItem.getDate().getTime() == date.getTime())
+                        return;
+                }
+                annItem.setAuthor(author);
+                annItem.setDate(date);
+                annItem.setData(data);
+            });
+        }
+        database.close();
     }
 
     private void checkJobStatus() {

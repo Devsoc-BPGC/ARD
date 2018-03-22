@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -28,6 +27,10 @@ import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
 import io.realm.RealmList;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -47,14 +50,20 @@ public class ChatFragment extends BaseFragment {
     /**
      * TextView to show in case of no chats.
      */
+    @BindView(R.id.tv_fragment_chat_empty)
     TextView emptyListTV;
+
+    @BindView(R.id.recyclerView_fragment_chat)
+    RecyclerView recyclerView;
+
+    Unbinder unbinder;
+
     RealmResults<ChatsItem> chats;
     /**
      * Used to communicate with {@link com.macbitsgoa.ard.activities.MainActivity}. to notify it
      * of updates.
      */
     private ChatFragmentListener mListener;
-    private RecyclerView recyclerView;
     private ChatsAdapter chatsAdapter;
     private DatabaseReference myStatus;
 
@@ -78,18 +87,13 @@ public class ChatFragment extends BaseFragment {
                              final Bundle savedInstanceState) {
         mListener.updateChatFragment();
         final View view = inflater.inflate(R.layout.fragment_chat, container, false);
-
-        emptyListTV = view.findViewById(R.id.tv_fragment_chat_empty);
-        recyclerView = view.findViewById(R.id.recyclerView_fragment_chat);
-        final FloatingActionButton newChatFab = view.findViewById(R.id.fab_fragment_chat);
+        unbinder = ButterKnife.bind(this, view);
 
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         AHC.startService(getContext(), MessagingService.class, MessagingService.TAG);
         getContext().startService(new Intent(getContext(), SendService.class));
-
-        newChatFab.setOnClickListener(this);
         return view;
     }
 
@@ -168,7 +172,13 @@ public class ChatFragment extends BaseFragment {
     }
 
     @Override
-    public void onClick(final View v) {
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    @OnClick(R.id.fab_fragment_chat)
+    public void onFabClick() {
         //Only fab  is registered
         startActivity(new Intent(getContext(), NewChatActivity.class));
     }

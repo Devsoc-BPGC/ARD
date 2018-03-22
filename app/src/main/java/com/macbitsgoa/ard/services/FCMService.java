@@ -6,12 +6,15 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
 import com.crashlytics.android.Crashlytics;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.AnnActivity;
+import com.macbitsgoa.ard.activities.MainActivity;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.FCMKeys;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
@@ -76,11 +79,11 @@ public class FCMService extends FirebaseMessagingService {
                 break;
             }
             case FCMKeys.ACTION_ANNOUNCEMENT: {
-                Intent intent = new Intent(this, AnnNotifyService.class);
-                intent.putExtra(AnnItemKeys.AUTHOR, data.get(AnnItemKeys.AUTHOR));
-                intent.putExtra(AnnItemKeys.DATA, data.get(AnnItemKeys.DATA));
-                startService(intent);
-                startService(new Intent(this, HomeService.class));
+                Bundle extras = new Bundle();
+                extras.putString(AnnItemKeys.AUTHOR, data.get(AnnItemKeys.AUTHOR));
+                extras.putString(AnnItemKeys.DATA, data.get(AnnItemKeys.DATA));
+                AHC.startService(this, AnnNotifyService.class, AnnNotifyService.TAG, extras);
+                AHC.startService(this, HomeService.class, HomeService.TAG);
                 break;
             }
             default: {
@@ -126,16 +129,29 @@ public class FCMService extends FirebaseMessagingService {
         AHC.logd(TAG, "Received a notification");
         AHC.logd(TAG, data.toString());
 
-        final Uri uri = Uri.parse(data.get(FCMKeys.ACTION_VIEW_URI));
+        final int _ID = 143;
+
+        Uri uri = null;
+        if (data.containsKey(FCMKeys.ACTION_VIEW_URI))
+            uri = Uri.parse(data.get(FCMKeys.ACTION_VIEW_URI));
         final String title = data.get(FCMKeys.ACTION_VIEW_TITLE);
         final String text = data.get(FCMKeys.ACTION_VIEW_TEXT);
         final int notificationId = Integer.parseInt(data.get(FCMKeys.ID));
+
+        PendingIntent pi;
+        if(uri == null) {
+            pi = PendingIntent.getActivity(this, _ID,
+                    new Intent(this, AnnActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
+        } else {
+            pi = PendingIntent.getActivity(this, _ID,
+                    new Intent(Intent.ACTION_VIEW, uri), PendingIntent.FLAG_UPDATE_CURRENT);
+        }
 
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         AHC.createChannels(nm);
         NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, AHC.ARD)
                 .setContentTitle(title)
-                .setContentIntent(PendingIntent.getActivity(this, 143, new Intent(Intent.ACTION_VIEW, uri), PendingIntent.FLAG_UPDATE_CURRENT))
+                .setContentIntent(pi)
                 .setAutoCancel(true)
                 .setContentText(text)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)

@@ -4,10 +4,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.support.annotation.Nullable;
+import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.firebase.jobdispatcher.JobParameters;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
@@ -15,12 +16,15 @@ import com.macbitsgoa.ard.utils.AHC;
 
 /**
  * Service to notify Announcement data. Intent should contain author and data strings as extras.
- * Use keys {@link AnnItemKeys#AUTHOR} and {@link AnnItemKeys#DATA}.
+ * Use keys {@link AnnItemKeys#AUTHOR} and {@link AnnItemKeys#DATA}. Only shows the latest message
+ * as id is contant value. This service also checks if {@link AnnActivity} is running or not before
+ * posting the notification.
  *
  * @author Vikramaditya Kukreja.
+ * @see #NOTIFICATION_ID
  */
 
-public class AnnNotifyService extends BaseIntentService {
+public class AnnNotifyService extends BaseJobService {
 
     /**
      * Tag for this class.
@@ -28,16 +32,18 @@ public class AnnNotifyService extends BaseIntentService {
     public static final String TAG = AnnNotifyService.class.getSimpleName();
 
     /**
-     * Creates an IntentService.
+     * Id used to notify notification manager. In case of new announcement, old one is removed.
      */
-    public AnnNotifyService() {
-        super(AnnNotifyService.class.getSimpleName());
-    }
+    public static final int NOTIFICATION_ID = 223;
 
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
-        final String author = intent.getStringExtra(AnnItemKeys.AUTHOR);
-        final String data = intent.getStringExtra(AnnItemKeys.DATA);
+    public boolean onStartJob(JobParameters job) {
+        //Don't display notification if AnnActivity is running
+        if (AnnActivity.inForeground) return false;
+
+        final Bundle extras = job.getExtras();
+        final String author = extras.getString(AnnItemKeys.AUTHOR, AHC.DEFAULT_AUTHOR);
+        final String data = extras.getString(AnnItemKeys.DATA, "Announcement");
         final int id = data.hashCode();
 
         NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -61,5 +67,11 @@ public class AnnNotifyService extends BaseIntentService {
                         .setBigContentTitle("New announcement from ARD")
                         .setSummaryText(author));
         nm.notify(id, ncb.build());
+        return false;
+    }
+
+    @Override
+    public boolean onStopJob(JobParameters job) {
+        return true;
     }
 }

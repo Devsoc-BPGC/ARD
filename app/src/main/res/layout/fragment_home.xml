@@ -12,11 +12,11 @@
         android:id="@+id/coordinatorLayout_fragment_home"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:fitsSystemWindows="true"
         android:layout_marginBottom="@dimen/marginBottom_home_fragment_coordinatorLayout"
         android:layout_marginEnd="@dimen/marginEnd_home_fragment_coordinatorLayout"
         android:layout_marginStart="@dimen/marginStart_home_fragment_coordinatorLayout"
         android:layout_marginTop="@dimen/marginTop_home_fragment_coordinatorLayout"
+        android:fitsSystemWindows="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -25,7 +25,7 @@
         <android.support.design.widget.AppBarLayout
             android:id="@+id/ab_fragment_home"
             android:layout_width="match_parent"
-            android:layout_height="250dp"
+            android:layout_height="220dp"
             android:theme="@style/AppTheme.AppBarOverlay"
             app:expanded="true">
 
@@ -58,9 +58,11 @@
         </android.support.design.widget.AppBarLayout>
 
         <android.support.v4.widget.NestedScrollView
+            android:id="@+id/nsv_fragment_home"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/nsv_fragment_home"
+            android:fillViewport="true"
+            android:scrollbars="vertical"
             app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
             <LinearLayout
@@ -68,8 +70,7 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-               <include
-                   layout="@layout/vh_ann_card_fragment_home" />
+                <include layout="@layout/vh_ann_card_fragment_home" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/recyclerView_fragment_home"

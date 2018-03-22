@@ -121,7 +121,7 @@ public class GeneralFragment extends BaseFragment {
         super.onStart();
         faqItems = database.where(FaqItem.class)
                 .equalTo(FaqItemKeys.SECTION, getArguments().getString(SECTION_KEY))
-                .findAllSorted(FaqItemKeys.UPDATE, sort);
+                .findAllSortedAsync(FaqItemKeys.UPDATE, sort);
         forumAdapter = new ForumAdapter(faqItems);
         recyclerView.setAdapter(forumAdapter);
         toDesc = (Animatable) sortOrderImg.getDrawable();

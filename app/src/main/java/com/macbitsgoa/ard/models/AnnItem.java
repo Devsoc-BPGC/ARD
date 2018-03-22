@@ -10,6 +10,7 @@ import java.util.Date;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.Required;
 
 /**
  * Realm object for posts of type {@link com.macbitsgoa.ard.types.PostType#ANNOUNCEMENT}.
@@ -27,31 +28,29 @@ public class AnnItem extends RealmObject {
     /**
      * Data is the main content of this type.
      */
-    @NonNull
+    @Required
     private String data;
 
     /**
      * Author name field.
      */
-    @NonNull
+    @Required
     private String author;
 
     /**
      * Date of original posting.
      * Update date can also be added later.
      */
-    @NonNull
+    @Required
     private Date date;
 
     public AnnItem() {
-        data = "";
-        author = "Admin";
+        author = AHC.DEFAULT_AUTHOR;
         date = Calendar.getInstance().getTime();
     }
 
-
-    public AnnItem(final String key, @NonNull final String data, @NonNull final String author,
-                   @NonNull final Date date) {
+    public AnnItem(final String key, final String data, final String author,
+                   final Date date) {
         this.key = key;
         this.data = data;
         this.author = author;
@@ -62,7 +61,7 @@ public class AnnItem extends RealmObject {
         return key;
     }
 
-    public void setKey(@NonNull final String key) {
+    public void setKey(final String key) {
         this.key = key;
     }
 
@@ -81,9 +80,8 @@ public class AnnItem extends RealmObject {
     }
 
     public void setAuthor(@Nullable final String author) {
-        this.author = author;
-        if (this.author == null || this.author.length() == 0) {
-            this.author = AHC.DEFAULT_AUTHOR;
+        if (author != null || author.length() != 0) {
+            this.author = author;
         }
     }
 
@@ -92,8 +90,10 @@ public class AnnItem extends RealmObject {
         return date;
     }
 
-    public void setDate(@NonNull final Date date) {
-        this.date = date;
+    public void setDate(@Nullable final Date date) {
+        if (date != null) {
+            this.date = date;
+        }
     }
 
     public String toStringVerbose() {

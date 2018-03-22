@@ -14,7 +14,6 @@ import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ViewPagerAdapter;
 import com.macbitsgoa.ard.fragments.forum.GeneralFragment;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
-import com.macbitsgoa.ard.models.FaqItem;
 import com.macbitsgoa.ard.models.FaqSectionItem;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.utils.AHC;
@@ -103,11 +102,7 @@ public class ForumFragment extends BaseFragment {
                 final String fragmentTitle = faqSectionItems.get(i).getSectionTitle();
                 final String fragmentKey = faqSectionItems.get(i).getSectionKey();
                 final GeneralFragment gf = GeneralFragment.newInstance(fragmentKey);
-                if (database.where(FaqItem.class)
-                        .equalTo(FaqItemKeys.SECTION, fragmentKey)
-                        .findAll()
-                        .size() != 0)
-                    viewPagerAdapter.addFragment(gf, fragmentTitle);
+                viewPagerAdapter.addFragment(gf, fragmentTitle);
             }
             viewPagerAdapter.notifyDataSetChanged();
         });
@@ -115,11 +110,7 @@ public class ForumFragment extends BaseFragment {
             final String fragmentTitle = sections.get(i).getSectionTitle();
             final String fragmentKey = sections.get(i).getSectionKey();
             final GeneralFragment gf = GeneralFragment.newInstance(fragmentKey);
-            if (database.where(FaqItem.class)
-                    .equalTo(FaqItemKeys.SECTION, fragmentKey)
-                    .findAll()
-                    .size() != 0)
-                viewPagerAdapter.addFragment(gf, fragmentTitle);
+            viewPagerAdapter.addFragment(gf, fragmentTitle);
         }
         viewPager.setAdapter(viewPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);

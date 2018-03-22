@@ -17,7 +17,9 @@ import java.util.Date;
 import io.realm.Realm;
 
 /**
- * Created by vikramaditya on 19/3/18.
+ * Service to download faq items.
+ *
+ * @author Vikramadtiya Kukreja
  */
 
 public class ForumService extends BaseIntentService {
@@ -55,6 +57,9 @@ public class ForumService extends BaseIntentService {
             }
 
             private void faqSectionParse(final DataSnapshot faqSectionShot) {
+                if (faqSectionShot == null) return;
+                //Always get latest faq sections
+                database.executeTransaction(r -> r.delete(FaqSectionItem.class));
                 for (final DataSnapshot childShot : faqSectionShot.getChildren()) {
                     database.executeTransaction(r -> {
                         FaqSectionItem fsi = r.where(FaqSectionItem.class)
@@ -74,6 +79,7 @@ public class ForumService extends BaseIntentService {
             }
 
             private void faqParse(final DataSnapshot faqSnapshot) {
+                if (faqSnapshot == null) return;
                 for (final DataSnapshot child : faqSnapshot.getChildren()) {
                     final String key = child.getKey();
                     final Date updateDate = child.child(FaqItemKeys.UPDATE).getValue(Date.class);
