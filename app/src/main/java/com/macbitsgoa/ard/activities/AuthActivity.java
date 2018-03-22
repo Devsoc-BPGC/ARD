@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -20,6 +21,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.helpers.AuthHelperForGoogle;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
@@ -54,8 +56,12 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      * Google Sign In Button.
      */
     @BindView(R.id.btn_content_auth_google)
-    public Button googleSignInButton;
+    Button googleSignInButton;
     ProgressDialog pd;
+
+    @BindView(R.id.tv_activity_auth_version)
+    TextView versionTV;
+
     /**
      * Google API Client for login purposes.
      */
@@ -66,6 +72,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
+        versionTV.setText(BuildConfig.VERSION_NAME);
         if (FirebaseAuth.getInstance().getCurrentUser() != null) {
             final Intent intent = new Intent(this, MainActivity.class);
             startActivity(intent);

@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ARD</string>
+    <string name="app_name" translatable="false">ARD</string>
     <string name="app_description">ARD - Brought to you by the Mobile Applications Club, BITS Pilani K K Birla Goa Campus</string>
 
     <!--Services description -->
@@ -60,7 +60,7 @@
     <string name="contentDesc_viewHolder_ann_icon">Announcement viewholder icon</string>
 
     <!-- Strings related to login -->
-    <string name="banner_text_ard">ARD</string>
+    <string name="banner_text_ard" translatable="false">ARD</string>
     <string name="google_sign_in">Sign in with Google</string>
     <string name="error_google_sign_in_failed">Google sign in failed</string>
 

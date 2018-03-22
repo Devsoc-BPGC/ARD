@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
@@ -21,105 +20,93 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
-import com.lapism.searchview.SearchView;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.activities.PostDetailsActivity;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.adapters.SlideshowAdapter;
-import com.macbitsgoa.ard.interfaces.HomeFragmentListener;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
-import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
 import com.macbitsgoa.ard.keys.SlideshowItemKeys;
-import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.SlideshowItem;
-import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
-import com.macbitsgoa.ard.types.HomeType;
+import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.utils.AHC;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.realm.OrderedCollectionChangeSet;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
 /**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment can implement the
- * {@link HomeFragmentListener} interface
- * to handle interaction events.
- * Use the {@link HomeFragment#newInstance} factory method to
- * create an instance of this fragment.
+ * A simple {@link Fragment} subclass to display home content.
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeFragment extends BaseFragment implements OnItemClickListener, AppBarLayout.OnOffsetChangedListener {
+public class HomeFragment extends BaseFragment implements OnItemClickListener,
+        AppBarLayout.OnOffsetChangedListener {
 
     /**
      * TAG for this class.
      */
     public static final String TAG = HomeFragment.class.getSimpleName();
 
-    //----------------------------------------------------------------------------------------------
     /**
      * RecyclerView to display Home content.
      */
     @BindView(R.id.recyclerView_fragment_home)
-    public RecyclerView recyclerView;
+    public RecyclerView homeRV;
 
     /**
      * Viewpager indicator.
      */
     @BindView(R.id.ci_fragment_home)
-    public ViewPagerIndicator viewPagerIndicator;
+    public ViewPagerIndicator pagerIndicator;
+
     /**
      * ViewPager for image slideshow.
      */
     @BindView(R.id.vp_fragment_home_slideshow)
-    public ViewPager viewPagerSlideShow;
+    public ViewPager slideshowVP;
+
     /**
      * HomeAdapter object.
      */
     public HomeAdapter homeAdapter;
-    /**
-     * Toolbar search view object.
-     */
-    @BindView(R.id.search_view_fragment_home)
-    SearchView searchView;
 
-    //----------------------------------------------------------------------------------------------
     @BindView(R.id.ab_fragment_home)
     AppBarLayout appBarLayout;
+
     Handler handler;
     Runnable update;
-    private List<TypeItem> dataSet;
+
+    private RealmResults<HomeItem> homeItems;
+
     /**
      * Unbinder for ButterKnife.
      */
     private Unbinder unbinder;
-    private SlideshowAdapter slideshowAdapter;
+
     /**
-     * Reference to node {@link AHC#FDR_HOME} to which listener is attached.
+     * Slideshow adapter.
      */
-    private DatabaseReference dbRef = getRootReference().child(AHC.FDR_HOME);
+    private SlideshowAdapter slideshowAdapter;
+
     /**
      * Reference to slide show image data.
      */
     //TODO change to fhr home..and change fdr home to home
     private DatabaseReference slideShowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
-    private ValueEventListener slideShowEventListener;
-    /**
-     * EventListener for {@link AHC#FDR_HOME} which is required to remove in {@link #onStop()}.
-     */
-    private ValueEventListener homeEventListener;
+    private ValueEventListener slideShowVEL;
+    private ValueEventListener homeRefVEL;
+
+    private DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
+
     /**
      * Item touch listener of RecyclerView.
      */
@@ -128,19 +115,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
      * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
      */
     private int appBarOffset = 0;
-
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param bundle Bundled data for this fragment.
-     * @return A new instance of fragment HomeFragment.
-     */
-    public static HomeFragment newInstance(@Nullable final Bundle bundle) {
-        final HomeFragment fragment = new HomeFragment();
-        fragment.setArguments(bundle);
-        return fragment;
-    }
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
@@ -156,11 +130,11 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
      * View updates and listeners can be done here.
      */
     private void init() {
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        onItemTouchListener = new RecyclerItemClickListener(getContext(), recyclerView, this);
-        recyclerView.addOnItemTouchListener(onItemTouchListener);
-        recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        homeRV.setHasFixedSize(true);
+        homeRV.setLayoutManager(new LinearLayoutManager(getContext()));
+        onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
+        homeRV.addOnItemTouchListener(onItemTouchListener);
+        homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         appBarLayout.addOnOffsetChangedListener(this);
         database = Realm.getDefaultInstance();
     }
@@ -168,15 +142,86 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
     @Override
     public void onStart() {
         super.onStart();
-        dataSet = generateList();
-        homeAdapter = new HomeAdapter(dataSet, getContext());
-        recyclerView.setAdapter(homeAdapter);
+        //adter super call, database is ready
+        homeItems = database.where(HomeItem.class).findAllSorted(HomeItemKeys.DATE, Sort.DESCENDING);
+        homeItems.addChangeListener((collection, changeSet) -> {
+            // `null`  means the async query returns the first time.
+            if (changeSet == null) {
+                homeAdapter.notifyDataSetChanged();
+                return;
+            }
+            // For deletions, the adapter has to be notified in reverse order.
+            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+            for (int i = deletions.length - 1; i >= 0; i--) {
+                OrderedCollectionChangeSet.Range range = deletions[i];
+                homeAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+            for (OrderedCollectionChangeSet.Range range : insertions) {
+                homeAdapter.notifyItemRangeInserted(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+            for (OrderedCollectionChangeSet.Range range : modifications) {
+                homeAdapter.notifyItemRangeChanged(range.startIndex, range.length);
+            }
+            if (homeAdapter.getItemCount() == 0) {
+                //emptyTextView.setVisibility(View.VISIBLE);
+            } else {
+                //emptyTextView.setVisibility(View.GONE);
+            }
+        });
+        homeAdapter = new HomeAdapter(homeItems, getContext());
+        homeRV.setAdapter(homeAdapter);
+        homeRefVEL = getHomeRefVEL();
+        homeRef.addValueEventListener(homeRefVEL);
+
         appBarLayout.offsetTopAndBottom(appBarOffset);
 
         setupSlideshow();
+    }
 
-        homeEventListener = getValueEventListener();
-        dbRef.addValueEventListener(homeEventListener);
+    @Override
+    public void onStop() {
+        handler.removeCallbacks(update);
+        slideshowAdapter.close();
+        //Remove firebase database listeners
+        slideShowRef.removeEventListener(slideShowVEL);
+        homeRef.removeEventListener(homeRefVEL);
+
+        //Remove database change listener
+        homeItems.removeAllChangeListeners();
+
+        //null the adapter
+        homeAdapter = null;
+        super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        homeRV.removeOnItemTouchListener(onItemTouchListener);
+        unbinder.unbind();
+        database.close();
+    }
+
+    @Override
+    public void onItemClick(final View view, final int position) {
+        final Intent intent = new Intent(getContext(), PostDetailsActivity.class);
+        final HomeItem hi = homeItems.get(position);
+        intent.putExtra(HomeItemKeys.KEY, hi.getKey());
+        startActivity(intent);
+    }
+
+    @Override
+    public void onLongItemClick(final View view, final int position) {
+        //Not required as of now
+    }
+
+    @Override
+    public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
+        appBarOffset = verticalOffset;
     }
 
     private void setupSlideshow() {
@@ -184,10 +229,10 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
 
         handler = new Handler();
         update = () -> {
-            if (viewPagerSlideShow == null || slideshowAdapter == null) return;
-            int newPos = viewPagerSlideShow.getCurrentItem() + 1;
+            if (slideshowVP == null || slideshowAdapter == null) return;
+            int newPos = slideshowVP.getCurrentItem() + 1;
             newPos %= slideshowAdapter.getCount();
-            viewPagerSlideShow.setCurrentItem(newPos, true);
+            slideshowVP.setCurrentItem(newPos, true);
         };
 
         ViewPager.OnPageChangeListener vopl = new ViewPager.OnPageChangeListener() {
@@ -209,47 +254,16 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
                 }
             }
         };
-        viewPagerSlideShow.addOnPageChangeListener(vopl);
+        slideshowVP.addOnPageChangeListener(vopl);
         handler.postDelayed(update, 7500);
-        viewPagerSlideShow.setAdapter(slideshowAdapter);
-        slideShowEventListener = getSlideShowEventListener();
-        viewPagerIndicator.setupWithViewPager(viewPagerSlideShow);
-        viewPagerIndicator.addOnPageChangeListener(vopl);
-        slideShowRef.addValueEventListener(slideShowEventListener);
+        slideshowVP.setAdapter(slideshowAdapter);
+        slideShowVEL = getSlideShowVEL();
+        pagerIndicator.setupWithViewPager(slideshowVP);
+        pagerIndicator.addOnPageChangeListener(vopl);
+        slideShowRef.addValueEventListener(slideShowVEL);
     }
 
-    /**
-     * When fragment is created the list is generated from the realm database.
-     * This cannot be called before {@link #onStart()} as database is not ready.
-     *
-     * @return Generated list from Realm.
-     */
-    private List<TypeItem> generateList() {
-        //Clear existing results
-        final List<TypeItem> list = new ArrayList<>();
-
-        //Add announcement tab
-        final List<String> anns = new ArrayList<>();
-        final RealmResults<AnnItem> annItems = database.where(AnnItem.class)
-                .findAllSorted(AnnItemKeys.DATE, Sort.DESCENDING);
-        for (final AnnItem annItem : annItems) {
-            anns.add(annItem.getData());
-        }
-        if (anns.size() == 0) anns.add("No announcements");
-        list.add(new TypeItem(anns, HomeAdapter.ANNOUNCEMENT_TAB));
-
-
-        //Add home items
-        final RealmResults<HomeItem> homeItems = database.where(HomeItem.class)
-                .findAllSorted(HomeItemKeys.DATE, Sort.DESCENDING);
-        for (final HomeItem hi : homeItems) {
-            list.add(new TypeItem(hi, HomeType.HOME_ITEM));
-        }
-
-        return list;
-    }
-
-    private ValueEventListener getSlideShowEventListener() {
+    private ValueEventListener getSlideShowVEL() {
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
@@ -258,9 +272,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
                 if (dataSnapshot.getChildrenCount() == 0) return;
 
                 //Delete old values
-                database.executeTransaction(r -> {
-                    database.delete(SlideshowItem.class);
-                });
+                database.executeTransaction(r -> database.delete(SlideshowItem.class));
                 for (final DataSnapshot cs :
                         dataSnapshot.getChildren()) {
                     if (!cs.hasChild(SlideshowItemKeys.PHOTO_URL)
@@ -285,68 +297,21 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener, A
         };
     }
 
-    /**
-     * Returns the valueEventListener for the node {@link AHC#FDR_HOME}.
-     *
-     * @return valueEventListener object that can be later detached in {@link #onStop()}.
-     */
-    @NonNull
-    private ValueEventListener getValueEventListener() {
+    private ValueEventListener getHomeRefVEL() {
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                homeAdapter.notifyDataSetChanged();
+                HomeService.saveHomeSnapshotToRealm(dataSnapshot);
             }
 
             @Override
-            public void onCancelled(final DatabaseError databaseError) {
-                Log.e(TAG, "Error in " + AHC.FDR_HOME + " node\n"
-                        + databaseError.getDetails());
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "Database access error." + databaseError.toString());
             }
         };
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        handler.removeCallbacks(update);
-        slideshowAdapter.close();
-        slideShowRef.removeEventListener(slideShowEventListener);
-        dbRef.removeEventListener(homeEventListener);
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        recyclerView.removeOnItemTouchListener(onItemTouchListener);
-        homeAdapter = null;
-        unbinder.unbind();
-        database.close();
-    }
-
-    @Override
-    public void onItemClick(final View view, final int position) {
-        if (position == 0) {
-            startActivity(new Intent(getContext(), AnnActivity.class));
-        } else {
-            final Intent intent = new Intent(getContext(), PostDetailsActivity.class);
-            final HomeItem hi = (HomeItem) dataSet.get(position).getData();
-            intent.putExtra(HomeItemKeys.KEY, hi.getKey());
-            startActivity(intent);
-        }
-    }
-
-    @Override
-    public void onLongItemClick(final View view, final int position) {
-        //Not required as of now
-    }
-
-    @Override
-    public void onOffsetChanged(final AppBarLayout appBarLayout, final int verticalOffset) {
-        appBarOffset = verticalOffset;
-    }
-
     public void scrollToTop() {
-        if (recyclerView != null) recyclerView.smoothScrollToPosition(0);
+        if (homeRV != null) homeRV.smoothScrollToPosition(0);
     }
 }

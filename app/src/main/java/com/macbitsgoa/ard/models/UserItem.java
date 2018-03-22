@@ -43,36 +43,21 @@ public class UserItem extends RealmObject implements Comparable<UserItem> {
      */
     private String desc;
 
-    /**
-     * Is admin or not?
-     */
-    private boolean admin;
-
     public UserItem() {
         this.uid = "";
         email = "";
         photoUrl = "";
         name = "";
         desc = "";
-        admin = false;
     }
 
     public UserItem(@NonNull String uid, @Nullable String name, @Nullable String email,
-                    @Nullable String photoUrl, @Nullable String desc, boolean admin) {
+                    @Nullable String photoUrl, @Nullable String desc) {
         this.uid = uid;
         setName(name);
         setEmail(email);
         setPhotoUrl(photoUrl);
         setDesc(desc);
-        setAdmin(admin);
-    }
-
-    public boolean isAdmin() {
-        return admin;
-    }
-
-    public void setAdmin(boolean admin) {
-        this.admin = admin;
     }
 
     @NonNull
@@ -132,8 +117,7 @@ public class UserItem extends RealmObject implements Comparable<UserItem> {
                 + ", name='" + name + '\''
                 + ", email='" + email + '\''
                 + ", photoUrl='" + photoUrl + '\''
-                + ", desc='" + desc + '\''
-                + ", admin=" + admin
+                + ", desc='" + desc
                 + '}';
     }
 

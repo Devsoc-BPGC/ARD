@@ -1,9 +1,8 @@
 package com.macbitsgoa.ard.services;
 
-import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.firebase.jobdispatcher.JobParameters;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,46 +26,31 @@ import io.realm.RealmList;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeService extends BaseIntentService {
+public class HomeService extends BaseJobService {
 
     /**
      * TAG for class.
      */
     public static final String TAG = HomeService.class.getSimpleName();
 
-    /**
-     * Key for intent extra, which denotes how many of the latest news item are to be fetched.
-     */
-    public static final String LIMIT_TO_LAST = "limitToLast";
-
-    /**
-     * Request code for Alarm manager.
-     */
-    public static final int REQUEST_CODE = 69;
-
-    public HomeService() {
-        super(HomeService.class.getSimpleName());
-    }
+    boolean completedHome = false;
+    boolean completedAnn = false;
+    JobParameters job;
 
     @Override
-    protected void onHandleIntent(@Nullable final Intent intent) {
-        super.onHandleIntent(intent);
-        int limitToLast = -1;
-        if (intent != null && intent.hasExtra(LIMIT_TO_LAST)) {
-            limitToLast = intent.getIntExtra(LIMIT_TO_LAST, -1);
-        }
-        final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
-        final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
-        final ValueEventListener homeCEL = getHomeListener();
-        final ValueEventListener annRefCEL = getAnnListener();
+    public boolean onStartJob(JobParameters job) {
+        this.job = job;
+        AHC.logd(TAG, "Starting new thread for job");
+        new Thread(() -> {
+            final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
+            final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
+            final ValueEventListener homeCEL = getHomeListener();
+            final ValueEventListener annRefCEL = getAnnListener();
 
-        if (limitToLast != -1) {
-            homeRef.limitToLast(limitToLast).addListenerForSingleValueEvent(homeCEL);
-        } else {
             homeRef.addListenerForSingleValueEvent(homeCEL);
-        }
-        AHC.logd(TAG, "Limit is " + limitToLast);
-        annRef.addListenerForSingleValueEvent(annRefCEL);
+            annRef.addListenerForSingleValueEvent(annRefCEL);
+        }).start();
+        return true;
     }
 
     /**
@@ -77,73 +61,64 @@ public class HomeService extends BaseIntentService {
     private ValueEventListener getHomeListener() {
         //noinspection OverlyLongMethod
         return new ValueEventListener() {
-            private Realm database;
-
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                database = Realm.getDefaultInstance();
-                for (DataSnapshot child : dataSnapshot.getChildren()) {
-                    final String key = child.getKey();
-                    final String author = child.child(HomeItemKeys.AUTHOR).getValue(String.class);
-                    final Date date = child.child(HomeItemKeys.DATE).getValue(Date.class);
-                    if (date == null || !child.hasChild(HomeItemKeys.SUB_SECTIONS)) continue;
-                    database.executeTransaction(r -> {
-                        HomeItem hi = r
-                                .where(HomeItem.class)
-                                .equalTo(HomeItemKeys.KEY, key)
-                                .findFirst();
-                        if (hi == null) {
-                            hi = r.createObject(HomeItem.class, key);
-                        } else {
-                            if (hi.getImages() != null) {
-                                hi.getImages().deleteAllFromRealm();
-                            }
-                            if (hi.getTexts() != null) {
-                                hi.getTexts().deleteAllFromRealm();
-                            }
-                        }
-                        hi.setAuthor(author == null
-                                || author.length() == 0 ? AHC.DEFAULT_AUTHOR : author);
-                        hi.setDate(date);
-                        final RealmList<PhotoItem> images = new RealmList<>();
-                        final RealmList<TextItem> texts = new RealmList<>();
-                        for (final DataSnapshot subSectionDS
-                                : child.child(HomeItemKeys.SUB_SECTIONS).getChildren()) {
-                            final int type = subSectionDS.child(HomeItemKeys.TYPE).getValue(Integer.class);
-                            final String data = subSectionDS.child(HomeItemKeys.DATA).getValue(String.class);
-                            switch (type) {
-                                case HomeType.FDR_PHOTO_ITEM:
-                                    final PhotoItem pi = r.createObject(PhotoItem.class);
-                                    pi.setPhotoUrl(data);
-                                    pi.setPriority(subSectionDS.getKey());
-                                    images.add(pi);
-                                    break;
-                                case HomeType.FDR_TEXT_ITEM:
-                                    final TextItem ti = r.createObject(TextItem.class);
-                                    ti.setData(data);
-                                    ti.setPriority(subSectionDS.getKey());
-                                    texts.add(ti);
-                                    break;
-                            }
-                        }
-                        hi.setImages(images);
-                        hi.setTexts(texts);
-                    });
-                }
-                database.close();
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                saveHomeSnapshotToRealm(dataSnapshot);
+                completedHome = true;
             }
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
                 Log.e(TAG, "Error in getting announcements\n" + databaseError.getDetails());
-                if (database != null && !database.isClosed()) {
-                    if (database.isInTransaction()) {
-                        database.cancelTransaction();
-                    }
-                    database.close();
-                }
+                completedHome = true;
             }
         };
+    }
+
+    public static void saveHomeSnapshotToRealm(final DataSnapshot dataSnapshot) {
+        final Realm database = Realm.getDefaultInstance();
+        for (DataSnapshot child : dataSnapshot.getChildren()) {
+            final String key = child.getKey();
+            final String author = child.child(HomeItemKeys.AUTHOR).getValue(String.class);
+            final Date date = child.child(HomeItemKeys.DATE).getValue(Date.class);
+            if (date == null || !child.hasChild(HomeItemKeys.SUB_SECTIONS)) continue;
+            database.executeTransaction(r -> {
+                HomeItem hi = r
+                        .where(HomeItem.class)
+                        .equalTo(HomeItemKeys.KEY, key)
+                        .findFirst();
+                if (hi == null) {
+                    hi = r.createObject(HomeItem.class, key);
+                    AHC.logd(TAG, "Creating new home item");
+                }
+                hi.setAuthor(author);
+                hi.setDate(date);
+                final RealmList<PhotoItem> images = new RealmList<>();
+                final RealmList<TextItem> texts = new RealmList<>();
+                for (final DataSnapshot subSectionDS
+                        : child.child(HomeItemKeys.SUB_SECTIONS).getChildren()) {
+                    final int type = subSectionDS.child(HomeItemKeys.TYPE).getValue(Integer.class);
+                    final String data = subSectionDS.child(HomeItemKeys.DATA).getValue(String.class);
+                    switch (type) {
+                        case HomeType.FDR_PHOTO_ITEM:
+                            final PhotoItem pi = r.createObject(PhotoItem.class);
+                            pi.setPhotoUrl(data);
+                            pi.setPriority(subSectionDS.getKey());
+                            images.add(pi);
+                            break;
+                        case HomeType.FDR_TEXT_ITEM:
+                            final TextItem ti = r.createObject(TextItem.class);
+                            ti.setData(data);
+                            ti.setPriority(subSectionDS.getKey());
+                            texts.add(ti);
+                            break;
+                    }
+                }
+                hi.setImages(images);
+                hi.setTexts(texts);
+            });
+        }
+        database.close();
     }
 
 
@@ -154,12 +129,10 @@ public class HomeService extends BaseIntentService {
      */
     public ValueEventListener getAnnListener() {
         return new ValueEventListener() {
-            private Realm database;
-
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null) return;
-                database = Realm.getDefaultInstance();
+                final Realm database = Realm.getDefaultInstance();
                 for (DataSnapshot child : dataSnapshot.getChildren()) {
                     final String key = child.getKey();
                     final String data = child.child(AnnItemKeys.DATA).getValue(String.class);
@@ -178,27 +151,26 @@ public class HomeService extends BaseIntentService {
                             if (annItem.getDate().getTime() == date.getTime())
                                 return;
                         }
-                        //Only way an update occurred is if date objecct changed, in which case ann is
-                        //now unread
-                        annItem.setAuthor(author == null || author.length() == 0 ? "Admin" : author);
+                        annItem.setAuthor(author);
                         annItem.setDate(date);
                         annItem.setData(data);
-                        startService(new Intent(HomeService.this, NotificationService.class));
                     });
                 }
                 database.close();
+                completedAnn = true;
+                checkJobStatus();
             }
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
                 Log.e(TAG, "Error in getting announcements\n" + databaseError.getDetails());
-                if (database != null && !database.isClosed()) {
-                    if (database.isInTransaction()) {
-                        database.cancelTransaction();
-                    }
-                    database.close();
-                }
+                completedAnn = true;
             }
         };
+    }
+
+    private void checkJobStatus() {
+        AHC.logd(TAG, "Status of jobs is " + completedAnn + " and " + completedHome);
+        if (completedAnn && completedHome) jobFinished(job, false);
     }
 }

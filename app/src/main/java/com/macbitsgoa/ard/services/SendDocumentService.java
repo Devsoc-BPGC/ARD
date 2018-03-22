@@ -44,8 +44,7 @@ public class SendDocumentService extends BaseIntentService {
     @Override
     protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
-        if (intent == null
-                || intent.getData() == null
+        if (intent.getData() == null
                 || !intent.hasExtra(MessageItemKeys.OTHER_USER_ID)) {
             AHC.logd(TAG, "Null intent was passed, sending all unsent documents");
             sendAll();
@@ -93,7 +92,7 @@ public class SendDocumentService extends BaseIntentService {
             if (data.toString().contains("image")) {
                 StorageReference tRef = sRef.getParent().child("thumbs").child(documentId);
 
-                InputStream image_stream = null;
+                InputStream image_stream;
                 try {
                     image_stream = getContentResolver().openInputStream(data);
                     Bitmap bitmap = BitmapFactory.decodeStream(image_stream);

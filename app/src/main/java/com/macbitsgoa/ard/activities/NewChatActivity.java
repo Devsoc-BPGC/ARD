@@ -59,8 +59,14 @@ public class NewChatActivity extends BaseActivity {
      */
     @BindView(R.id.rv_activity_new_chat)
     RecyclerView userRV;
+
     @BindView(R.id.toolbar_activity_new_chat)
     Toolbar toolbar;
+
+    ValueEventListener adminEventListener;
+    ValueEventListener usersEventListener;
+    List<UserItem> adminsList, usersList;
+    NewChatAdapter adapter;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -71,15 +77,30 @@ public class NewChatActivity extends BaseActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         toolbar.setNavigationOnClickListener(v -> onBackPressed());
 
-        List<UserItem> adminsList = new ArrayList<>();
-        List<UserItem> usersList = new ArrayList<>();
+        adminsList = new ArrayList<>();
+        usersList = new ArrayList<>();
 
-        NewChatAdapter adapter = new NewChatAdapter(adminsList, usersList, this);
+        adapter = new NewChatAdapter(adminsList, usersList, this);
         userRV.setLayoutManager(new LinearLayoutManager(this));
         userRV.setHasFixedSize(true);
         userRV.setAdapter(adapter);
 
-        adminsRef.addValueEventListener(new ValueEventListener() {
+        adminEventListener = getAdminEventListener();
+        usersEventListener = getUsersEventListener();
+
+        adminsRef.addValueEventListener(adminEventListener);
+        usersRef.addValueEventListener(usersEventListener);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        adminsRef.removeEventListener(adminEventListener);
+        usersRef.removeEventListener(usersEventListener);
+    }
+
+    private ValueEventListener getAdminEventListener() {
+        return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 adminsList.clear();
@@ -95,14 +116,13 @@ public class NewChatActivity extends BaseActivity {
                             name,
                             email,
                             photoUrl,
-                            desc,
-                            true);
+                            desc);
                     adminsList.add(ui);
                 }
                 Collections.sort(adminsList);
                 AHC.logd(TAG, "Admins are " + adminsList.toString());
                 adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.INVISIBLE);
+                progressBar.setVisibility(View.GONE);
             }
 
             @Override
@@ -114,8 +134,11 @@ public class NewChatActivity extends BaseActivity {
                         "Could not get admin data. Try again later!",
                         Toast.LENGTH_SHORT).show();
             }
-        });
-        usersRef.addValueEventListener(new ValueEventListener() {
+        };
+    }
+
+    private ValueEventListener getUsersEventListener() {
+        return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 usersList.clear();
@@ -131,8 +154,7 @@ public class NewChatActivity extends BaseActivity {
                             name,
                             email,
                             photoUrl,
-                            "User",
-                            false);
+                            "User");
                     usersList.add(ui);
                 }
                 AHC.logd(TAG, "All users are " + usersList.toString());
@@ -141,7 +163,6 @@ public class NewChatActivity extends BaseActivity {
                     AHC.logd(TAG, "Final non admin users are " + usersList.toString());
                 else AHC.logd(TAG, "No admins were removed from userlist");
                 adapter.notifyDataSetChanged();
-                progressBar.setVisibility(View.INVISIBLE);
             }
 
             @Override
@@ -150,6 +171,6 @@ public class NewChatActivity extends BaseActivity {
                         + NewChatActivity.class.getSimpleName());
                 AHC.logd(TAG, databaseError.toString());
             }
-        });
+        };
     }
 }

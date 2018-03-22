@@ -12,11 +12,11 @@ import com.macbitsgoa.ard.models.FaqItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.viewholders.FaqViewHolder;
 
-import java.util.List;
+import io.realm.RealmResults;
 
 /**
- * Adapter to display forums. Call using {@link ForumAdapter#ForumAdapter(List)} where list is a
- * List object of type {@link TypeItem} class. List should be nonnull.
+ * Adapter to display forums. Call using {@link ForumAdapter#ForumAdapter(RealmResults)} where
+ * list is a {@link RealmResults} object of type {@link TypeItem} class.
  *
  * @author Vikramaditya Kukreja
  */
@@ -25,7 +25,7 @@ public class ForumAdapter extends RecyclerView.Adapter<FaqViewHolder> {
     /**
      * Item list to use as data source.
      */
-    private List<FaqItem> items;
+    private RealmResults<FaqItem> items;
 
     /**
      * Maintains expanded text info.
@@ -33,14 +33,19 @@ public class ForumAdapter extends RecyclerView.Adapter<FaqViewHolder> {
     private SparseBooleanArray sba;
 
     /**
-     * Constructor for items of {@link TypeItem} class. Automatically initialises a sparse boolean
-     * array to maintain clicked items info.
+     * Constructor for items of {@link RealmResults<FaqItem>} class.
+     * It also initialises a sparse boolean array to maintain clicked items info.
      *
-     * @param items List of {@link FaqItem}.
+     * @param items {@link RealmResults} of {@link FaqItem}.
      */
-    public ForumAdapter(@NonNull final List<FaqItem> items) {
+    public ForumAdapter(@NonNull final RealmResults<FaqItem> items) {
         this.items = items;
         sba = new SparseBooleanArray(getItemCount());
+    }
+
+    public void setNewData(@NonNull final RealmResults<FaqItem> items) {
+        this.items = items;
+        notifyDataSetChanged();
     }
 
     @NonNull

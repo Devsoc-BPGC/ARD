@@ -10,20 +10,17 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.adapters.HomeAdapter;
+import com.macbitsgoa.ard.adapters.AnnAdapter;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
-import com.macbitsgoa.ard.models.TypeItem;
-import com.macbitsgoa.ard.types.PostType;
+import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.utils.AHC;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.OrderedCollectionChangeSet;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -71,6 +68,9 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+
+        AHC.startService(this, HomeService.class, HomeService.TAG);
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ann);
         ButterKnife.bind(this);
@@ -84,36 +84,44 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
         annRV.addOnItemTouchListener(onItemTouchListener);
         annRV.addItemDecoration(new DividerItemDecoration(this, DividerItemDecoration.VERTICAL));
 
-        //TODO cancel ongoing notifications
-
         //Generate data
-        final List<TypeItem> annItemsList = new ArrayList<>();
         anns = database.where(AnnItem.class)
                 .findAllSorted(AnnItemKeys.DATE, Sort.DESCENDING);
-        for (final AnnItem ai : anns) {
-            annItemsList.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
-        }
+        //Init adapter
+        final AnnAdapter annAdapter = new AnnAdapter(anns);
+        //set adapter
+        annRV.setAdapter(annAdapter);
 
-        if (annItemsList.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+        if (anns.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
         else emptyListTV.setVisibility(View.INVISIBLE);
 
-        //Init adapter
-        final HomeAdapter homeAdapter = new HomeAdapter(annItemsList, this);
-
         //Setup on change listener
-        anns.addChangeListener(annItems -> {
-            annItemsList.clear();
+        anns.addChangeListener((collection, changeSet) -> {
             //TODO cancel ongoing notifications
-            for (final AnnItem ais : annItems) {
-                annItemsList.add(new TypeItem(ais, PostType.ANNOUNCEMENT));
+            // `null`  means the async query returns the first time.
+            if (changeSet == null) {
+                annAdapter.notifyDataSetChanged();
+                return;
             }
-            if (annItemsList.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
-            else emptyListTV.setVisibility(View.INVISIBLE);
-            homeAdapter.notifyDataSetChanged();
-        });
+            // For deletions, the adapter has to be notified in reverse order.
+            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+            for (int i = deletions.length - 1; i >= 0; i--) {
+                OrderedCollectionChangeSet.Range range = deletions[i];
+                annAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
+            }
 
-        //set adapter
-        annRV.setAdapter(homeAdapter);
+            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+            for (OrderedCollectionChangeSet.Range range : insertions) {
+                annAdapter.notifyItemRangeInserted(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+            for (OrderedCollectionChangeSet.Range range : modifications) {
+                annAdapter.notifyItemRangeChanged(range.startIndex, range.length);
+            }
+            if (anns.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+            else emptyListTV.setVisibility(View.INVISIBLE);
+        });
     }
 
     /**
@@ -131,10 +139,6 @@ public class AnnActivity extends BaseActivity implements OnItemClickListener {
     @Override
     public void onItemClick(final View view, final int position) {
         final AnnItem ai = anns.get(position);
-        if (ai.getKey() == null) {
-            AHC.logd(TAG, "Key was null, was item deleted?");
-            return;
-        }
         final Intent intent = new Intent(this, PostDetailsActivity.class);
         intent.putExtra("annItem", ai.getKey());
         startActivity(intent);

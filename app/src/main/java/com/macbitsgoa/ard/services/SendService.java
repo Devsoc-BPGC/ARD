@@ -40,31 +40,25 @@ public class SendService extends BaseIntentService {
     private Realm database;
 
     public SendService() {
-        super(SendService.class.getSimpleName());
+        super(TAG);
     }
 
     @Override
     protected void onHandleIntent(final Intent intent) {
         super.onHandleIntent(intent);
         database = Realm.getDefaultInstance();
-        if (intent == null) {
-            AHC.logd(TAG, "Null intent was passed for send service," +
-                    " sending all unsent messages");
+        AHC.logd(TAG, "Calling intent for " + TAG + "\n" + intent.toString());
+        //Get message data and receiver id in intent
+        final String messageData = intent.getStringExtra(MessageItemKeys.MESSAGE_DATA);
+        final String receiverId = intent.getStringExtra(MessageItemKeys.OTHER_USER_ID);
+        if (messageData == null || receiverId == null) {
+            Log.e(TAG, "No extras sent in intent, messageData was "
+                    + messageData + " and receiver id was " + receiverId);
             sendAll();
         } else {
-            AHC.logd(TAG, "Calling intent for " + TAG + "\n" + intent.toString());
-            //Get message data and receiver id in intent
-            final String messageData = intent.getStringExtra(MessageItemKeys.MESSAGE_DATA);
-            final String receiverId = intent.getStringExtra(MessageItemKeys.OTHER_USER_ID);
-            if (messageData == null || receiverId == null) {
-                Log.e(TAG, "No extras sent in intent, messageData was "
-                        + messageData + " and receiver id was " + receiverId);
-                sendAll();
-            } else {
-                AHC.logd(TAG, "Sending message " + messageData
-                        + " to receiver " + receiverId);
-                sendMessage(messageData, receiverId);
-            }
+            AHC.logd(TAG, "Sending message " + messageData
+                    + " to receiver " + receiverId);
+            sendMessage(messageData, receiverId);
         }
         database.close();
     }
@@ -116,7 +110,6 @@ public class SendService extends BaseIntentService {
         final String messageId = mItem.getMessageId();
         final String messageData = mItem.getMessageData();
         final String receiverId = mItem.getOtherUserId();
-        final String latestMessage = messageData;
         final Date messageTime = mItem.getMessageTime();
 
         //First write to local database
@@ -137,7 +130,7 @@ public class SendService extends BaseIntentService {
             final ChatsItem ci = r.where(ChatsItem.class)
                     .equalTo(ChatItemKeys.DB_ID, receiverId).findFirst();
             if (ci != null) {
-                ci.setLatest(latestMessage);
+                ci.setLatest(messageData);
                 ci.setUpdate(messageTime);
             }
         });
@@ -150,7 +143,7 @@ public class SendService extends BaseIntentService {
                 .child(ChatItemKeys.PRIVATE_MESSAGES)
                 .child(getUser().getUid());
 
-        Log.e(TAG, "Sending message with id " + mItem.getMessageId());
+        AHC.logd(TAG, "Sending message with id " + mItem.getMessageId());
 
         //Add new message
         final Map<String, Object> messageMap = new HashMap<>();
@@ -161,14 +154,14 @@ public class SendService extends BaseIntentService {
         final Map<String, Object> senderMap = new HashMap<>();
         senderMap.put(ChatItemKeys.FDR_ID, getUser().getUid());
         senderMap.put(ChatItemKeys.FDR_NAME, getUser().getDisplayName());
-        senderMap.put(ChatItemKeys.FDR_LATEST, latestMessage);
+        senderMap.put(ChatItemKeys.FDR_LATEST, messageData);
         senderMap.put(ChatItemKeys.FDR_PHOTO_URL, getUser().getPhotoUrl().toString());
         senderMap.put(ChatItemKeys.FDR_DATE, messageTime);
 
         sendMessageRef.child(ChatItemKeys.FDR_MESSAGES).child(messageId).setValue(messageMap);
         sendMessageRef.child(ChatItemKeys.SENDER).setValue(senderMap);
 
-        Log.e(TAG, "Calling notify service");
+        AHC.logd(TAG, "Calling notify service");
         notifyStatus(receiverId);
     }
 

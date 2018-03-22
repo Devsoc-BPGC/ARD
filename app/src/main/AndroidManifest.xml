@@ -30,6 +30,7 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
             android:resource="@color/colorPrimaryDark" />
+
         <activity
             android:name=".activities.MainActivity"
             android:label="@string/app_name"
@@ -60,15 +61,6 @@
             android:theme="@style/AppTheme.NoActionBar"
             android:windowSoftInputMode="adjustResize|stateHidden" />
         <activity
-            android:name=".activities.SearchActivity"
-            android:label="@string/title_activity_search"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.macbitsgoa.ard.activities.MainActivity" />
-        </activity>
-        <activity
             android:name=".activities.ChatActivity"
             android:label="@string/title_activity_chat"
             android:theme="@style/AppTheme.NoActionBar">
@@ -80,22 +72,31 @@
         <service
             android:name=".services.MessagingService"
             android:description="@string/messaging_service_desc"
-            android:process=":BackgroundServices" />
+            android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
         <service
             android:name=".services.NotificationService"
             android:description="@string/notification_service_desc"
-            android:process=":BackgroundServices" />
-        <service
-            android:name=".services.SendService"
-            android:process=":BackgroundServices" />
+            android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
+        <service android:name=".services.SendService"/>
         <service
             android:name=".services.NotifyService"
             android:process=":BackgroundServices" />
-        <service android:name=".services.ServicesStarter" />
         <service
             android:name=".services.HomeService"
             android:description="@string/home_service_desc"
-            android:process=":BackgroundServices" />
+            android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
         <service android:name=".services.SendDocumentService" />
         <service android:name=".services.FCMService">
             <intent-filter>
@@ -108,16 +109,7 @@
             </intent-filter>
         </service>
         <service android:name=".services.AnnNotifyService" />
-
-        <receiver
-            android:name=".services.BootBroadcastReceiver"
-            android:enabled="true">
-            <intent-filter>
-                <action android:name="android.intent.action.ACTION_POWER_CONNECTED" />
-                <action android:name="android.intent.action.SCREEN_ON" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
+        <service android:name=".services.ForumService" />
 
         <activity
             android:name=".activities.NewChatActivity"

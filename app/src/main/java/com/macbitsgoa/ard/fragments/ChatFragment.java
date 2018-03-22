@@ -86,7 +86,7 @@ public class ChatFragment extends BaseFragment {
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-        getContext().startService(new Intent(getContext(), MessagingService.class));
+        AHC.startService(getContext(), MessagingService.class, MessagingService.TAG);
         getContext().startService(new Intent(getContext(), SendService.class));
 
         newChatFab.setOnClickListener(this);
@@ -156,9 +156,9 @@ public class ChatFragment extends BaseFragment {
 
     @Override
     public void onStop() {
-        super.onStop();
         chats.removeAllChangeListeners();
         myStatus.removeValue();
+        super.onStop();
     }
 
     @Override

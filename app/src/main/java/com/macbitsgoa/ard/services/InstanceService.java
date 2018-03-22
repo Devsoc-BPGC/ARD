@@ -2,7 +2,6 @@ package com.macbitsgoa.ard.services;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.FirebaseInstanceIdService;
-import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.utils.AHC;
 
 /**
@@ -11,6 +10,10 @@ import com.macbitsgoa.ard.utils.AHC;
  * @author Vikramaditya Kukreja
  */
 public class InstanceService extends FirebaseInstanceIdService {
+
+    /**
+     * Tag for this class.
+     */
     private static final String TAG = InstanceService.class.getSimpleName();
 
     /**
@@ -24,6 +27,5 @@ public class InstanceService extends FirebaseInstanceIdService {
         String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         AHC.logd(TAG, "Refreshed token: " + refreshedToken);
         AHC.sendRegistrationToServer(refreshedToken);
-        FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
     }
 }

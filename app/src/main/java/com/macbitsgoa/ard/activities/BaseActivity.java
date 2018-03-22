@@ -24,8 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.services.HomeService;
-import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.utils.AHC;
 
 import io.realm.Realm;
@@ -61,7 +59,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
         if (FirebaseAuth.getInstance().getCurrentUser() == null && !(this instanceof AuthActivity)) {
             startActivity(new Intent(this, AuthActivity.class));
         }
-        AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
         database = Realm.getDefaultInstance();
     }
 
@@ -69,7 +66,6 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
     protected void onDestroy() {
         super.onDestroy();
         database.close();
-        AHC.setNextAlarm(this, MessagingService.class, MessagingService.REQUEST_CODE, 0);
     }
 
     /**
@@ -224,7 +220,7 @@ public class BaseActivity extends AppCompatActivity implements View.OnClickListe
                           @NonNull final View view, @ColorRes final int textColor,
                           @ColorRes final int backgroundColor) {
         final Snackbar snackbar = Snackbar.make(view, message, length);
-        final TextView snackBarText = (TextView) snackbar.getView()
+        final TextView snackBarText = snackbar.getView()
                 .findViewById(R.id.snackbar_text);
         snackBarText.setTextColor(ContextCompat.getColor(this, textColor));
         snackbar.getView().setBackgroundColor(ContextCompat.getColor(this, backgroundColor));

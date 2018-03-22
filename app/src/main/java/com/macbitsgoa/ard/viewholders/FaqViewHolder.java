@@ -41,9 +41,7 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
     public FaqViewHolder(@NonNull final View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
-        itemView.setOnClickListener(v -> {
-            answerTV.click();
-        });
+        itemView.setOnClickListener(v -> answerTV.click());
     }
 
 

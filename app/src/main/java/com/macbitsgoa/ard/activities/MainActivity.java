@@ -9,7 +9,6 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
@@ -19,8 +18,8 @@ import com.macbitsgoa.ard.fragments.ChatFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
-import com.macbitsgoa.ard.interfaces.ForumFragmentListener;
-import com.macbitsgoa.ard.keys.AuthActivityKeys;
+import com.macbitsgoa.ard.services.ForumService;
+import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.types.MainActivityType;
 import com.macbitsgoa.ard.utils.AHC;
@@ -39,8 +38,12 @@ import butterknife.ButterKnife;
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
         BottomNavigationView.OnNavigationItemSelectedListener,
-        ForumFragmentListener,
         ChatFragmentListener {
+
+    /**
+     * Tag for this class.
+     */
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     private static int currentSection = MainActivityType.HOME;
     /**
@@ -77,33 +80,28 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
         //Check if authorised
-        if (!auth(getIntent())) {
+        if (getUser() == null) {
+            AHC.logd(TAG, "Current user null");
             startActivity(new Intent(this, AuthActivity.class));
             finish();
+        } else {
+            AHC.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
+            FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
+            FirebaseMessaging.getInstance().subscribeToTopic(BuildConfig.BUILD_TYPE);
+            FirebaseMessaging.getInstance().subscribeToTopic("android");
+            FirebaseMessaging.getInstance().subscribeToTopic(getUser().getUid());
+
+            setContentView(R.layout.activity_main);
+            init();
+
+            startService(new Intent(this, ForumService.class));
+            AHC.startService(this, HomeService.class, HomeService.TAG);
+            AHC.startService(this, MessagingService.class, MessagingService.TAG);
+
+            bottomNavigationView.setOnNavigationItemSelectedListener(this);
         }
-        AHC.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
-        FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
-        FirebaseMessaging.getInstance().subscribeToTopic(BuildConfig.BUILD_TYPE);
-        FirebaseMessaging.getInstance().subscribeToTopic("android");
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        init();
-        startService(new Intent(this, MessagingService.class));
-        bottomNavigationView.setOnNavigationItemSelectedListener(this);
-    }
-
-    /**
-     * Start {@link AuthActivity} if Firebase user object is null.
-     * This also closes the current {@link MainActivity} before launching Auth.
-     *
-     * @param intent Intent object. Should not be null. See <b>MainActivityTest</b>.
-     * @return boolean true if auth is successful, false otherwise.
-     */
-    public boolean auth(@NonNull final Intent intent) {
-        return !intent.getBooleanExtra(AuthActivityKeys.USE_DEFAULT, true)
-                || FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     /**
@@ -115,7 +113,7 @@ public class MainActivity extends BaseActivity
         fragmentManager = getSupportFragmentManager();
 
         forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
-        homeFragment = HomeFragment.newInstance(null);
+        homeFragment = new HomeFragment();
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
 
         launchFragment(currentSection);
@@ -202,11 +200,6 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void updateChatFragment() {
-
-    }
-
-    @Override
-    public void updateForumFragment() {
 
     }
 }

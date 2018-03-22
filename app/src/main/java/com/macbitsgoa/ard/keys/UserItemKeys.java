@@ -16,9 +16,9 @@ public class UserItemKeys {
     public static final String UID = "uid";
 
     /**
-     * Field {@link UserItem#admin} (admin status).
+     * Token key for use with Firebase. Not saved in local database.
      */
-    public static final String ADMIN = "admin";
+    public static final String FDR_TOKEN = "token";
 
     /**
      * Field {@link UserItem#name} (Name of UserItem).

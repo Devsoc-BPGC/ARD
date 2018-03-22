@@ -128,19 +128,19 @@ public class ChatActivity extends BaseActivity {
         setupUI();
         nmc = NotificationManagerCompat.from(this);
 
-        startService(new Intent(this, MessagingService.class));
+        AHC.startService(this, MessagingService.class, MessagingService.TAG);
         notifyOfReadStatus();
         //Create the receiver to update read status
         newMessageReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(final Context context, final Intent intent) {
-                AHC.logd(TAG, "Received action " + intent.getAction());
                 if (intent == null
                         || intent.getAction() == null
                         || intent.getStringExtra(MessageItemKeys.OTHER_USER_ID) == null
                         || !intent.getStringExtra(MessageItemKeys.OTHER_USER_ID).equals(otherUserId)) {
                     return;
                 }
+                AHC.logd(TAG, "Received action " + intent.getAction());
                 switch (intent.getAction()) {
                     case ChatItemKeys.NOTIFICATION_ACTION:
                         //Cancel ongoing notifications for this user
@@ -165,6 +165,7 @@ public class ChatActivity extends BaseActivity {
                 } else {
                     subtitle.setVisibility(View.VISIBLE);
                 }
+                notifyOfReadStatus();
             }
 
             @Override
@@ -237,6 +238,8 @@ public class ChatActivity extends BaseActivity {
                 .equalTo(MessageItemKeys.OTHER_USER_ID, otherUserId)
                 .findAllSorted(MessageItemKeys.MESSAGE_RECEIVED_TIME, Sort.DESCENDING);
         messageItems.addChangeListener((messageItems, changeSet) -> {
+            AHC.logd(TAG, "Calling NotifyService in chat change listener");
+            notifyOfReadStatus();
             // `null`  means the async query returns the first time.
             if (changeSet == null && chatMsgAdapter != null) {
                 chatMsgAdapter.notifyDataSetChanged();
@@ -276,7 +279,9 @@ public class ChatActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         nmc.cancel(otherUserId.hashCode());
-        //TODO check if notify service is required here
+        Intent intent = new Intent(ChatActivity.this, NotifyService.class);
+        intent.putExtra(MessageItemKeys.OTHER_USER_ID, otherUserId);
+        startService(intent);
     }
 
     @Override

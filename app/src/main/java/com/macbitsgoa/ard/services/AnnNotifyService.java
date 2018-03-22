@@ -1,15 +1,17 @@
 package com.macbitsgoa.ard.services;
 
+import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
+import com.macbitsgoa.ard.utils.AHC;
 
 /**
  * Service to notify Announcement data. Intent should contain author and data strings as extras.
@@ -19,6 +21,11 @@ import com.macbitsgoa.ard.keys.AnnItemKeys;
  */
 
 public class AnnNotifyService extends BaseIntentService {
+
+    /**
+     * Tag for this class.
+     */
+    public static final String TAG = AnnNotifyService.class.getSimpleName();
 
     /**
      * Creates an IntentService.
@@ -33,8 +40,9 @@ public class AnnNotifyService extends BaseIntentService {
         final String data = intent.getStringExtra(AnnItemKeys.DATA);
         final int id = data.hashCode();
 
-        NotificationManagerCompat nmc = NotificationManagerCompat.from(this);
-        NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, "ann")
+        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        AHC.createChannels(nm);
+        NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, AHC.ARD)
                 .setSmallIcon(R.mipmap.ic_launcher)
                 .setContentText(data)
                 .setAutoCancel(true)
@@ -44,6 +52,7 @@ public class AnnNotifyService extends BaseIntentService {
                                 PendingIntent.FLAG_UPDATE_CURRENT))
                 .setContentTitle("New announcement from ARD")
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
+                .setShowWhen(true)
                 .setOnlyAlertOnce(true)
                 .setColor(ContextCompat.getColor(this, R.color.colorPrimaryDark))
                 .setColorized(true)
@@ -51,7 +60,6 @@ public class AnnNotifyService extends BaseIntentService {
                         .bigText(data)
                         .setBigContentTitle("New announcement from ARD")
                         .setSummaryText(author));
-
-        nmc.notify(id, ncb.build());
+        nm.notify(id, ncb.build());
     }
 }

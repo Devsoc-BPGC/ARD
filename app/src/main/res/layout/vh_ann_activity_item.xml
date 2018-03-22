@@ -38,6 +38,7 @@
         android:textColor="?attr/textColor_viewHolder_ann_data"
         android:textIsSelectable="true"
         android:textSize="@dimen/textSize_viewHolder_ann_data"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintLeft_toRightOf="@+id/imageView_viewHolder_ann_icon"
         app:layout_constraintTop_toTopOf="parent" />
 

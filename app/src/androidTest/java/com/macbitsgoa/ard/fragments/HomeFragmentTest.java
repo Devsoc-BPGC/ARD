@@ -49,38 +49,32 @@ public class HomeFragmentTest {
     public void init() throws Throwable {
         activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
         activityTestRule
-                .runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        final RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
-                                .name("fakeRealm")
-                                .inMemory()
-                                .initialData(new Realm.Transaction() {
-                                    @Override
-                                    public void execute(Realm realm) {
-                                        for (int i = 0; i < 30; i++) {
-                                            AnnItem annItem = realm.createObject(AnnItem.class, "key " + i);
-                                            annItem.setData("data " + i);
-                                            annItem.setAuthor("author " + i);
-                                            annItem.setDate(Calendar.getInstance().getTime());
-                                        }
-                                    }
-                                })
-                                .build();
-                        final Realm database = Realm.getInstance(realmConfiguration);
+                .runOnUiThread(() -> {
+                    final RealmConfiguration realmConfiguration = new RealmConfiguration.Builder()
+                            .name("fakeRealm")
+                            .inMemory()
+                            .initialData(realm -> {
+                                for (int i = 0; i < 30; i++) {
+                                    AnnItem annItem = realm.createObject(AnnItem.class, "key " + i);
+                                    annItem.setData("data " + i);
+                                    annItem.setAuthor("author " + i);
+                                    annItem.setDate(Calendar.getInstance().getTime());
+                                }
+                            })
+                            .build();
+                    final Realm database = Realm.getInstance(realmConfiguration);
 
 
-                        final List<TypeItem> data = new ArrayList<>();
-                        //Generate Announcement type list
-                        for (final AnnItem annItem
-                                : database.where(AnnItem.class).findAllSorted("date", Sort.DESCENDING)) {
-                            data.add(new TypeItem(annItem, PostType.ANNOUNCEMENT));
-                            Log.e(AHC.TAG, annItem.toString());
-                        }
-                        HomeFragment homeFragment = (HomeFragment) activityTestRule.getActivity()
-                                .getSupportFragmentManager()
-                                .findFragmentById(R.id.frame_content_main);
+                    final List<TypeItem> data = new ArrayList<>();
+                    //Generate Announcement type list
+                    for (final AnnItem annItem
+                            : database.where(AnnItem.class).findAllSorted("date", Sort.DESCENDING)) {
+                        data.add(new TypeItem(annItem, PostType.ANNOUNCEMENT));
+                        Log.e(AHC.TAG, annItem.toString());
                     }
+                    HomeFragment homeFragment = (HomeFragment) activityTestRule.getActivity()
+                            .getSupportFragmentManager()
+                            .findFragmentById(R.id.frame_content_main);
                 });
 
     }

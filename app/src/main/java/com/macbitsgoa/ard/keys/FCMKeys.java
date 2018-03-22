@@ -32,7 +32,6 @@ public class FCMKeys {
     public static final String ACTION_SERVICE = "service";
 
     public static final String ACTION_SERVICE_NAME = "serviceName";
-    public static final String ACTION_LIMIT_TO_LAST = "limitToLast";
 
     /**
      * Delete action is sent.

@@ -30,12 +30,18 @@ public class BaseFragment extends Fragment implements View.OnClickListener {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 
+    /**
+     * Subclasses should call this at the start.
+     */
     @Override
     public void onStart() {
         super.onStart();
         database = Realm.getDefaultInstance();
     }
 
+    /**
+     * Subclasses should call this method at the end.
+     */
     @Override
     public void onStop() {
         super.onStop();

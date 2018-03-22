@@ -8,7 +8,7 @@ import android.view.View;
 import android.widget.FrameLayout;
 
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.adapters.HomeAdapter;
+import com.macbitsgoa.ard.adapters.PostDetailsAdapter;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
@@ -63,7 +63,6 @@ public class PostDetailsActivity extends BaseActivity {
         setContentView(R.layout.activity_post_details);
         ButterKnife.bind(this);
 
-        //https://developer.android.com/topic/libraries/support-library/preview/emoji-compat.html
         //If opening intent is null, we don't have data to show
         //exit this activity
         //If intent is not null but does not extras to decide what data is to be shown, exit again
@@ -91,8 +90,8 @@ public class PostDetailsActivity extends BaseActivity {
         } else {
             postItems = handleHomeItem(key);
         }
-        final HomeAdapter homeAdapter = new HomeAdapter(postItems, this);
-        recyclerView.setAdapter(homeAdapter);
+        final PostDetailsAdapter pdAdapter = new PostDetailsAdapter(postItems, this);
+        recyclerView.setAdapter(pdAdapter);
     }
 
     /**

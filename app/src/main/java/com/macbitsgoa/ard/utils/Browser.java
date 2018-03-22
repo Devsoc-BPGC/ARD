@@ -232,12 +232,7 @@ public final class Browser {
             initiateIntent();
             mCustomTabsIntent.launchUrl(hostActivity, Uri.parse(saneUrl));
         } else {
-            hostActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(hostActivity, "Invalid URL", Toast.LENGTH_SHORT).show();
-                }
-            });
+            hostActivity.runOnUiThread(() -> Toast.makeText(hostActivity, "Invalid URL", Toast.LENGTH_SHORT).show());
         }
     }
 

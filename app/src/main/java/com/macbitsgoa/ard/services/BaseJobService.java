@@ -1,10 +1,10 @@
 package com.macbitsgoa.ard.services;
 
 import android.annotation.SuppressLint;
-import android.app.IntentService;
-import android.content.Intent;
 import android.support.annotation.Nullable;
 
+import com.firebase.jobdispatcher.JobParameters;
+import com.firebase.jobdispatcher.JobService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -14,16 +14,11 @@ import com.google.firebase.storage.StorageReference;
 import com.macbitsgoa.ard.BuildConfig;
 
 /**
- * Base service class with useful methods.
- *
- * @author Vikramaditya Kukreja
+ * Created by vikramaditya on 20/3/18.
  */
+
 @SuppressLint("Registered")
-public class BaseIntentService extends IntentService {
-    public BaseIntentService(final String name) {
-        super(name);
-        setIntentRedelivery(true);
-    }
+public class BaseJobService extends JobService {
 
     protected DatabaseReference getRootReference() {
         return FirebaseDatabase.getInstance().getReference().child(BuildConfig.BUILD_TYPE);
@@ -39,7 +34,12 @@ public class BaseIntentService extends IntentService {
     }
 
     @Override
-    protected void onHandleIntent(@Nullable final Intent intent) {
+    public boolean onStartJob(JobParameters job) {
+        return false;
+    }
 
+    @Override
+    public boolean onStopJob(JobParameters job) {
+        return true;
     }
 }

@@ -1,6 +1,9 @@
 package com.macbitsgoa.ard.models.home;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
+import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -89,8 +92,11 @@ public class HomeItem extends RealmObject {
         return author;
     }
 
-    public void setAuthor(@NonNull final String author) {
+    public void setAuthor(@Nullable final String author) {
         this.author = author;
+        if (this.author == null || this.author.length() == 0) {
+            this.author = AHC.DEFAULT_AUTHOR;
+        }
     }
 
     @NonNull

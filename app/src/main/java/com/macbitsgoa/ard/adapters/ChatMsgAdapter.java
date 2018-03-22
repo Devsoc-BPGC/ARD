@@ -46,8 +46,9 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
         this.context = context;
     }
 
+    @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         if (viewType == RECEIVER || viewType == SENDER) {
             final View view = inflater.inflate(R.layout.vh_activity_chat_chatmsg, parent, false);
@@ -74,7 +75,7 @@ public class ChatMsgAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder
     }
 
     @Override
-    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder, final int position) {
         MessageItem mi = messages.get(position);
         if (mi.hasAttachments()) {
             DocumentItem di = mi.getDocuments().get(0);

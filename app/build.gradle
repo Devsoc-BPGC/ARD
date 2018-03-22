@@ -32,8 +32,8 @@ ext {
     rxJava2Ver = "2.1.6"
     supportVer = "27.1.0"
     targetSdkVer = 26
-    verCode = 6
-    verName = "1.4-beta"
+    verCode = 7
+    verName = "1.5-beta"
     vPagerIndVer = "1.0.2"
 }
 
@@ -128,13 +128,15 @@ dependencies {
     implementation "com.google.firebase:firebase-messaging:${firebaseVer}"
     implementation "com.google.android:flexbox:${flexboxVer}"
     implementation "com.crashlytics.sdk.android:crashlytics:${crashAnalytics}"
-
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
+    
     implementation "com.jakewharton:butterknife:${butterknifeVer}"
     implementation "com.github.bumptech.glide:glide:${glideVer}"
     implementation "com.lapism:searchview:${lapismSearchVer}"
     implementation "com.github.vivchar:ViewPagerIndicator:${vPagerIndVer}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
     annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
+    implementation 'com.github.turing-tech:MaterialScrollBar:12.+'
 
     implementation "io.reactivex.rxjava2:rxjava:${rxJava2Ver}"
 

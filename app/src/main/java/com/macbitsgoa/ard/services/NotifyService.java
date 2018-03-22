@@ -28,19 +28,32 @@ public class NotifyService extends BaseIntentService {
     public static final String TAG = NotifyService.class.getSimpleName();
 
     public NotifyService() {
-        super(NotifyService.class.getSimpleName());
+        super(TAG);
     }
 
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {
-        if (intent == null || getUser() == null) return;
+        if (getUser() == null) return;
         final String otherUserId = intent.getStringExtra(MessageItemKeys.OTHER_USER_ID);
         if (otherUserId == null) {
             Log.e(TAG, "Receiver id was null");
             return;
         }
 
+        AHC.logd(TAG, "Inside notify service. Notifying " + otherUserId);
+
         final Realm database = Realm.getDefaultInstance();
+        database.executeTransaction(r -> {
+            final ChatsItem ci = r
+                    .where(ChatsItem.class)
+                    .equalTo(ChatItemKeys.DB_ID, otherUserId)
+                    .findFirst();
+            Log.e(TAG, "Chat item count set to 0");
+            if (ci != null)
+                ci.setUnreadCount(0);
+            //TODO what if null
+        });
+
         final RealmList<MessageItem> notifyList = new RealmList<>();
         notifyList.addAll(database
                 .where(MessageItem.class)
@@ -48,6 +61,7 @@ public class NotifyService extends BaseIntentService {
                 .equalTo(MessageItemKeys.MESSAGE_RECEIVED, true)
                 .lessThanOrEqualTo(MessageItemKeys.MESSAGE_STATUS, MessageStatusType.MSG_RCVD)
                 .findAll());
+
         AHC.logd(TAG, "For id " + otherUserId + ", messages unread = " + notifyList.size());
         final DatabaseReference readStatusRef = getRootReference()
                 .child(AHC.FDR_CHAT)
@@ -58,7 +72,7 @@ public class NotifyService extends BaseIntentService {
 
         for (final MessageItem mi : notifyList) {
             readStatusRef.child(mi.getMessageId()).setValue(MessageStatusType.MSG_READ);
-            AHC.logd(TAG, "message read notif sent for " + mi.getMessageId());
+            AHC.logd(TAG, "Message read notif sent for " + mi.getMessageId());
             database.executeTransaction(r -> {
                 final MessageItem mItem = r
                         .where(MessageItem.class)
@@ -67,15 +81,7 @@ public class NotifyService extends BaseIntentService {
                 mItem.setMessageStatus(MessageStatusType.MSG_READ);
             });
         }
-        database.executeTransaction(r -> {
-            final ChatsItem ci = r
-                    .where(ChatsItem.class)
-                    .equalTo("id", otherUserId)
-                    .findFirst();
-            Log.e(TAG, "Chat item count set to 0");
-            if (ci != null)
-                ci.setUnreadCount(0);
-        });
+
         database.close();
     }
 }

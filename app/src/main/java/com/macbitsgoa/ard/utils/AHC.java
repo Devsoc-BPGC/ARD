@@ -1,23 +1,32 @@
 package com.macbitsgoa.ard.utils;
 
-import android.app.AlarmManager;
-import android.app.PendingIntent;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.util.TypedValue;
 
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.JobService;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
+import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.models.TypeItem;
+import com.macbitsgoa.ard.services.AnnNotifyService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -35,6 +44,11 @@ import javax.annotation.Nonnull;
  */
 @SuppressWarnings({"unused", "WeakerAccess"})
 public class AHC {
+
+    /**
+     * ARD.
+     */
+    public static final String ARD = "ARD";
 
     /**
      * Application id of app.
@@ -224,53 +238,6 @@ public class AHC {
     }
 
     /**
-     * Setup alarm after delay.
-     *
-     * @param context      Context object for use.
-     * @param className    Class to start.
-     * @param requestCode  Unique code for pending intent.
-     * @param delayMinutes Delay value in minutes.
-     */
-    public static void setNextAlarm(final Context context, final Class className,
-                                    final int requestCode, final int delayMinutes) {
-        AHC.logd(TAG, "Setting next alarm for given class name " + className.getSimpleName());
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, delayMinutes);
-        //Create a new PendingIntent and add it to the AlarmManager
-        final Intent intent = new Intent(context, className);
-        final PendingIntent pi = PendingIntent.getService(
-                context,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        final AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
-    }
-
-    /**
-     * Setup alarm after delay.
-     *
-     * @param context      Context object for use.
-     * @param intent       Intent object for pending intent.
-     * @param requestCode  Unique code for pending intent.
-     * @param delayMinutes Delay value in minutes.
-     */
-    public static void setNextAlarm(final Context context, final Intent intent,
-                                    final int requestCode, final int delayMinutes) {
-        Log.i(TAG, "Setting next alarm for given intent");
-        final Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.MINUTE, delayMinutes);
-        //Create a new PendingIntent and add it to the AlarmManager
-        final PendingIntent pi = PendingIntent.getService(
-                context,
-                requestCode,
-                intent,
-                PendingIntent.FLAG_CANCEL_CURRENT);
-        final AlarmManager am = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-        am.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pi);
-    }
-
-    /**
      * Get screen width.
      *
      * @return width of screen in pixels.
@@ -343,7 +310,7 @@ public class AHC {
                 .getReference(BuildConfig.BUILD_TYPE)
                 .child(FDR_USERS)
                 .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .child("token").setValue(token);
+                .child(UserItemKeys.FDR_TOKEN).setValue(token);
     }
 
     /**
@@ -362,5 +329,46 @@ public class AHC {
     public static String getImageUrlFromMimeType(@NonNull final String mimeType) {
         AHC.logd(TAG, "Requested url for mime type " + mimeType);
         return "https://ard-bits.firebaseapp.com/assets/icons/" + mimeType + "/icon.png";
+    }
+
+    public static void startService(final Context context,
+                                   final Class<? extends JobService> serviceClass,
+                                   final String tag) {
+        final FirebaseJobDispatcher fjd = getJobDispatcher(context);
+        final Job.Builder jobBuilder = fjd.newJobBuilder()
+                .setService(serviceClass)
+                .setTag(tag)
+                .setTrigger(Trigger.NOW)
+                .setRecurring(false)
+                .setReplaceCurrent(false)
+                .setLifetime(Lifetime.FOREVER)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR);
+        int status = fjd.schedule(jobBuilder.build());
+        if (status != FirebaseJobDispatcher.SCHEDULE_RESULT_SUCCESS) {
+            Log.e(TAG, "Failed to schedule job for " + tag
+                    + "\nStatus code " + status);
+        } else {
+            AHC.logd(TAG, "Job successfully scheduled for tag " + tag);
+        }
+    }
+
+    public static FirebaseJobDispatcher getJobDispatcher(final Context context) {
+        return new FirebaseJobDispatcher(new GooglePlayDriver(context));
+    }
+
+    /**
+     * Channel creation for Android O and above.
+     *
+     * @param nm {@link NotificationManager} object.
+     */
+    public static void createChannels(final NotificationManager nm) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            final int importance = NotificationManager.IMPORTANCE_HIGH;
+            final NotificationChannel nc = new NotificationChannel(ARD, ARD, importance);
+            nm.createNotificationChannel(nc);
+        } else {
+            logd(AnnNotifyService.TAG, "Build Version < Android O. " +
+                    "Skipping channel creation.");
+        }
     }
 }

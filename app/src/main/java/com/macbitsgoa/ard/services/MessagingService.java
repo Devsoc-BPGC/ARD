@@ -1,9 +1,9 @@
 package com.macbitsgoa.ard.services;
 
 import android.content.Intent;
-import android.support.annotation.Nullable;
 import android.util.Log;
 
+import com.firebase.jobdispatcher.JobParameters;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,51 +23,56 @@ import java.util.Date;
 import io.realm.Realm;
 import io.realm.RealmList;
 
-public class MessagingService extends BaseIntentService {
+public class MessagingService extends BaseJobService {
 
     /**
      * TAG for class.
      */
     public static final String TAG = MessagingService.class.getSimpleName();
 
-    /**
-     * Request code for alarm manager.
-     */
-    public static final int REQUEST_CODE = 107;
+    boolean continueJob1 = true;
+    boolean continueJob2 = true;
 
-    private final DatabaseReference messageStatusRef = getRootReference().child(AHC.FDR_CHAT);
+    JobParameters job;
+    Thread serverThread;
 
-    public MessagingService() {
-        super(MessagingService.class.getSimpleName());
+    @Override
+    public boolean onStartJob(JobParameters job) {
+        this.job = job;
+        serverThread = new Thread() {
+            @Override
+            public void run() {
+                AHC.logd(TAG, "Thread has started");
+                AHC.logd(TAG, "checking for nun user");
+                if (getUser() == null) {
+                    AHC.logd(TAG, "User was null. Exiting job");
+                    jobFinished(job, false);
+                }
+
+                AHC.logd(TAG, "Started " + TAG + " job!");
+
+                //Send message status reference for this user
+                getRootReference()
+                        .child(AHC.FDR_CHAT)
+                        .child(getUser().getUid())
+                        .child(ChatItemKeys.SENT_STATUS)
+                        .addListenerForSingleValueEvent(getSentMsgStatusVEL());
+
+                //Private messages reference for this user
+                getRootReference()
+                        .child(AHC.FDR_CHAT)
+                        .child(getUser().getUid())
+                        .child(ChatItemKeys.PRIVATE_MESSAGES)
+                        .addListenerForSingleValueEvent(getEventListener());
+            }
+        };
+        serverThread.start();
+        return true;
     }
 
     @Override
-    protected void onHandleIntent(@Nullable final Intent intent) {
-        super.onHandleIntent(intent);
-        if (getUser() == null) return;
-        final DatabaseReference pmReference = getRootReference()
-                .child(AHC.FDR_CHAT)
-                .child(getUser().getUid())
-                .child(ChatItemKeys.PRIVATE_MESSAGES);
-        final DatabaseReference sentMessagesStatusRef = getRootReference()
-                .child(AHC.FDR_CHAT)
-                .child(getUser().getUid())
-                .child(ChatItemKeys.SENT_STATUS);
-
-        final ValueEventListener pmRefListener = getEventListener();
-        final ValueEventListener sentMessagesStatusListener = getSentMsgStatusVEL();
-
-        pmReference.addValueEventListener(pmRefListener);
-        sentMessagesStatusRef.addValueEventListener(sentMessagesStatusListener);
-
-        try {
-            Thread.sleep(1000 * 60);
-        } catch (final InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            AHC.setNextAlarm(this, MessagingService.class, REQUEST_CODE, 3);
-            pmReference.removeEventListener(pmRefListener);
-        }
+    public boolean onStopJob(JobParameters job) {
+        return false;
     }
 
     /**
@@ -81,31 +86,31 @@ public class MessagingService extends BaseIntentService {
 
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
+                AHC.logd(TAG, "Received datasnapshot for messages");
                 database = Realm.getDefaultInstance();
-
+                AHC.logd(TAG, "snapshot has " + dataSnapshot.getChildrenCount() + " children");
                 for (final DataSnapshot senderSnapshot : dataSnapshot.getChildren()) {
-                    final DataSnapshot senderInfoSnapshot = senderSnapshot.child(ChatItemKeys.SENDER);
-                    final String senderId = senderInfoSnapshot
-                            .child(ChatItemKeys.FDR_ID).getValue(String.class);
+                    final DataSnapshot senderInfoSnapshot = senderSnapshot
+                            .child(ChatItemKeys.SENDER);
+                    final String senderId = senderSnapshot.getKey();
                     final String senderName = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_NAME).getValue(String.class);
                     final String latestFromSender = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_LATEST).getValue(String.class);
                     final String senderPhotoUrl = senderInfoSnapshot
                             .child(ChatItemKeys.FDR_PHOTO_URL).getValue(String.class);
-                    final Date senderLatestUpdate = senderInfoSnapshot
-                            .child(ChatItemKeys.FDR_DATE).getValue(Date.class);
+                    Date senderLatestUpdate = null;
+                    try {
+                        senderLatestUpdate = senderInfoSnapshot
+                                .child(ChatItemKeys.FDR_DATE).getValue(Date.class);
+                    } catch (NullPointerException e) {
+                        AHC.logd(TAG, "Date was null");
+                    }
+                    if (senderLatestUpdate == null)
+                        senderLatestUpdate = Calendar.getInstance().getTime();
 
-                    if (senderId == null) continue;
-
-                    final DatabaseReference msgStatusWriteRef;
                     //TODO fix sentMessages value listener
-                    msgStatusWriteRef = messageStatusRef
-                            .child(senderId)
-                            .child(ChatItemKeys.PRIVATE_MESSAGES)
-                            .child(getUser().getUid())
-                            .child(ChatItemKeys.MESSAGE_STATUS);
-
+                    //Parse messages from sender
                     for (final DataSnapshot messageSnapshot : senderSnapshot
                             .child(ChatItemKeys.FDR_MESSAGES).getChildren()) {
                         final String messageId = messageSnapshot.getKey();
@@ -114,18 +119,35 @@ public class MessagingService extends BaseIntentService {
                         final Date messageTime = messageSnapshot.child(MessageItemKeys.FDR_DATE)
                                 .getValue(Date.class);
 
-                        if (messageData == null || messageTime == null || messageId == null)
+                        if (messageData == null || messageTime == null || messageId == null) {
                             continue;
+                        }
+
+                        final DatabaseReference rcvdMessageStatusRef = getRootReference()
+                                .child(AHC.FDR_CHAT)
+                                .child(senderId)
+                                .child(ChatItemKeys.PRIVATE_MESSAGES)
+                                .child(getUser().getUid())
+                                .child(ChatItemKeys.MESSAGE_STATUS);
 
                         RealmList<DocumentItem> documentItems = new RealmList<>();
                         if (messageSnapshot.hasChild(MessageItemKeys.FDR_DOCUMENTS)) {
-                            DataSnapshot documentsSnapshot = messageSnapshot.child(MessageItemKeys.FDR_DOCUMENTS);
+                            DataSnapshot documentsSnapshot = messageSnapshot
+                                    .child(MessageItemKeys.FDR_DOCUMENTS);
                             for (DataSnapshot documentSnapshot : documentsSnapshot.getChildren()) {
                                 DocumentItem di = new DocumentItem();
-                                di.setId(documentSnapshot.child(DocumentItemKeys.DOCUMENT_ID).getValue(String.class));
-                                di.setRemoteUrl(documentSnapshot.child(DocumentItemKeys.REMOTE_URL).getValue(String.class));
-                                di.setMimeType(documentSnapshot.child(DocumentItemKeys.MIME_TYPE).getValue(String.class));
-                                di.setRemoteThumbnailUrl(documentSnapshot.child(DocumentItemKeys.REMOTE_THUMBNAIL_URL).getValue(String.class));
+                                di.setId(documentSnapshot
+                                        .child(DocumentItemKeys.DOCUMENT_ID)
+                                        .getValue(String.class));
+                                di.setRemoteUrl(documentSnapshot
+                                        .child(DocumentItemKeys.REMOTE_URL)
+                                        .getValue(String.class));
+                                di.setMimeType(documentSnapshot
+                                        .child(DocumentItemKeys.MIME_TYPE)
+                                        .getValue(String.class));
+                                di.setRemoteThumbnailUrl(documentSnapshot
+                                        .child(DocumentItemKeys.REMOTE_THUMBNAIL_URL)
+                                        .getValue(String.class));
                                 di.setLocalUri(di.getRemoteUrl());
                                 //TODO set local thumbnail and uri
                                 //TODO download file service required
@@ -142,34 +164,37 @@ public class MessagingService extends BaseIntentService {
                         mi.setMessageRcvd(true);
                         mi.setMessageStatus(MessageStatusType.MSG_RCVD);
                         mi.setDocuments(documentItems);
-                        database.executeTransaction(r -> {
-                            r.insertOrUpdate(mi);
-                        });
-                        msgStatusWriteRef
+
+                        database.executeTransaction(r -> r.insertOrUpdate(mi));
+
+                        rcvdMessageStatusRef
                                 .child(messageId)
                                 .setValue(MessageStatusType.MSG_RCVD);
                         messageSnapshot.getRef().removeValue();
                     }
+
                     final Intent broadcastIntent = new Intent(ChatItemKeys.NEW_MESSAGE_ARRIVED);
                     broadcastIntent.putExtra(MessageItemKeys.OTHER_USER_ID, senderId);
                     sendBroadcast(broadcastIntent);
 
                     //Our message status from other user
+                    AHC.logd(TAG, "Other user has updated their rcvd/read status");
+                    AHC.logd(TAG, "Message rcvd/read status available for " + senderSnapshot.child(ChatItemKeys.MESSAGE_STATUS).getChildrenCount());
                     for (final DataSnapshot ourMsgStatusSnapshot : senderSnapshot
                             .child(ChatItemKeys.MESSAGE_STATUS).getChildren()) {
                         final MessageItem mi = database
                                 .where(MessageItem.class)
                                 .equalTo(MessageItemKeys.MESSAGE_ID, ourMsgStatusSnapshot.getKey())
                                 .findFirst();
-                        ourMsgStatusSnapshot.getRef().removeValue();
                         if (mi == null) {
-                            Log.e(TAG, "Message lost");
-                            //If message is lost, we can safely remove this value from firebase
-                            continue;
+                            AHC.logd(TAG, "Message lost");
+                        } else {
+                            AHC.logd(TAG, "Update message read ack status of other user for " + mi.getMessageId());
+                            database.beginTransaction();
+                            mi.setMessageStatus(ourMsgStatusSnapshot.getValue(Integer.class));
+                            database.commitTransaction();
                         }
-                        database.beginTransaction();
-                        mi.setMessageStatus(ourMsgStatusSnapshot.getValue(Integer.class));
-                        database.commitTransaction();
+                        ourMsgStatusSnapshot.getRef().removeValue();
                     }
 
                     final int newMessageCount = database
@@ -186,6 +211,7 @@ public class MessagingService extends BaseIntentService {
                     if (ci == null) {
                         ci = database.createObject(ChatsItem.class, senderId);
                     }
+                    //TODO change to last known message of these users
                     if (senderLatestUpdate.getTime() > ci.getUpdate().getTime()) {
                         ci.setLatest(latestFromSender);
                         ci.setUpdate(senderLatestUpdate);
@@ -199,17 +225,21 @@ public class MessagingService extends BaseIntentService {
                     //lingering in database
                     if (database.where(MessageItem.class)
                             .equalTo(MessageItemKeys.OTHER_USER_ID, senderId)
-                            .findAll().isEmpty())
-                        database.executeTransaction(r -> {
-                            r.where(ChatsItem.class)
-                                    .equalTo(ChatItemKeys.DB_ID, senderId)
-                                    .findFirst()
-                                    .deleteFromRealm();
-                        });
-
-                    createNotification();
+                            .findAll().isEmpty()) {
+                        database.executeTransaction(r -> r.where(ChatsItem.class)
+                                .equalTo(ChatItemKeys.DB_ID, senderId)
+                                .findFirst()
+                                .deleteFromRealm());
+                    }
+                    AHC.startService(MessagingService.this,
+                            NotificationService.class, NotificationService.TAG);
                 }
                 database.close();
+                continueJob1 = false;
+                AHC.logd(TAG, "continue1 is false, continue2 is " + continueJob2);
+                if (!continueJob1 && !continueJob2) {
+                    jobFinished(job, false);
+                }
             }
 
             @Override
@@ -221,6 +251,9 @@ public class MessagingService extends BaseIntentService {
                     }
                     database.close();
                 }
+                continueJob1 = false;
+                AHC.logd(TAG, "continue1 is false, continue2 is " + continueJob2);
+                if (!continueJob1 && !continueJob2) jobFinished(job, false);
             }
         };
     }
@@ -236,7 +269,9 @@ public class MessagingService extends BaseIntentService {
 
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
+                AHC.logd(TAG, "sent messages status updates");
                 database = Realm.getDefaultInstance();
+                AHC.logd(TAG, "Total " + dataSnapshot.getChildrenCount() + " status updates for sent messages");
                 for (final DataSnapshot messageSnapshot : dataSnapshot.getChildren()) {
                     final String key = messageSnapshot.getKey();
                     final MessageItem mi = database
@@ -253,16 +288,23 @@ public class MessagingService extends BaseIntentService {
                     messageSnapshot.getRef().removeValue();
                 }
                 database.close();
+                continueJob2 = false;
+                AHC.logd(TAG, "continue2 is false, continue1 is " + continueJob1);
+                if (!continueJob1 && !continueJob2) jobFinished(job, false);
             }
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
-                if (database != null && !database.isClosed()) database.close();
+                if (database != null && !database.isClosed()) {
+                    if (database.isInTransaction()) {
+                        database.cancelTransaction();
+                    }
+                    database.close();
+                }
+                continueJob2 = false;
+                AHC.logd(TAG, "continue2 is false, continue1 is " + continueJob1);
+                if (!continueJob1 && !continueJob2) jobFinished(job, false);
             }
         };
-    }
-
-    private void createNotification() {
-        startService(new Intent(this, NotificationService.class));
     }
 }

@@ -6,10 +6,11 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.TooltipCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
@@ -19,12 +20,11 @@ import com.macbitsgoa.ard.keys.FaqItemKeys;
 import com.macbitsgoa.ard.models.FaqItem;
 import com.macbitsgoa.ard.utils.AHC;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.realm.OrderedCollectionChangeSet;
+import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -60,23 +60,32 @@ public class GeneralFragment extends BaseFragment {
 
 
     @BindView(R.id.imgView_fragment_forum_general_sort_order)
-    ImageView sortOrderImg;
+    ImageButton sortOrderImg;
 
     @BindView(R.id.imgView_fragment_forum_general_sort)
-    ImageView sortImg;
+    ImageButton sortImg;
 
     /**
      * Adapter for recyclerview.
      */
     private ForumAdapter forumAdapter;
+
+    /**
+     * Faq items from database.
+     */
     private RealmResults<FaqItem> faqItems;
 
     /**
-     * Final list to use for displaying using adapter.
+     * Default seorting order to be used.
      */
-    private List<FaqItem> items;
     Sort sort = Sort.DESCENDING;
+
+
     Animatable toDesc, toAsc, sortAnimatable;
+
+    /**
+     * Refers to "Last modified".
+     */
     int currentSortOrder = 2;
 
     /**
@@ -100,13 +109,10 @@ public class GeneralFragment extends BaseFragment {
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_forum_general, container, false);
         ButterKnife.bind(this, view);
-        items = new ArrayList<>();
-        forumAdapter = new ForumAdapter(items);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(forumAdapter);
-        toDesc = (Animatable) sortOrderImg.getDrawable();
-        sortAnimatable = (Animatable) sortImg.getDrawable();
+        TooltipCompat.setTooltipText(sortImg, "Sort");
+        TooltipCompat.setTooltipText(sortOrderImg, "Asc/Desc");
         return view;
     }
 
@@ -116,21 +122,43 @@ public class GeneralFragment extends BaseFragment {
         faqItems = database.where(FaqItem.class)
                 .equalTo(FaqItemKeys.SECTION, getArguments().getString(SECTION_KEY))
                 .findAllSorted(FaqItemKeys.UPDATE, sort);
-        populateAdapter();
+        forumAdapter = new ForumAdapter(faqItems);
+        recyclerView.setAdapter(forumAdapter);
+        toDesc = (Animatable) sortOrderImg.getDrawable();
+        sortAnimatable = (Animatable) sortImg.getDrawable();
+        faqItems.addChangeListener(getChangeListener());
     }
 
-    /**
-     * Method to generate adapter data and set adapter.
-     */
-    private void populateAdapter() {
-        items.clear();
-        items.addAll(faqItems);
-        forumAdapter.notifyDataSetChanged();
-        if (forumAdapter.getItemCount() == 0) {
-            emptyTextView.setVisibility(View.VISIBLE);
-        } else {
-            emptyTextView.setVisibility(View.GONE);
-        }
+    @NonNull
+    private OrderedRealmCollectionChangeListener<RealmResults<FaqItem>> getChangeListener() {
+        return (collection, changeSet) -> {
+            // `null`  means the async query returns the first time.
+            if (changeSet == null) {
+                forumAdapter.notifyDataSetChanged();
+                return;
+            }
+            // For deletions, the adapter has to be notified in reverse order.
+            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+            for (int i = deletions.length - 1; i >= 0; i--) {
+                OrderedCollectionChangeSet.Range range = deletions[i];
+                forumAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+            for (OrderedCollectionChangeSet.Range range : insertions) {
+                forumAdapter.notifyItemRangeInserted(range.startIndex, range.length);
+            }
+
+            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+            for (OrderedCollectionChangeSet.Range range : modifications) {
+                forumAdapter.notifyItemRangeChanged(range.startIndex, range.length);
+            }
+            if (forumAdapter.getItemCount() == 0) {
+                emptyTextView.setVisibility(View.VISIBLE);
+            } else {
+                emptyTextView.setVisibility(View.GONE);
+            }
+        };
     }
 
     @Override
@@ -138,8 +166,6 @@ public class GeneralFragment extends BaseFragment {
         faqItems.removeAllChangeListeners();
         super.onStop();
     }
-
-    boolean sortOrderDesc = true;
 
     @OnClick(R.id.imgView_fragment_forum_general_sort_order)
     public void onSortDirectionChanged() {
@@ -151,7 +177,7 @@ public class GeneralFragment extends BaseFragment {
         } else {
             fieldName = FaqItemKeys.UPDATE;
         }
-        if (sortOrderDesc) {
+        if (sort == Sort.DESCENDING) {
             sort = Sort.ASCENDING;
             sortOrderImg.setImageResource(R.drawable.avd_anim_desc);
             toDesc = (Animatable) sortOrderImg.getDrawable();
@@ -162,9 +188,14 @@ public class GeneralFragment extends BaseFragment {
             toAsc = (Animatable) sortOrderImg.getDrawable();
             toAsc.start();
         }
-        faqItems = faqItems.sort(fieldName, sort);
-        populateAdapter();
-        sortOrderDesc = !sortOrderDesc;
+        sortAndUpdateList(fieldName, sort);
+    }
+
+    public void sortAndUpdateList(String fieldname, Sort sort) {
+        faqItems.removeAllChangeListeners();
+        faqItems = faqItems.sort(fieldname, sort);
+        faqItems.addChangeListener(getChangeListener());
+        forumAdapter.setNewData(faqItems);
     }
 
     @OnClick(R.id.imgView_fragment_forum_general_sort)
@@ -175,17 +206,18 @@ public class GeneralFragment extends BaseFragment {
                 .setSingleChoiceItems(sortOrders,
                         currentSortOrder,
                         (dialog, which) -> {
+                            String fieldName;
                             if (which == 0) {
                                 currentSortOrder = 0;
-                                faqItems = faqItems.sort(FaqItemKeys.QUES, sort);
+                                fieldName = FaqItemKeys.QUES;
                             } else if (which == 1) {
                                 currentSortOrder = 1;
-                                faqItems = faqItems.sort(FaqItemKeys.ORIGINAL, sort);
-                            } else if (which == 2) {
+                                fieldName = FaqItemKeys.ORIGINAL;
+                            } else {
                                 currentSortOrder = 2;
-                                faqItems = faqItems.sort(FaqItemKeys.UPDATE, sort);
+                                fieldName = FaqItemKeys.UPDATE;
                             }
-                            populateAdapter();
+                            sortAndUpdateList(fieldName, sort);
                             AHC.logd(TAG, "Notifying faq adapter of sort change");
                         }).show();
     }
