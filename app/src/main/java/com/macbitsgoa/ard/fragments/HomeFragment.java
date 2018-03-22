@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -21,22 +22,29 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.activities.PostDetailsActivity;
+import com.macbitsgoa.ard.adapters.AnnSlideshowAdapter;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.adapters.SlideshowAdapter;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
+import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
 import com.macbitsgoa.ard.keys.SlideshowItemKeys;
+import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.SlideshowItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.utils.AHC;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.Realm;
@@ -82,10 +90,19 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     @BindView(R.id.ab_fragment_home)
     AppBarLayout appBarLayout;
 
+    @BindView(R.id.vp_vh_announcement)
+    ViewPager annVP;
+
+    @BindView(R.id.nsv_fragment_home)
+    NestedScrollView nsv;
+
     Handler handler;
     Runnable update;
+    Handler annSlideshowHandler;
+    Runnable annSlideshowRunable;
 
     private RealmResults<HomeItem> homeItems;
+    private RealmResults<AnnItem> annItems;
 
     /**
      * Unbinder for ButterKnife.
@@ -100,12 +117,22 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     /**
      * Reference to slide show image data.
      */
-    //TODO change to fhr home..and change fdr home to home
-    private DatabaseReference slideShowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
-    private ValueEventListener slideShowVEL;
-    private ValueEventListener homeRefVEL;
+    private DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
 
+    /**
+     * Value event listener for {@link #imageSlideshowRef}.
+     */
+    private ValueEventListener imageSlideShowVEL;
+
+    /**
+     * Firebase database reference to home content.
+     */
     private DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
+
+    /**
+     * Value event listener for {@link #homeRef}.
+     */
+    private ValueEventListener homeRefVEL;
 
     /**
      * Item touch listener of RecyclerView.
@@ -177,6 +204,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         homeRefVEL = getHomeRefVEL();
         homeRef.addValueEventListener(homeRefVEL);
 
+        setupAnnouncementSlideshow();
         appBarLayout.offsetTopAndBottom(appBarOffset);
 
         setupSlideshow();
@@ -186,12 +214,16 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     public void onStop() {
         handler.removeCallbacks(update);
         slideshowAdapter.close();
+        if (annSlideshowHandler != null && annSlideshowRunable != null) {
+            annSlideshowHandler.removeCallbacks(annSlideshowRunable);
+        }
         //Remove firebase database listeners
-        slideShowRef.removeEventListener(slideShowVEL);
+        imageSlideshowRef.removeEventListener(imageSlideShowVEL);
         homeRef.removeEventListener(homeRefVEL);
 
         //Remove database change listener
         homeItems.removeAllChangeListeners();
+        annItems.removeAllChangeListeners();
 
         //null the adapter
         homeAdapter = null;
@@ -257,13 +289,25 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         slideshowVP.addOnPageChangeListener(vopl);
         handler.postDelayed(update, 7500);
         slideshowVP.setAdapter(slideshowAdapter);
-        slideShowVEL = getSlideShowVEL();
+        imageSlideShowVEL = getImageSlideShowVEL();
         pagerIndicator.setupWithViewPager(slideshowVP);
         pagerIndicator.addOnPageChangeListener(vopl);
-        slideShowRef.addValueEventListener(slideShowVEL);
+        imageSlideshowRef.addValueEventListener(imageSlideShowVEL);
     }
 
-    private ValueEventListener getSlideShowVEL() {
+    private void setupAnnouncementSlideshow() {
+        annItems = database.where(AnnItem.class).findAllSorted(AnnItemKeys.DATE, Sort.DESCENDING);
+        final List<String> annItemsText = new ArrayList<>();
+        for (AnnItem ai : annItems) annItemsText.add(ai.getData());
+        setTextData(annItemsText);
+        annItems.addChangeListener((collection, changeSet) -> {
+            annItemsText.clear();
+            for (AnnItem ai : annItems) annItemsText.add(ai.getData());
+            setTextData(annItemsText);
+        });
+    }
+
+    private ValueEventListener getImageSlideShowVEL() {
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
@@ -312,6 +356,32 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     }
 
     public void scrollToTop() {
-        if (homeRV != null) homeRV.smoothScrollToPosition(0);
+        //App crashes on removing this check
+        //TODO fix required
+        if (nsv != null) nsv.scrollTo(0, 0);
+    }
+
+    public void setTextData(final List<String> data) {
+        if (annVP == null) return;
+        final AnnSlideshowAdapter adapter = new AnnSlideshowAdapter(data);
+        if (annSlideshowHandler == null) annSlideshowHandler = new Handler();
+        if (annSlideshowRunable == null) annSlideshowRunable = new Runnable() {
+            @Override
+            public void run() {
+                int viewpagerpos = annVP.getCurrentItem();
+                viewpagerpos++;
+                viewpagerpos %= adapter.getCount();
+                annVP.setCurrentItem(viewpagerpos);
+                annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
+            }
+        };
+        annVP.setAdapter(adapter);
+        annSlideshowHandler.removeCallbacks(annSlideshowRunable);
+        annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
+    }
+
+    @OnClick(R.id.ann_card_fragment_home)
+    public void openAnnActivity() {
+        startActivity(new Intent(getContext(), AnnActivity.class));
     }
 }

@@ -70,7 +70,7 @@ public class HomeFragmentTest {
                     for (final AnnItem annItem
                             : database.where(AnnItem.class).findAllSorted("date", Sort.DESCENDING)) {
                         data.add(new TypeItem(annItem, PostType.ANNOUNCEMENT));
-                        Log.e(AHC.TAG, annItem.toString());
+                        Log.e(AHC.TAG, annItem.toStringVerbose());
                     }
                     HomeFragment homeFragment = (HomeFragment) activityTestRule.getActivity()
                             .getSupportFragmentManager()

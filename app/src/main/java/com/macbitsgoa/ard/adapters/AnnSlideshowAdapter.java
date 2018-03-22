@@ -11,16 +11,16 @@ import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
 
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by vikramaditya on 14/11/17.
  */
 
 public class AnnSlideshowAdapter extends PagerAdapter {
-    private ArrayList<String> slideshowItems;
+    private List<String> slideshowItems;
 
-    public AnnSlideshowAdapter(@Nullable final ArrayList<String> slideshowItems) {
+    public AnnSlideshowAdapter(@NonNull final List<String> slideshowItems) {
         this.slideshowItems = slideshowItems;
     }
 
@@ -45,7 +45,7 @@ public class AnnSlideshowAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        return slideshowItems == null ? 0 : slideshowItems.size();
+        return slideshowItems.size();
     }
 
     @Override

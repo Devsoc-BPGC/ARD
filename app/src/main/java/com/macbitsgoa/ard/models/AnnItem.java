@@ -96,8 +96,7 @@ public class AnnItem extends RealmObject {
         this.date = date;
     }
 
-    @Override
-    public String toString() {
+    public String toStringVerbose() {
         return "AnnItem{"
                 + "key='" + key + '\''
                 + ", data='" + data + '\''
