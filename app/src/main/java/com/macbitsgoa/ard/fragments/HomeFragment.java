@@ -158,6 +158,11 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_home, container, false);
         unbinder = ButterKnife.bind(this, view);
+        homeRV.setHasFixedSize(true);
+        homeRV.setLayoutManager(new LinearLayoutManager(getContext()));
+        onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
+        homeRV.addOnItemTouchListener(onItemTouchListener);
+        homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         return view;
     }
 
@@ -171,11 +176,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         homeItems = database.where(HomeItem.class).findAllSortedAsync(HomeItemKeys.DATE, Sort.DESCENDING);
         homeAdapter = new HomeAdapter(homeItems, getContext());
 
-        homeRV.setHasFixedSize(true);
-        homeRV.setLayoutManager(new LinearLayoutManager(getContext()));
-        onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
-        homeRV.addOnItemTouchListener(onItemTouchListener);
-        homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         homeRV.setAdapter(homeAdapter);
 
         homeItems.addChangeListener((collection, changeSet) -> {

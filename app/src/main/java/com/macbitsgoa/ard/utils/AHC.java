@@ -23,6 +23,8 @@ import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.RetryStrategy;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.keys.UserItemKeys;
@@ -305,13 +307,37 @@ public class AHC {
      * @param token The current token to be updated on server.
      */
     public static void sendRegistrationToServer(final String token) {
-        if (FirebaseAuth.getInstance().getCurrentUser() == null
-                || FirebaseAuth.getInstance().getCurrentUser().getUid() == null) return;
-        FirebaseDatabase.getInstance()
-                .getReference(BuildConfig.BUILD_TYPE)
+        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || user.getUid() == null) return;
+        final String userDisplayName = user.getDisplayName();
+        final String userPhotoUrl = user.getPhotoUrl().toString();
+        final String userEmail = user.getEmail();
+        final String userUid = user.getUid();
+
+        final DatabaseReference userRef = FirebaseDatabase.getInstance()
+                .getReference()
+                .getRoot()
+                .child(BuildConfig.BUILD_TYPE)
                 .child(FDR_USERS)
-                .child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                .child(UserItemKeys.FDR_TOKEN).setValue(token);
+                .child(userUid);
+
+        userRef.child(UserItemKeys.EMAIL).setValue(userEmail);
+        userRef.child(UserItemKeys.NAME).setValue(userDisplayName);
+        userRef.child(UserItemKeys.PHOTO_URL).setValue(userPhotoUrl);
+        userRef.child(UserItemKeys.DESC).setValue("User");
+        userRef.child(UserItemKeys.FDR_TOKEN).setValue(token);
+
+        final DatabaseReference adminRef = FirebaseDatabase.getInstance()
+                .getReference()
+                .getRoot()
+                .child(BuildConfig.BUILD_TYPE)
+                .child(FDR_ADMINS)
+                .child(userUid);
+
+        adminRef.child(UserItemKeys.EMAIL).setValue(userEmail);
+        adminRef.child(UserItemKeys.NAME).setValue(userDisplayName);
+        adminRef.child(UserItemKeys.PHOTO_URL).setValue(userPhotoUrl);
+        adminRef.child(UserItemKeys.FDR_TOKEN).setValue(token);
     }
 
     /**

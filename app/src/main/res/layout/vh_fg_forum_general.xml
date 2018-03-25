@@ -30,12 +30,12 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_vh_fg_forum_general_question"
-        app:maxCollapsedLines="3">
+        app:maxCollapsedLines="0">
 
         <ImageButton
             android:id="@+id/expand_collapse"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:layout_gravity="top"
             android:layout_marginStart="16dp"
             android:background="@color/transparent"
@@ -45,7 +45,6 @@
             android:id="@+id/expandable_text"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ellipsize="end"
             android:padding="8dp"
             android:text="Answer" />
     </com.macbitsgoa.ard.utils.ExpandableTextView>
