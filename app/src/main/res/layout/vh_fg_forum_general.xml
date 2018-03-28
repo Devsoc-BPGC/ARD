@@ -1,61 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:animateLayoutChanges="true"
-    android:descendantFocusability="afterDescendants">
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/tv_vh_fg_forum_general_sub_section"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:text="SubSection"
+        android:textSize="18sp"
+        android:textStyle="bold|italic" />
 
     <TextView
         android:id="@+id/tv_vh_fg_forum_general_question"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="0dp"
+        android:paddingBottom="8dp"
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
         android:paddingTop="8dp"
         android:text="Question"
-        android:textColor="@color/colorPrimaryDark"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textColor="@color/colorPrimaryDark" />
 
-    <com.macbitsgoa.ard.utils.ExpandableTextView
+    <TextView
         android:id="@+id/tv_vh_fg_forum_general_answer"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:descendantFocusability="afterDescendants"
-        android:orientation="horizontal"
-        app:animDuration="100"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_vh_fg_forum_general_question"
-        app:maxCollapsedLines="0">
-
-        <ImageButton
-            android:id="@+id/expand_collapse"
-            android:layout_width="wrap_content"
-            android:layout_height="0dp"
-            android:layout_gravity="top"
-            android:layout_marginStart="16dp"
-            android:background="@color/transparent"
-            android:tint="@color/colorPrimaryDark" />
-
-        <TextView
-            android:id="@+id/expandable_text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="8dp"
-            android:text="Answer" />
-    </com.macbitsgoa.ard.utils.ExpandableTextView>
-
-    <View
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@color/grey_300"
-        android:padding="4dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_vh_fg_forum_general_answer" />
-</android.support.constraint.ConstraintLayout>
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="8dp"
+        android:text="Answer" />
+
+</LinearLayout>

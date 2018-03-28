@@ -8,7 +8,6 @@ import android.view.View;
 import android.widget.TextView;
 
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.utils.ExpandableTextView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -31,17 +30,35 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
      * Expandable text view to display answer data.
      */
     @BindView(R.id.tv_vh_fg_forum_general_answer)
-    ExpandableTextView answerTV;
+    TextView answerTV;
+
+    @BindView(R.id.tv_vh_fg_forum_general_sub_section)
+    TextView subSectionTV;
+
+    private SparseBooleanArray sba;
 
     /**
      * Default constructor.
      *
      * @param itemView Nonnull inflated view.
      */
-    public FaqViewHolder(@NonNull final View itemView) {
+    public FaqViewHolder(@NonNull final View itemView, SparseBooleanArray sba) {
         super(itemView);
         ButterKnife.bind(this, itemView);
-        itemView.setOnClickListener(v -> answerTV.click());
+        this.sba = sba;
+        sba.put(getAdapterPosition(), false);
+        itemView.setOnClickListener(v -> showAnswer());
+    }
+
+    private void showAnswer() {
+        if (!sba.get(getAdapterPosition())) {
+            sba.put(getAdapterPosition(), true);
+            answerTV.setVisibility(View.VISIBLE);
+            answerTV.setAlpha(1f);
+        } else {
+            sba.put(getAdapterPosition(), false);
+            answerTV.setVisibility(View.GONE);
+        }
     }
 
 
@@ -49,13 +66,28 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
         this.questionTV.setText(question);
     }
 
+    public void hideSubSection() {
+        subSectionTV.setVisibility(View.GONE);
+    }
+
+    public void setSubSection(final String subSection) {
+        if (subSectionTV.getVisibility() != View.VISIBLE)
+            subSectionTV.setVisibility(View.VISIBLE);
+        subSectionTV.setText(subSection);
+    }
+
     /**
      * Set answer data for faq. Clicks are handled automatically.
      *
      * @param answer Nonnull string to use as answer.
-     * @param sba    SparseBooleanArray to maintain clicked info.
      */
-    public void setAnswerTV(@NonNull final String answer, final SparseBooleanArray sba) {
-        answerTV.setText(Html.fromHtml(answer), sba, getAdapterPosition());
+    public void setAnswerTV(@NonNull final String answer) {
+        answerTV.setText(Html.fromHtml(answer));
+        if (sba.get(getAdapterPosition())) {
+            answerTV.setVisibility(View.VISIBLE);
+        } else {
+            answerTV.setVisibility(View.GONE);
+        }
+
     }
 }

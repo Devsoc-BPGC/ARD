@@ -18,7 +18,6 @@ import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.models.home.HomeItem;
-import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.HomeItemViewHolder;
 import com.macbitsgoa.ard.viewholders.ImageViewHolder;
 
@@ -31,7 +30,8 @@ import io.realm.RealmResults;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeAdapter extends RecyclerView.Adapter<HomeItemViewHolder> implements ImageViewHolder.ImageClickListener {
+public class HomeAdapter extends RecyclerView.Adapter<HomeItemViewHolder> implements
+        ImageViewHolder.ImageClickListener {
 
     /**
      * TAG for class.

@@ -50,6 +50,10 @@ public class ForumService extends BaseIntentService {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 //faq children
+                if (dataSnapshot == null) {
+                    AHC.logd(TAG, "No faq data at all");
+                    return;
+                }
                 database = Realm.getDefaultInstance();
                 faqSectionParse(dataSnapshot.child(FaqItemKeys.FDR_FAQ_SECTION));
                 faqParse(dataSnapshot.child(FaqItemKeys.FDR_FAQ));
@@ -57,7 +61,10 @@ public class ForumService extends BaseIntentService {
             }
 
             private void faqSectionParse(final DataSnapshot faqSectionShot) {
-                if (faqSectionShot == null) return;
+                if (faqSectionShot == null) {
+                    AHC.logd(TAG, "Faq sections data null");
+                    return;
+                }
                 //Always get latest faq sections
                 database.executeTransaction(r -> r.delete(FaqSectionItem.class));
                 for (final DataSnapshot childShot : faqSectionShot.getChildren()) {
@@ -79,15 +86,22 @@ public class ForumService extends BaseIntentService {
             }
 
             private void faqParse(final DataSnapshot faqSnapshot) {
-                if (faqSnapshot == null) return;
+                if (faqSnapshot == null) {
+                    AHC.logd(TAG, "Faqs were null");
+                    return;
+                }
+                AHC.logd(TAG, "Total faqs on firebase = " + faqSnapshot.getChildrenCount());
                 for (final DataSnapshot child : faqSnapshot.getChildren()) {
                     final String key = child.getKey();
                     final Date updateDate = child.child(FaqItemKeys.UPDATE).getValue(Date.class);
+                    if (updateDate == null) continue;
+                    AHC.logd(TAG, "Faq last update " + updateDate);
                     database.executeTransaction(r -> {
                         FaqItem fi = r.where(FaqItem.class)
                                 .equalTo(FaqItemKeys.KEY, key).findFirst();
                         if (fi == null) {
                             fi = r.createObject(FaqItem.class, key);
+                            AHC.logd(TAG, "Creating new faq");
                         } else if (fi.getUpdateDate().getTime() == updateDate.getTime()) {
                             return;
                         }
@@ -98,18 +112,14 @@ public class ForumService extends BaseIntentService {
                         fi.setDesc(child.child(FaqItemKeys.DESC).getValue(String.class));
                         fi.setOriginalDate(child.child(FaqItemKeys.ORIGINAL).getValue(Date.class));
                         fi.setUpdateDate(child.child(FaqItemKeys.UPDATE).getValue(Date.class));
+                        fi.setSubSection(child.child(FaqItemKeys.SUB_SECTION).getValue(String.class));
+                        AHC.logd(TAG, "Sub section is " + fi.getSubSection());
                     });
                 }
             }
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
-                if (database != null && !database.isClosed()) {
-                    if (database.isInTransaction()) {
-                        database.cancelTransaction();
-                    }
-                    database.close();
-                }
                 Log.e(TAG, "Database read error for forum node\n" + databaseError.toString());
             }
         };

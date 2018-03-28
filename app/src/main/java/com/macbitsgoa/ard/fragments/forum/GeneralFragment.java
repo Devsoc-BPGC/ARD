@@ -121,7 +121,8 @@ public class GeneralFragment extends BaseFragment {
         super.onStart();
         faqItems = database.where(FaqItem.class)
                 .equalTo(FaqItemKeys.SECTION, getArguments().getString(SECTION_KEY))
-                .findAllSortedAsync(FaqItemKeys.UPDATE, sort);
+                .findAllSortedAsync(new String[]{FaqItemKeys.SUB_SECTION, FaqItemKeys.UPDATE},
+                        new Sort[]{Sort.ASCENDING, sort});
         forumAdapter = new ForumAdapter(faqItems);
         recyclerView.setAdapter(forumAdapter);
         toDesc = (Animatable) sortOrderImg.getDrawable();
@@ -135,21 +136,26 @@ public class GeneralFragment extends BaseFragment {
             // `null`  means the async query returns the first time.
             if (changeSet == null) {
                 forumAdapter.notifyDataSetChanged();
+                if (forumAdapter.getItemCount() == 0) {
+                    emptyTextView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyTextView.setVisibility(View.GONE);
+                }
                 return;
             }
             // For deletions, the adapter has to be notified in reverse order.
-            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+            final OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
             for (int i = deletions.length - 1; i >= 0; i--) {
                 OrderedCollectionChangeSet.Range range = deletions[i];
                 forumAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
             }
 
-            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+            final OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
             for (OrderedCollectionChangeSet.Range range : insertions) {
                 forumAdapter.notifyItemRangeInserted(range.startIndex, range.length);
             }
 
-            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+            final OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
             for (OrderedCollectionChangeSet.Range range : modifications) {
                 forumAdapter.notifyItemRangeChanged(range.startIndex, range.length);
             }
@@ -193,7 +199,8 @@ public class GeneralFragment extends BaseFragment {
 
     public void sortAndUpdateList(String fieldname, Sort sort) {
         faqItems.removeAllChangeListeners();
-        faqItems = faqItems.sort(fieldname, sort);
+        faqItems = faqItems.sort(new String[]{FaqItemKeys.SUB_SECTION, fieldname},
+                new Sort[]{Sort.ASCENDING, sort});
         faqItems.addChangeListener(getChangeListener());
         forumAdapter.setNewData(faqItems);
     }

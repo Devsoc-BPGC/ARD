@@ -10,6 +10,7 @@ import java.util.Date;
 
 import io.realm.RealmObject;
 import io.realm.annotations.PrimaryKey;
+import io.realm.annotations.Required;
 
 /**
  * Class represting a Faq object.
@@ -32,6 +33,13 @@ public class FaqItem extends RealmObject {
      */
     @NonNull
     private String section;
+
+    /**
+     * Name of sub section that it belongs to.
+     */
+    @Required
+    @NonNull
+    private String subSection;
 
     /**
      * Origin date of faq.
@@ -74,6 +82,7 @@ public class FaqItem extends RealmObject {
      */
     public FaqItem() {
         section = "General";
+        subSection = section;
         originalDate = Calendar.getInstance().getTime();
         updateDate = originalDate;
         question = "";
@@ -169,6 +178,17 @@ public class FaqItem extends RealmObject {
             this.desc = "";
         } else {
             this.desc = desc;
+        }
+    }
+
+    @NonNull
+    public String getSubSection() {
+        return subSection;
+    }
+
+    public void setSubSection(@Nullable final String subSection) {
+        if (subSection != null && !subSection.equals("")) {
+            this.subSection = subSection;
         }
     }
 }

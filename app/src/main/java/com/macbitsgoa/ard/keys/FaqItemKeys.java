@@ -76,6 +76,10 @@ public class FaqItemKeys {
      */
     public static final String SECTION = "section";
 
+    /**
+     * String used to represent sub section node in Firebase and database.
+     */
+    public static final String SUB_SECTION = "subSection";
 
     /**
      * String used to represent desc node in Firebase and database.
