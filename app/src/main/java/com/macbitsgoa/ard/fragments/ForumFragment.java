@@ -128,4 +128,5 @@ public class ForumFragment extends BaseFragment {
         super.onDestroyView();
         unbinder.unbind();
     }
+
 }

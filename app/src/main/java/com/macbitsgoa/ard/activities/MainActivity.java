@@ -1,7 +1,6 @@
 package com.macbitsgoa.ard.activities;
 
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -15,6 +14,7 @@ import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.ChatFragment;
+import com.macbitsgoa.ard.fragments.DetailsFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
@@ -74,6 +74,10 @@ public class MainActivity extends BaseActivity
     private HomeFragment homeFragment;
 
     /**
+     * DetailsFragment object.
+     */
+    private DetailsFragment detailFragment;
+    /**
      * ChatFragment object.
      */
     private ChatFragment chatFragment;
@@ -115,20 +119,15 @@ public class MainActivity extends BaseActivity
         forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
         homeFragment = new HomeFragment();
         chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
-
+        detailFragment= DetailsFragment.newInstance();
         launchFragment(currentSection);
         final int menuId;
         if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
         else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
+        else if (currentSection == MainActivityType.DETAILS) menuId = R.id.bottom_nav_details;
         else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
-    }
-
-    @Override
-    public void onConfigurationChanged(final Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        bottomNavigationView.getMenu().findItem(R.id.bottom_nav_home).setChecked(true);
     }
 
     @Override
@@ -140,6 +139,8 @@ public class MainActivity extends BaseActivity
         } else if (id == R.id.bottom_nav_home) {
             launchFragment(MainActivityType.HOME);
             homeFragment.scrollToTop();
+        } else if (id == R.id.bottom_nav_details) {
+            launchFragment(MainActivityType.DETAILS);
         } else {
             launchFragment(MainActivityType.CHAT);
         }
@@ -158,6 +159,7 @@ public class MainActivity extends BaseActivity
         BaseFragment baseFragment;
         if (currentSection == MainActivityType.FORUM) baseFragment = forumFragment;
         else if (currentSection == MainActivityType.HOME) baseFragment = homeFragment;
+        else if (currentSection == MainActivityType.DETAILS) baseFragment = detailFragment;
         else baseFragment = chatFragment;
         fragmentManager.beginTransaction().replace(R.id.frame_content_main, baseFragment).commit();
     }
@@ -191,6 +193,7 @@ public class MainActivity extends BaseActivity
         final int menuId;
         if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
         else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
+        else if (currentSection == MainActivityType.DETAILS) menuId = R.id.bottom_nav_details;
         else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);

@@ -129,11 +129,12 @@ dependencies {
     implementation "com.google.android:flexbox:${flexboxVer}"
     implementation "com.crashlytics.sdk.android:crashlytics:${crashAnalytics}"
     implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
-    
+
     implementation "com.jakewharton:butterknife:${butterknifeVer}"
     implementation "com.github.bumptech.glide:glide:${glideVer}"
     implementation "com.lapism:searchview:${lapismSearchVer}"
     implementation "com.github.vivchar:ViewPagerIndicator:${vPagerIndVer}"
+    implementation 'com.android.support:support-v4:26.1.0'
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
     annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
     implementation 'com.github.turing-tech:MaterialScrollBar:12.+'

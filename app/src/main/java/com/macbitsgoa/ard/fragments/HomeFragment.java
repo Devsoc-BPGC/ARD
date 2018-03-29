@@ -1,10 +1,12 @@
 package com.macbitsgoa.ard.fragments;
 
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.NestedScrollView;
@@ -171,6 +173,8 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         super.onStart();
         appBarLayout.addOnOffsetChangedListener(this);
         scrollToTop();
+        //hide app bar if orientation is landscape on starting
+        hideAppBar();
 
         //adter super call, database is ready
         homeItems = database.where(HomeItem.class).findAllSortedAsync(HomeItemKeys.DATE, Sort.DESCENDING);
@@ -405,5 +409,28 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     @OnClick(R.id.ann_card_fragment_home)
     public void openAnnActivity() {
         startActivity(new Intent(getContext(), AnnActivity.class));
+    }
+
+    //called everytime orientation changes
+    @Override
+    public void onConfigurationChanged(Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
+        hideAppBar();
+    }
+
+    //function to hide appbar
+    void hideAppBar(){
+        CoordinatorLayout.LayoutParams params =
+                (CoordinatorLayout.LayoutParams) nsv.getLayoutParams();
+
+        // Checks the orientation of the screen
+        if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            params.setBehavior(null);
+            appBarLayout.setVisibility(View.GONE);
+        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+            params.setBehavior(new AppBarLayout.ScrollingViewBehavior());
+            appBarLayout.setVisibility(View.VISIBLE);
+        }
+        nsv.requestLayout();
     }
 }

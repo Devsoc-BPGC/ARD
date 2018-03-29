@@ -47,7 +47,7 @@ public class GeneralFragment extends BaseFragment {
     public static final String SECTION_KEY = "sectionKey";
 
     /**
-     * Recyclerview to display faqs.
+     * RecyclerView to display faqs.
      */
     @BindView(R.id.rv_fg_forum_general)
     RecyclerView recyclerView;
@@ -66,7 +66,7 @@ public class GeneralFragment extends BaseFragment {
     ImageButton sortImg;
 
     /**
-     * Adapter for recyclerview.
+     * Adapter for RecyclerView.
      */
     private ForumAdapter forumAdapter;
 
@@ -76,7 +76,7 @@ public class GeneralFragment extends BaseFragment {
     private RealmResults<FaqItem> faqItems;
 
     /**
-     * Default seorting order to be used.
+     * Default sorting order to be used.
      */
     Sort sort = Sort.DESCENDING;
 
