@@ -51,6 +51,7 @@ android {
         versionName verName
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
+        resValue "string", "APP_VERSION_NAME", "${verCode}-${verName}-${getDate()}"
     }
     buildTypes {
         debug {
@@ -182,6 +183,10 @@ dependencies {
 
     })
 
+}
+
+def getDate() {
+    new Date().format('yyyyMMdd')
 }
 
 checkstyle {

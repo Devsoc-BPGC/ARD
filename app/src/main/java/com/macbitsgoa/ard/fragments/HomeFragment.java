@@ -116,6 +116,11 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     private SlideshowAdapter slideshowAdapter;
 
     /**
+     * Slideshow list.
+     */
+    private List<SlideshowItem> slideshowItems;
+
+    /**
      * Firebase database reference to home content.
      */
     private DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
@@ -228,7 +233,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     @Override
     public void onStop() {
         handler.removeCallbacks(update);
-        slideshowAdapter.close();
         if (annSlideshowHandler != null && annSlideshowRunable != null) {
             annSlideshowHandler.removeCallbacks(annSlideshowRunable);
         }
@@ -272,7 +276,8 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     }
 
     private void setupSlideshow() {
-        slideshowAdapter = new SlideshowAdapter();
+        slideshowItems = new ArrayList<>();
+        slideshowAdapter = new SlideshowAdapter(slideshowItems);
 
         handler = new Handler();
         update = () -> {
@@ -282,7 +287,16 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
             slideshowVP.setCurrentItem(newPos, true);
         };
 
-        ViewPager.OnPageChangeListener vopl = new ViewPager.OnPageChangeListener() {
+        handler.postDelayed(update, 5000);
+        slideshowVP.setAdapter(slideshowAdapter);
+        pagerIndicator.setupWithViewPager(slideshowVP);
+        pagerIndicator.addOnPageChangeListener(getVopl());
+        slideshowVP.addOnPageChangeListener(getVopl());
+    }
+
+    @NonNull
+    private ViewPager.OnPageChangeListener getVopl() {
+        return new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(final int position, final float positionOffset,
                                        final int positionOffsetPixels) {
@@ -297,15 +311,10 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
             public void onPageScrollStateChanged(final int state) {
                 if (state == ViewPager.SCROLL_STATE_IDLE) {
                     handler.removeCallbacks(update);
-                    handler.postDelayed(update, 7500);
+                    handler.postDelayed(update, 5000);
                 }
             }
         };
-        slideshowVP.addOnPageChangeListener(vopl);
-        handler.postDelayed(update, 7500);
-        slideshowVP.setAdapter(slideshowAdapter);
-        pagerIndicator.setupWithViewPager(slideshowVP);
-        pagerIndicator.addOnPageChangeListener(vopl);
     }
 
     private void setupAnnouncementSlideshow() {
@@ -355,22 +364,22 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot == null) return;
                 //Delete old values
-                database.executeTransaction(r -> database.delete(SlideshowItem.class));
+                slideshowItems.clear();
                 for (final DataSnapshot cs :
                         dataSnapshot.getChildren()) {
                     if (!cs.hasChild(SlideshowItemKeys.PHOTO_URL)
                             || !cs.hasChild(SlideshowItemKeys.PHOTO_DATE)) continue;
-                    database.executeTransaction(r -> {
-                        final SlideshowItem ssi = r.createObject(SlideshowItem.class);
-                        ssi.setPhotoUrl(cs.child(SlideshowItemKeys.PHOTO_URL).getValue(String.class));
-                        ssi.setPhotoDate(cs.child(SlideshowItemKeys.PHOTO_DATE).getValue(Date.class));
-                        ssi.setPhotoTitle(cs.child(SlideshowItemKeys.PHOTO_TITLE).getValue(String.class));
-                        ssi.setPhotoDesc(cs.child(SlideshowItemKeys.PHOTO_DESC).getValue(String.class));
-                        ssi.setPhotoTag(cs.child(SlideshowItemKeys.PHOTO_TAG).getValue(String.class));
-                        ssi.setPhotoTagColor(cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class));
-                        ssi.setPhotoTagTextColor(cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class));
-                    });
+                    final SlideshowItem ssi = new SlideshowItem();
+                    ssi.setPhotoUrl(cs.child(SlideshowItemKeys.PHOTO_URL).getValue(String.class));
+                    ssi.setPhotoDate(cs.child(SlideshowItemKeys.PHOTO_DATE).getValue(Date.class));
+                    ssi.setPhotoTitle(cs.child(SlideshowItemKeys.PHOTO_TITLE).getValue(String.class));
+                    ssi.setPhotoDesc(cs.child(SlideshowItemKeys.PHOTO_DESC).getValue(String.class));
+                    ssi.setPhotoTag(cs.child(SlideshowItemKeys.PHOTO_TAG).getValue(String.class));
+                    ssi.setPhotoTagColor(cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class));
+                    ssi.setPhotoTagTextColor(cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class));
+                    slideshowItems.add(ssi);
                 }
+                slideshowAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -413,21 +422,21 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
 
     //called everytime orientation changes
     @Override
-    public void onConfigurationChanged(Configuration newConfig){
+    public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         hideAppBar();
     }
 
     //function to hide appbar
-    void hideAppBar(){
-        CoordinatorLayout.LayoutParams params =
+    private void hideAppBar() {
+        final CoordinatorLayout.LayoutParams params =
                 (CoordinatorLayout.LayoutParams) nsv.getLayoutParams();
 
         // Checks the orientation of the screen
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             params.setBehavior(null);
             appBarLayout.setVisibility(View.GONE);
-        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT){
+        } else if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT) {
             params.setBehavior(new AppBarLayout.ScrollingViewBehavior());
             appBarLayout.setVisibility(View.VISIBLE);
         }

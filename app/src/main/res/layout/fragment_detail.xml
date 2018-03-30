@@ -1,17 +1,75 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical"
     tools:context="com.macbitsgoa.ard.fragments.DetailsFragment">
 
-    <include layout="@layout/vh_details_user" />
+
+    <ImageView
+        android:id="@+id/imgView_vh_details_user"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:padding="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/tv_vh_details_email"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_vh_details_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="User"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgView_vh_details_user"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_vh_details_desc"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="4dp"
+        android:text="User"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgView_vh_details_user"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_details_name" />
+
+    <TextView
+        android:id="@+id/tv_vh_details_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:autoLink="email"
+        android:paddingEnd="4dp"
+        android:paddingStart="4dp"
+        android:text="No email found"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgView_vh_details_user"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_details_desc" />
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recyclerView_fragment_details"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:overScrollMode="never"
+        app:layout_constraintBottom_toTopOf="@+id/tv_fragment_detail_app_info"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_details_email" />
 
-    </android.support.v7.widget.RecyclerView>
+    <TextView
+        android:id="@+id/tv_fragment_detail_app_info"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="16dp"
+        android:text="@string/APP_VERSION_NAME"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

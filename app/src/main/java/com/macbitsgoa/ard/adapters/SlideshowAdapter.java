@@ -16,12 +16,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.SlideshowItem;
 
-import io.realm.Realm;
-import io.realm.RealmResults;
-import io.realm.Sort;
+import java.util.List;
 
 /**
  * Created by vikramaditya on 7/11/17.
@@ -33,18 +30,10 @@ public class SlideshowAdapter extends PagerAdapter {
      */
     public static final String TAG = SlideshowAdapter.class.getSimpleName();
 
-    private RealmResults<SlideshowItem> slideshowItems;
-    private Realm database;
+    private List<SlideshowItem> slideshowItems;
 
-    public SlideshowAdapter() {
-        database = Realm.getDefaultInstance();
-        slideshowItems = database.where(SlideshowItem.class)
-                .findAllSorted(SlideshowItemKeys.PHOTO_DATE, Sort.DESCENDING);
-        slideshowItems.addChangeListener(slideshowItems -> notifyDataSetChanged());
-    }
-
-    public void close() {
-        database.close();
+    public SlideshowAdapter(List<SlideshowItem> slideshowItems) {
+        this.slideshowItems = slideshowItems;
     }
 
     @NonNull

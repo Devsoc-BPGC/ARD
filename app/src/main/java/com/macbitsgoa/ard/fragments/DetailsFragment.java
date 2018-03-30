@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -31,6 +30,7 @@ import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.utils.AHC;
+import com.macbitsgoa.ard.utils.Browser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +38,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.realm.Realm;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -121,11 +122,11 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         detailRV.setHasFixedSize(true);
         detailRV.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), detailRV, this));
         detailRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-        detailRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+//        detailRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
 
         final List<String> itemList = new ArrayList<>();
         itemList.add("About ARD");
-        itemList.add("About Mac");
+        itemList.add("About app");
         itemList.add("Sign Out");
 
         DetailsAdapter detailsAdapter = new DetailsAdapter(itemList);
@@ -137,7 +138,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     @Override
     public void onStart() {
         super.onStart();
-        if (getUser() == null) {
+        if (getUser() == null || getUser().getUid() == null) {
             getActivity().finish();
             return;
         }
@@ -149,8 +150,12 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         userRef.addValueEventListener(userRefVEL);
 
         //Set basic data from auth if possible
-        userNameTV.setText(getUser().getDisplayName());
-        userEmailTV.setText(getUser().getEmail());
+        if (getUser().getDisplayName() != null) {
+            userNameTV.setText(getUser().getDisplayName());
+        }
+        if (getUser().getEmail() != null) {
+            userEmailTV.setText(getUser().getEmail());
+        }
         Glide.with(getContext())
                 .load(getUser().getPhotoUrl())
                 .transition(DrawableTransitionOptions.withCrossFade(500))
@@ -200,11 +205,14 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     public void onItemClick(View view, int position) {
         if (position == 0) {
             //About ARD
-            //Open url
+            new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
+            //TODO app closing when opening url
         } else if (position == 1) {
             //About MAC
         } else {
             FirebaseAuth.getInstance().signOut();
+            Realm.deleteRealm(Realm.getDefaultConfiguration());
+            //TODO cancel all running and scheduled services. also delete shared pref file
             final Intent intent = new Intent(getContext(), AuthActivity.class);
             startActivity(intent);
             getActivity().finish();

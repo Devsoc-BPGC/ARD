@@ -6,14 +6,12 @@ import android.support.annotation.Nullable;
 import java.util.Calendar;
 import java.util.Date;
 
-import io.realm.RealmObject;
-
 /**
  * Class to represent a slideshow image.
  *
  * @author Vikramaditya Kukreja
  */
-public class SlideshowItem extends RealmObject {
+public class SlideshowItem {
 
     /**
      * Url of slideshow image. Cannot be null.
@@ -38,22 +36,8 @@ public class SlideshowItem extends RealmObject {
     private String photoTagTextColor;
 
     public SlideshowItem() {
-        //TODO Add a correct permanent url
-        photoUrl = "";
+        photoUrl = "https://picsum.photos/640/400/?random";
         photoDate = Calendar.getInstance().getTime();
-    }
-
-    public SlideshowItem(@NonNull final String photoUrl, @Nullable final String photoTitle,
-                         @NonNull final Date photoDate, @Nullable final String photoDesc,
-                         @Nullable final String photoTag, @Nullable final String photoTagColor,
-                         @Nullable final String photoTagTextColor) {
-        this.photoUrl = photoUrl;
-        this.photoTitle = photoTitle;
-        this.photoDate = photoDate;
-        this.photoDesc = photoDesc;
-        this.photoTag = photoTag;
-        this.photoTagColor = photoTagColor;
-        this.photoTagTextColor = photoTagTextColor;
     }
 
     @NonNull

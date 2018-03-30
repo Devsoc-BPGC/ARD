@@ -176,6 +176,11 @@ public class AHC {
     public static final String DOCUMENT_LITERAL = "\uD83D\uDCCE Document";
 
     /**
+     * Url for ARD website redirect.
+     */
+    public static final String ARD_REDIRECT_URL = "ard-bits.firebaseapp.com/ard";
+
+    /**
      * Method to get pixel value corresponding to input dp.
      *
      * @param context of calling method.
