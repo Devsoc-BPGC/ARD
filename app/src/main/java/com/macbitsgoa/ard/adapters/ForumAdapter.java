@@ -31,7 +31,6 @@ public class ForumAdapter extends RecyclerView.Adapter<FaqViewHolder> {
      * Maintains expanded text info.
      */
     private SparseBooleanArray sba;
-
     /**
      * Constructor for items of {@link RealmResults<FaqItem>} class.
      * It also initialises a sparse boolean array to maintain clicked items info.

@@ -1,11 +1,15 @@
 package com.macbitsgoa.ard.viewholders;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.macbitsgoa.ard.R;
 
@@ -13,7 +17,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Viewholder for {@link com.macbitsgoa.ard.models.FaqItem} used in
+ * ViewHolder for {@link com.macbitsgoa.ard.models.FaqItem} used in
  * {@link com.macbitsgoa.ard.adapters.ForumAdapter}.
  *
  * @author Vikramaditya Kukreja
@@ -47,6 +51,7 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
         ButterKnife.bind(this, itemView);
         this.sba = sba;
         sba.put(getAdapterPosition(), false);
+        setCopyListener();
         itemView.setOnClickListener(v -> showAnswer());
     }
 
@@ -90,4 +95,14 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
         }
 
     }
+
+   private void setCopyListener(){
+           itemView.setOnLongClickListener(v -> {
+           ClipboardManager clipboard = (ClipboardManager) itemView.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
+           ClipData clip = ClipData.newPlainText("ARD","[Q] "+questionTV.getText()+"\n[A] "+answerTV.getText());
+           clipboard.setPrimaryClip(clip);
+           Toast.makeText(itemView.getContext(),"Copied To Clipboard",Toast.LENGTH_LONG).show();
+           return true;
+       });
+   }
 }
