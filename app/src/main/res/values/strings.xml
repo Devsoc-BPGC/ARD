@@ -77,5 +77,6 @@
     <string name="msg_rcvd">Message Delivered</string>
     <string name="msg_sent">Message Sent</string>
     <string name="msg_wait">Waiting</string>
+    <string name="not_admin_placeholder">User</string>
 
 </resources>

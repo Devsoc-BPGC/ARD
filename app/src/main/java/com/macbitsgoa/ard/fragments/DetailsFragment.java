@@ -6,7 +6,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,7 +15,6 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -64,21 +62,6 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     RecyclerView detailRV;
 
     /**
-     * Reference to user database on firebase.
-     */
-    private DatabaseReference userRef;
-
-    /**
-     * {@link #userRef} listener.
-     */
-    private ValueEventListener userRefVEL;
-
-    /**
-     * Butterknife unbinder.
-     */
-    private Unbinder unbinder;
-
-    /**
      * User name textview.
      */
     @BindView(R.id.tv_vh_details_name)
@@ -101,6 +84,21 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
      */
     @BindView(R.id.imgView_vh_details_user)
     ImageView userPhotoIV;
+
+    /**
+     * {@link #userRef} listener.
+     */
+    private ValueEventListener userRefVEL;
+
+    /**
+     * Reference to user database on firebase.
+     */
+    private DatabaseReference userRef;
+
+    /**
+     * Butterknife unbinder.
+     */
+    private Unbinder unbinder;
 
     public DetailsFragment() {
         // Required empty public constructor
@@ -127,7 +125,6 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         detailRV.setHasFixedSize(true);
         detailRV.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), detailRV, this));
         detailRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-//        detailRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
 
         final List<String> itemList = new ArrayList<>();
         itemList.add("About ARD");
@@ -137,30 +134,20 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         DetailsAdapter detailsAdapter = new DetailsAdapter(itemList);
         detailRV.setAdapter(detailsAdapter);
 
-        return view;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
         if (getUser() == null || getUser().getUid() == null) {
             getActivity().finish();
-            return;
+            return view;
         }
+
         userRef = getRootReference()
-                .child(AHC.FDR_USERS)
+                .child(AHC.FDR_ADMINS)
                 .child(getUser().getUid());
 
         userRefVEL = getData();
         userRef.addValueEventListener(userRefVEL);
 
-        //Set basic data from auth if possible
-        if (getUser().getDisplayName() != null) {
-            userNameTV.setText(getUser().getDisplayName());
-        }
-        if (getUser().getEmail() != null) {
-            userEmailTV.setText(getUser().getEmail());
-        }
+        userNameTV.setText(getUser().getDisplayName());
+        userEmailTV.setText(getUser().getEmail());
         Glide.with(getContext())
                 .load(getUser().getPhotoUrl())
                 .transition(DrawableTransitionOptions.withCrossFade(500))
@@ -168,17 +155,14 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
                         .circleCropTransform()
                         .error(R.drawable.ic_contact))
                 .into(userPhotoIV);
-    }
 
-    @Override
-    public void onStop() {
-        userRef.removeEventListener(userRefVEL);
-        userRefVEL = null;
-        super.onStop();
+        return view;
     }
 
     @Override
     public void onDestroyView() {
+        userRef.removeEventListener(userRefVEL);
+        userRefVEL = null;
         unbinder.unbind();
         super.onDestroyView();
     }
@@ -187,26 +171,20 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         return new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot ds) {
-                if (ds == null) {
-                    AHC.logd(TAG, "User data does not exist");
-                    Crashlytics.log("Null datasnapshot in " + TAG);
-                }
-                final String userName = ds.child(UserItemKeys.NAME).getValue(String.class);
-                final String userEmail = ds.child(UserItemKeys.EMAIL).getValue(String.class);
-                String userDesc = "User";
+                //Ds should never be null as the only way a user get this snapshot is if they are in
+                //the list. Else we handle it in onCancelled.
                 if (ds.hasChild(UserItemKeys.DESC)) {
-                    userDesc = ds.child(UserItemKeys.DESC).getValue(String.class);
+                    final String userDesc = ds.child(UserItemKeys.DESC).getValue(String.class);
+                    userDescTV.setText(userDesc);
+                } else {
+                    userDescTV.setText(getString(R.string.not_admin_placeholder));
                 }
-
-                //Set this data
-                userNameTV.setText(userName);
-                userEmailTV.setText(userEmail);
-                userDescTV.setText(userDesc);
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Database read error for user info");
+                AHC.logd(TAG, "Database read error for admin info. User not an admin.");
+                userDescTV.setText(getString(R.string.not_admin_placeholder));
             }
         };
     }
