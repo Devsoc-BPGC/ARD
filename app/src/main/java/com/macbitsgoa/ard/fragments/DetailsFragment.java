@@ -1,6 +1,5 @@
 package com.macbitsgoa.ard.fragments;
 
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -29,6 +28,10 @@ import com.macbitsgoa.ard.adapters.DetailsAdapter;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.UserItemKeys;
+import com.macbitsgoa.ard.services.ForumService;
+import com.macbitsgoa.ard.services.NotifyService;
+import com.macbitsgoa.ard.services.SendDocumentService;
+import com.macbitsgoa.ard.services.SendService;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.Browser;
 
@@ -38,7 +41,6 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.realm.Realm;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -94,6 +96,9 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     @BindView(R.id.tv_vh_details_email)
     TextView userEmailTV;
 
+    /**
+     * User photo image view.
+     */
     @BindView(R.id.imgView_vh_details_user)
     ImageView userPhotoIV;
 
@@ -211,16 +216,30 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         if (position == 0) {
             //About ARD
             new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
-            //TODO app closing when opening url
         } else if (position == 1) {
             //About MAC
         } else {
+            //Delete sp
+            getDefaultSharedPref().edit().clear().apply();
+
+            //Stop all intent services if they are running
+            getContext().stopService(new Intent(getContext(), ForumService.class));
+            getContext().stopService(new Intent(getContext(), SendService.class));
+            getContext().stopService(new Intent(getContext(), SendDocumentService.class));
+            getContext().stopService(new Intent(getContext(), NotifyService.class));
+            //Cancel all job intents
+            AHC.getJobDispatcher(getContext()).cancelAll();
+            //After services are stopped, log out user
             FirebaseAuth.getInstance().signOut();
-            Realm.deleteRealm(Realm.getDefaultConfiguration());
-            //TODO cancel all running and scheduled services. also delete shared pref file
+            //Reset Realm database
+            database.executeTransaction(r -> {
+                r.deleteAll();
+            });
+
+            //Start Auth activity
             final Intent intent = new Intent(getContext(), AuthActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(intent);
-            getActivity().finish();
         }
     }
 

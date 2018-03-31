@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.activities;
 
 import android.annotation.SuppressLint;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -50,7 +51,7 @@ public class BaseActivity extends AppCompatActivity {
      * @return app shared pref {@link AHC#SP_APP} in private mode.
      */
     public SharedPreferences getDefaultSharedPref() {
-        return getSharedPreferences(AHC.SP_APP, MODE_PRIVATE);
+        return getSharedPreferences(AHC.SP_APP, Context.MODE_PRIVATE);
     }
 
     @Override

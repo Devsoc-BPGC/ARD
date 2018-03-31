@@ -1,5 +1,7 @@
 package com.macbitsgoa.ard.fragments;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.v4.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -7,6 +9,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
+import com.macbitsgoa.ard.utils.AHC;
 
 import javax.annotation.Nullable;
 
@@ -22,6 +25,15 @@ public class BaseFragment extends Fragment {
 
     protected DatabaseReference getRootReference() {
         return FirebaseDatabase.getInstance().getReference().child(BuildConfig.BUILD_TYPE);
+    }
+
+    /**
+     * Get {@link SharedPreferences} for the app.
+     *
+     * @return app shared pref {@link AHC#SP_APP} in private mode.
+     */
+    public SharedPreferences getDefaultSharedPref() {
+        return getContext().getSharedPreferences(AHC.SP_APP, Context.MODE_PRIVATE);
     }
 
     @Nullable
