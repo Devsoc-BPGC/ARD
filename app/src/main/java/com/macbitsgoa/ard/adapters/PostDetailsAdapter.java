@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,7 +48,8 @@ public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
 
     @NonNull
     @Override
-    public RecyclerView.ViewHolder onCreateViewHolder(final ViewGroup parent, final int viewType) {
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull final ViewGroup parent,
+                                                      final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         final View view;
         switch (viewType) {
@@ -72,9 +74,10 @@ public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
                 final AnnViewHolder anvh = (AnnViewHolder) holder;
                 final AnnItem ai = (AnnItem) obj;
                 anvh.data.setText(Html.fromHtml(ai.getData()));
-                anvh.extras.setText(Html.fromHtml(ai.getAuthor()
-                        + ", "
+                anvh.extras.setText(Html.fromHtml(ai.getAuthor() + AHC.SEPARATOR
                         + AHC.getSimpleDayOrTime(ai.getDate())));
+                anvh.data.setMovementMethod(LinkMovementMethod.getInstance());
+                anvh.extras.setMovementMethod(LinkMovementMethod.getInstance());
                 break;
             }
             case HomeType.TEXT_ITEM: {

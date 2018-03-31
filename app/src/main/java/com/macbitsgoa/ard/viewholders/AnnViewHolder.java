@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.viewholders;
 
 import android.support.v7.widget.RecyclerView;
+import android.text.method.LinkMovementMethod;
 import android.view.View;
 import android.widget.TextView;
 
@@ -41,5 +42,7 @@ public class AnnViewHolder extends RecyclerView.ViewHolder {
     public AnnViewHolder(final View itemView) {
         super(itemView);
         ButterKnife.bind(this, itemView);
+        data.setMovementMethod(LinkMovementMethod.getInstance());
+        extras.setMovementMethod(LinkMovementMethod.getInstance());
     }
 }

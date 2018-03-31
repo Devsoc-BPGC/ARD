@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.ContextCompat;
+import android.text.Html;
 
 import com.firebase.jobdispatcher.JobParameters;
 import com.macbitsgoa.ard.R;
@@ -46,11 +47,12 @@ public class AnnNotifyService extends BaseJobService {
         final String data = extras.getString(AnnItemKeys.DATA, "Announcement");
         final int id = data.hashCode();
 
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        final NotificationManager nm = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
         AHC.createChannels(nm);
-        NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, AHC.ARD)
+        final NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, AHC.ARD)
                 .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentText(data)
+                .setContentText(Html.fromHtml(data))
                 .setAutoCancel(true)
                 .setContentIntent(PendingIntent
                         .getActivity(this, id,

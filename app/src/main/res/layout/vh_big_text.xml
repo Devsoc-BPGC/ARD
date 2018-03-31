@@ -8,10 +8,6 @@
         android:id="@+id/tv_vh_big_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:clickable="true"
-        android:autoLink="web|email"
-        android:focusable="true"
-        android:linksClickable="true"
         android:padding="16dp"
         android:textIsSelectable="true"
         android:textSize="18sp" />
