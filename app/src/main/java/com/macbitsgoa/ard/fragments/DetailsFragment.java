@@ -169,8 +169,13 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     public void onStop() {
         userRef.removeEventListener(userRefVEL);
         userRefVEL = null;
-        unbinder.unbind();
         super.onStop();
+    }
+
+    @Override
+    public void onDestroyView() {
+        unbinder.unbind();
+        super.onDestroyView();
     }
 
     private ValueEventListener getData() {
