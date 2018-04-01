@@ -9,7 +9,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
 import com.macbitsgoa.ard.models.FaqItem;
-import com.macbitsgoa.ard.models.FaqSectionItem;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Date;
@@ -55,34 +54,8 @@ public class ForumService extends BaseIntentService {
                     return;
                 }
                 database = Realm.getDefaultInstance();
-                faqSectionParse(dataSnapshot.child(FaqItemKeys.FDR_FAQ_SECTION));
                 faqParse(dataSnapshot.child(FaqItemKeys.FDR_FAQ));
                 database.close();
-            }
-
-            private void faqSectionParse(final DataSnapshot faqSectionShot) {
-                if (faqSectionShot == null) {
-                    AHC.logd(TAG, "Faq sections data null");
-                    return;
-                }
-                //Always get latest faq sections
-                database.executeTransaction(r -> r.delete(FaqSectionItem.class));
-                for (final DataSnapshot childShot : faqSectionShot.getChildren()) {
-                    database.executeTransaction(r -> {
-                        FaqSectionItem fsi = r.where(FaqSectionItem.class)
-                                .equalTo(FaqItemKeys.DB_FAQ_SECTION_KEY, childShot.getKey())
-                                .findFirst();
-                        if (fsi == null) {
-                            fsi = r.createObject(FaqSectionItem.class, childShot.getKey());
-                        }
-                        fsi.setSectionTitle(childShot
-                                .child(FaqItemKeys.FDR_FAQ_SECTION_TITLE)
-                                .getValue(String.class));
-                        fsi.setSectionPriority(childShot
-                                .child(FaqItemKeys.FDR_FAQ_SECTION_PRIORITY)
-                                .getValue(String.class));
-                    });
-                }
             }
 
             private void faqParse(final DataSnapshot faqSnapshot) {

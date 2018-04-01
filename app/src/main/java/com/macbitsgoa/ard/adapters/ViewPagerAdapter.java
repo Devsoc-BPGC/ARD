@@ -60,12 +60,4 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
         fragmentList.add(fragment);
         fragmentTitlesList.add(title);
     }
-
-    /**
-     * Empty the list.
-     */
-    public void removeAll() {
-        fragmentList.clear();
-        fragmentTitlesList.clear();
-    }
 }

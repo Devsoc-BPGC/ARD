@@ -14,21 +14,11 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
-import com.macbitsgoa.ard.activities.MainActivity;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.FCMKeys;
-import com.macbitsgoa.ard.keys.FaqItemKeys;
-import com.macbitsgoa.ard.keys.HomeItemKeys;
-import com.macbitsgoa.ard.keys.UserItemKeys;
-import com.macbitsgoa.ard.models.AnnItem;
-import com.macbitsgoa.ard.models.FaqItem;
-import com.macbitsgoa.ard.models.UserItem;
-import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.Map;
-
-import io.realm.Realm;
 
 /**
  * FCM service.
@@ -99,30 +89,7 @@ public class FCMService extends FirebaseMessagingService {
             Crashlytics.log(0, TAG, "Null id was sent for deletion from Realm");
             return;
         }
-        final Realm database = Realm.getDefaultInstance();
-        database.executeTransaction(r -> {
-            final HomeItem hi = r.where(HomeItem.class).equalTo(HomeItemKeys.KEY, id).findFirst();
-            if (hi != null) {
-                AHC.logd(TAG, "Found home item with same id to delete.");
-                hi.deleteFromRealm();
-            }
-            final AnnItem ai = r.where(AnnItem.class).equalTo(AnnItemKeys.KEY, id).findFirst();
-            if (ai != null) {
-                AHC.logd(TAG, "Found announcement item with same id to delete.");
-                ai.deleteFromRealm();
-            }
-            final FaqItem fi = r.where(FaqItem.class).equalTo(FaqItemKeys.KEY, id).findFirst();
-            if (fi != null) {
-                AHC.logd(TAG, "Found faq item with same id to delete.");
-                fi.deleteFromRealm();
-            }
-            final UserItem ui = r.where(UserItem.class).equalTo(UserItemKeys.UID, id).findFirst();
-            if (ui != null) {
-                AHC.logd(TAG, "Found user item with same id to delete.");
-                ui.deleteFromRealm();
-            }
-        });
-        database.close();
+        startService(new Intent(this, DeleteService.class));
     }
 
     private void createNotification(final Map<String, String> data) {
@@ -139,7 +106,7 @@ public class FCMService extends FirebaseMessagingService {
         final int notificationId = Integer.parseInt(data.get(FCMKeys.ID));
 
         PendingIntent pi;
-        if(uri == null) {
+        if (uri == null) {
             pi = PendingIntent.getActivity(this, _ID,
                     new Intent(this, AnnActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
         } else {
@@ -173,9 +140,9 @@ public class FCMService extends FirebaseMessagingService {
 
         if (service.equals(HomeService.TAG)) {
             AHC.startService(this, HomeService.class, HomeService.TAG);
-        //} else if (service.equals(MessagingService.TAG)) {
-        //    AHC.startService(this, MessagingService.class, MessagingService.TAG);
-        //    AHC.logd(TAG, "Messaging service will be started from FCM");
+            //} else if (service.equals(MessagingService.TAG)) {
+            //    AHC.startService(this, MessagingService.class, MessagingService.TAG);
+            //    AHC.logd(TAG, "Messaging service will be started from FCM");
         } else {
             AHC.logd(TAG, "Requested service is not yet supported. Service was " + service);
             throw new ClassNotFoundException("Currently not supporting " + service);

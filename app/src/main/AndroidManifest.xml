@@ -9,7 +9,6 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
-    <uses-permission android:name="android.permission.REAL_GET_TASKS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
@@ -89,8 +88,7 @@
         </service>
         <service android:name=".services.SendService"/>
         <service
-            android:name=".services.NotifyService"
-            android:process=":BackgroundServices" />
+            android:name=".services.NotifyService" />
         <service
             android:name=".services.HomeService"
             android:description="@string/home_service_desc"
@@ -112,6 +110,7 @@
         </service>
         <service android:name=".services.AnnNotifyService" />
         <service android:name=".services.ForumService" />
+        <service android:name=".services.DeleteService" />
 
         <activity
             android:name=".activities.NewChatActivity"

@@ -17,10 +17,8 @@ import io.realm.annotations.PrimaryKey;
  *
  * @author Rushikesh Jogdand
  */
-@SuppressWarnings("WeakerAccess")
-public class UserItem extends RealmObject implements Comparable<UserItem> {
+public class UserItem implements Comparable<UserItem> {
 
-    @PrimaryKey
     private String uid;
 
     /**

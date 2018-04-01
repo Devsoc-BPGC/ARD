@@ -146,6 +146,10 @@ public class AHC {
     public static final float ANIMATION_MULTIPLIER = 1.5f;
 
     /**
+     * Firebase node for all deleted items history
+     */
+    public static final String FDR_DELETES = "deletes";
+    /**
      * Firebase directory of users.
      */
     public static final String FDR_USERS = "users";

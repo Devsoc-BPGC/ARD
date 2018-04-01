@@ -13,16 +13,12 @@ import android.view.ViewGroup;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ViewPagerAdapter;
 import com.macbitsgoa.ard.fragments.forum.GeneralFragment;
-import com.macbitsgoa.ard.keys.FaqItemKeys;
-import com.macbitsgoa.ard.models.FaqSectionItem;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.utils.AHC;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.realm.RealmList;
-import io.realm.Sort;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -51,11 +47,6 @@ public class ForumFragment extends BaseFragment {
     public TabLayout tabLayout;
 
     /**
-     * Viewpager adapter for sub sections.
-     */
-    private ViewPagerAdapter viewPagerAdapter;
-
-    /**
      * Unbinder to remove views.
      */
     private Unbinder unbinder;
@@ -81,31 +72,23 @@ public class ForumFragment extends BaseFragment {
         final View view = inflater.inflate(R.layout.fragment_forum, container, false);
         unbinder = ButterKnife.bind(this, view);
         viewPager.setOffscreenPageLimit(2);
-        viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
+        final ViewPagerAdapter vpa = new ViewPagerAdapter(getChildFragmentManager());
+
+        vpa.addFragment(GeneralFragment.newInstance("0"), "Ph.D.");
+        vpa.addFragment(GeneralFragment.newInstance("1"), "M.E.");
+        vpa.addFragment(GeneralFragment.newInstance("2"), "B.E.");
+        vpa.addFragment(GeneralFragment.newInstance("3"), "Others");
+
+        viewPager.setAdapter(vpa);
+        tabLayout.setupWithViewPager(viewPager);
+
         getContext().startService(new Intent(getContext(), ForumService.class));
         return view;
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-        final RealmList<FaqSectionItem> sections = new RealmList<>();
-        sections.addAll(database.where(FaqSectionItem.class)
-                .findAllSorted(FaqItemKeys.DB_FAQ_SECTION_PRIORITY, Sort.ASCENDING));
-        for (int i = 0; i < sections.size(); i++) {
-            final String fragmentTitle = sections.get(i).getSectionTitle();
-            final String fragmentKey = sections.get(i).getSectionKey();
-            final GeneralFragment gf = GeneralFragment.newInstance(fragmentKey);
-            viewPagerAdapter.addFragment(gf, fragmentTitle);
-        }
-        viewPager.setAdapter(viewPagerAdapter);
-        tabLayout.setupWithViewPager(viewPager);
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
-        viewPagerAdapter = null;
         unbinder.unbind();
     }
 }

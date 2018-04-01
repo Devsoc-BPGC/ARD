@@ -16,6 +16,7 @@ import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.DetailsFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
+import com.macbitsgoa.ard.services.DeleteService;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.types.MainActivityType;
@@ -98,6 +99,7 @@ public class MainActivity extends BaseActivity
             init();
 
             startService(new Intent(this, ForumService.class));
+            startService(new Intent(this, DeleteService.class));
             AHC.startService(this, HomeService.class, HomeService.TAG);
             //AHC.startService(this, MessagingService.class, MessagingService.TAG);
 
