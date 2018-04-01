@@ -21,7 +21,7 @@ import com.macbitsgoa.ard.utils.AHC;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
-import io.realm.RealmResults;
+import io.realm.RealmList;
 import io.realm.Sort;
 
 /**
@@ -61,11 +61,6 @@ public class ForumFragment extends BaseFragment {
     private Unbinder unbinder;
 
     /**
-     * Sections list.
-     */
-    private RealmResults<FaqSectionItem> sections;
-
-    /**
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
@@ -86,6 +81,7 @@ public class ForumFragment extends BaseFragment {
         final View view = inflater.inflate(R.layout.fragment_forum, container, false);
         unbinder = ButterKnife.bind(this, view);
         viewPager.setOffscreenPageLimit(2);
+        viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
         getContext().startService(new Intent(getContext(), ForumService.class));
         return view;
     }
@@ -93,19 +89,9 @@ public class ForumFragment extends BaseFragment {
     @Override
     public void onStart() {
         super.onStart();
-        viewPagerAdapter = new ViewPagerAdapter(getChildFragmentManager());
-        sections = database.where(FaqSectionItem.class)
-                .findAllSorted(FaqItemKeys.DB_FAQ_SECTION_PRIORITY, Sort.ASCENDING);
-        sections.addChangeListener(faqSectionItems -> {
-            viewPagerAdapter.removeAll();
-            for (int i = 0; i < faqSectionItems.size(); i++) {
-                final String fragmentTitle = faqSectionItems.get(i).getSectionTitle();
-                final String fragmentKey = faqSectionItems.get(i).getSectionKey();
-                final GeneralFragment gf = GeneralFragment.newInstance(fragmentKey);
-                viewPagerAdapter.addFragment(gf, fragmentTitle);
-            }
-            viewPagerAdapter.notifyDataSetChanged();
-        });
+        final RealmList<FaqSectionItem> sections = new RealmList<>();
+        sections.addAll(database.where(FaqSectionItem.class)
+                .findAllSorted(FaqItemKeys.DB_FAQ_SECTION_PRIORITY, Sort.ASCENDING));
         for (int i = 0; i < sections.size(); i++) {
             final String fragmentTitle = sections.get(i).getSectionTitle();
             final String fragmentKey = sections.get(i).getSectionKey();
@@ -117,16 +103,9 @@ public class ForumFragment extends BaseFragment {
     }
 
     @Override
-    public void onStop() {
-        viewPagerAdapter = null;
-        sections.removeAllChangeListeners();
-        super.onStop();
-    }
-
-    @Override
     public void onDestroyView() {
         super.onDestroyView();
+        viewPagerAdapter = null;
         unbinder.unbind();
     }
-
 }

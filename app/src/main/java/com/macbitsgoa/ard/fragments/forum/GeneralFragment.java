@@ -23,7 +23,6 @@ import com.macbitsgoa.ard.utils.AHC;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
 import io.realm.Sort;
@@ -113,6 +112,8 @@ public class GeneralFragment extends BaseFragment {
         recyclerView.setHasFixedSize(true);
         TooltipCompat.setTooltipText(sortImg, "Sort");
         TooltipCompat.setTooltipText(sortOrderImg, "Asc/Desc");
+        toDesc = (Animatable) sortOrderImg.getDrawable();
+        sortAnimatable = (Animatable) sortImg.getDrawable();
         return view;
     }
 
@@ -125,8 +126,6 @@ public class GeneralFragment extends BaseFragment {
                         new Sort[]{Sort.ASCENDING, sort});
         forumAdapter = new ForumAdapter(faqItems);
         recyclerView.setAdapter(forumAdapter);
-        toDesc = (Animatable) sortOrderImg.getDrawable();
-        sortAnimatable = (Animatable) sortImg.getDrawable();
         faqItems.addChangeListener(getChangeListener());
     }
 
@@ -134,6 +133,7 @@ public class GeneralFragment extends BaseFragment {
     private OrderedRealmCollectionChangeListener<RealmResults<FaqItem>> getChangeListener() {
         return (collection, changeSet) -> {
             // `null`  means the async query returns the first time.
+            //We are not listening for each and every update but only for the first one.
             if (changeSet == null) {
                 forumAdapter.notifyDataSetChanged();
                 if (forumAdapter.getItemCount() == 0) {
@@ -141,28 +141,11 @@ public class GeneralFragment extends BaseFragment {
                 } else {
                     emptyTextView.setVisibility(View.GONE);
                 }
-                return;
-            }
-            // For deletions, the adapter has to be notified in reverse order.
-            final OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
-            for (int i = deletions.length - 1; i >= 0; i--) {
-                OrderedCollectionChangeSet.Range range = deletions[i];
-                forumAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
-            }
-
-            final OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
-            for (OrderedCollectionChangeSet.Range range : insertions) {
-                forumAdapter.notifyItemRangeInserted(range.startIndex, range.length);
-            }
-
-            final OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
-            for (OrderedCollectionChangeSet.Range range : modifications) {
-                forumAdapter.notifyItemRangeChanged(range.startIndex, range.length);
-            }
-            if (forumAdapter.getItemCount() == 0) {
-                emptyTextView.setVisibility(View.VISIBLE);
-            } else {
-                emptyTextView.setVisibility(View.GONE);
+                if (forumAdapter.getItemCount() == 0) {
+                    emptyTextView.setVisibility(View.VISIBLE);
+                } else {
+                    emptyTextView.setVisibility(View.GONE);
+                }
             }
         };
     }
@@ -208,7 +191,11 @@ public class GeneralFragment extends BaseFragment {
     @OnClick(R.id.imgView_fragment_forum_general_sort)
     public void onSortPressed() {
         sortAnimatable.start();
-        CharSequence[] sortOrders = new CharSequence[]{"Alphabetical", "Last Created", "Last Modified"};
+        final CharSequence[] sortOrders = new CharSequence[]{
+                "Alphabetical",
+                "Last Created",
+                "Last Modified",
+        };
         new AlertDialog.Builder(getActivity())
                 .setSingleChoiceItems(sortOrders,
                         currentSortOrder,
