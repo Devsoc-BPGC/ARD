@@ -173,9 +173,9 @@ public class FCMService extends FirebaseMessagingService {
 
         if (service.equals(HomeService.TAG)) {
             AHC.startService(this, HomeService.class, HomeService.TAG);
-        } else if (service.equals(MessagingService.TAG)) {
-            AHC.startService(this, MessagingService.class, MessagingService.TAG);
-            AHC.logd(TAG, "Messaging service will be started from FCM");
+        //} else if (service.equals(MessagingService.TAG)) {
+        //    AHC.startService(this, MessagingService.class, MessagingService.TAG);
+        //    AHC.logd(TAG, "Messaging service will be started from FCM");
         } else {
             AHC.logd(TAG, "Requested service is not yet supported. Service was " + service);
             throw new ClassNotFoundException("Currently not supporting " + service);

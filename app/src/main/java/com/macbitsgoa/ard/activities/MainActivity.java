@@ -13,14 +13,11 @@ import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.BaseFragment;
-import com.macbitsgoa.ard.fragments.ChatFragment;
 import com.macbitsgoa.ard.fragments.DetailsFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
-import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.services.HomeService;
-import com.macbitsgoa.ard.services.MessagingService;
 import com.macbitsgoa.ard.types.MainActivityType;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -37,8 +34,8 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        BottomNavigationView.OnNavigationItemSelectedListener,
-        ChatFragmentListener {
+        BottomNavigationView.OnNavigationItemSelectedListener //,
+        /*ChatFragmentListener*/ {
 
     /**
      * Tag for this class.
@@ -77,11 +74,11 @@ public class MainActivity extends BaseActivity
      * DetailsFragment object.
      */
     private DetailsFragment detailFragment;
+
     /**
      * ChatFragment object.
      */
-    private ChatFragment chatFragment;
-
+    //private ChatFragment chatFragment;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,7 +99,7 @@ public class MainActivity extends BaseActivity
 
             startService(new Intent(this, ForumService.class));
             AHC.startService(this, HomeService.class, HomeService.TAG);
-            AHC.startService(this, MessagingService.class, MessagingService.TAG);
+            //AHC.startService(this, MessagingService.class, MessagingService.TAG);
 
             bottomNavigationView.setOnNavigationItemSelectedListener(this);
         }
@@ -118,14 +115,14 @@ public class MainActivity extends BaseActivity
 
         forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
         homeFragment = new HomeFragment();
-        chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
-        detailFragment= DetailsFragment.newInstance();
+        //chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
+        detailFragment = DetailsFragment.newInstance();
         launchFragment(currentSection);
         final int menuId;
         if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
         else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
-        else if (currentSection == MainActivityType.DETAILS) menuId = R.id.bottom_nav_details;
-        else menuId = R.id.bottom_nav_chat;
+        else /*if (currentSection == MainActivityType.DETAILS)*/ menuId = R.id.bottom_nav_details;
+        //else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
     }
@@ -139,10 +136,10 @@ public class MainActivity extends BaseActivity
         } else if (id == R.id.bottom_nav_home) {
             launchFragment(MainActivityType.HOME);
             homeFragment.scrollToTop();
-        } else if (id == R.id.bottom_nav_details) {
+        } else /*if (id == R.id.bottom_nav_details)*/ {
             launchFragment(MainActivityType.DETAILS);
-        } else {
-            launchFragment(MainActivityType.CHAT);
+        /*} else {
+            launchFragment(MainActivityType.CHAT);*/
         }
         return true;
     }
@@ -159,8 +156,8 @@ public class MainActivity extends BaseActivity
         BaseFragment baseFragment;
         if (currentSection == MainActivityType.FORUM) baseFragment = forumFragment;
         else if (currentSection == MainActivityType.HOME) baseFragment = homeFragment;
-        else if (currentSection == MainActivityType.DETAILS) baseFragment = detailFragment;
-        else baseFragment = chatFragment;
+        else /*if (currentSection == MainActivityType.DETAILS)*/ baseFragment = detailFragment;
+        //else baseFragment = chatFragment;
         fragmentManager.beginTransaction().replace(R.id.frame_content_main, baseFragment).commit();
     }
 
@@ -193,16 +190,16 @@ public class MainActivity extends BaseActivity
         final int menuId;
         if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
         else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
-        else if (currentSection == MainActivityType.DETAILS) menuId = R.id.bottom_nav_details;
-        else menuId = R.id.bottom_nav_chat;
+        else /*if (currentSection == MainActivityType.DETAILS)*/ menuId = R.id.bottom_nav_details;
+        //else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
 
         sectionsHistory.remove(staleSection);
     }
 
-    @Override
+    /*@Override
     public void updateChatFragment() {
 
-    }
+    }*/
 }

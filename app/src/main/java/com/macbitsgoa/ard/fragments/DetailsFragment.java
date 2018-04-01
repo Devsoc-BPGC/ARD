@@ -27,9 +27,6 @@ import com.macbitsgoa.ard.interfaces.OnItemClickListener;
 import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.services.ForumService;
-import com.macbitsgoa.ard.services.NotifyService;
-import com.macbitsgoa.ard.services.SendDocumentService;
-import com.macbitsgoa.ard.services.SendService;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.Browser;
 
@@ -202,9 +199,9 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
 
             //Stop all intent services if they are running
             getContext().stopService(new Intent(getContext(), ForumService.class));
-            getContext().stopService(new Intent(getContext(), SendService.class));
-            getContext().stopService(new Intent(getContext(), SendDocumentService.class));
-            getContext().stopService(new Intent(getContext(), NotifyService.class));
+            //getContext().stopService(new Intent(getContext(), SendService.class));
+            //getContext().stopService(new Intent(getContext(), SendDocumentService.class));
+            //getContext().stopService(new Intent(getContext(), NotifyService.class));
             //Cancel all job intents
             AHC.getJobDispatcher(getContext()).cancelAll();
             //After services are stopped, log out user
