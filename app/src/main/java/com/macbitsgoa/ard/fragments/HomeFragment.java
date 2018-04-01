@@ -170,6 +170,11 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
         homeRV.addOnItemTouchListener(onItemTouchListener);
         homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+
+        setupSlideshow();
+        imageSlideShowVEL = getImageSlideShowVEL();
+        imageSlideshowRef.addValueEventListener(imageSlideShowVEL);
+
         return view;
     }
 
@@ -218,16 +223,12 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
 
         homeRefVEL = getHomeRefVEL();
         annRefVEL = getAnnRefVEL();
-        imageSlideShowVEL = getImageSlideShowVEL();
 
         homeRef.orderByChild(HomeItemKeys.DATE + "/time").limitToLast(5).addValueEventListener(homeRefVEL);
         annRef.addValueEventListener(annRefVEL);
-        imageSlideshowRef.addValueEventListener(imageSlideShowVEL);
 
         setupAnnouncementSlideshow();
         appBarLayout.offsetTopAndBottom(appBarOffset);
-
-        setupSlideshow();
     }
 
     @Override
@@ -237,7 +238,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
             annSlideshowHandler.removeCallbacks(annSlideshowRunable);
         }
         //Remove firebase database listeners
-        imageSlideshowRef.removeEventListener(imageSlideShowVEL);
         homeRef.removeEventListener(homeRefVEL);
         annRef.removeEventListener(annRefVEL);
 
@@ -253,6 +253,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        imageSlideshowRef.removeEventListener(imageSlideShowVEL);
         homeRV.removeOnItemTouchListener(onItemTouchListener);
         unbinder.unbind();
     }
@@ -334,7 +335,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 AHC.logd(TAG, "query snapshot is " + dataSnapshot.toString());
-                HomeService.saveHomeSnapshotToRealm(dataSnapshot);
+                new Thread(() -> HomeService.saveHomeSnapshotToRealm(dataSnapshot)).start();
             }
 
             @Override
@@ -348,7 +349,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                HomeService.saveAnnSnapshotToRealm(dataSnapshot);
+                new Thread(() -> HomeService.saveAnnSnapshotToRealm(dataSnapshot));
             }
 
             @Override
