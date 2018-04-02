@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:background="?selectableItemBackground"
     android:orientation="vertical">
 
     <TextView
@@ -9,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="8dp"
-        android:text="SubSection"
         android:textSize="18sp"
         android:textStyle="bold|italic" />
 
@@ -21,7 +21,6 @@
         android:paddingEnd="16dp"
         android:paddingStart="16dp"
         android:paddingTop="8dp"
-        android:text="Question"
         android:textColor="@color/colorPrimaryDark" />
 
     <TextView
@@ -29,7 +28,6 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="8dp"
-        android:text="Answer" />
+        android:padding="8dp" />
 
 </LinearLayout>

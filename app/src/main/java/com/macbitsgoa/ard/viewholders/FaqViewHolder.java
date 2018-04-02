@@ -93,7 +93,6 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
         } else {
             answerTV.setVisibility(View.GONE);
         }
-
     }
 
    private void setCopyListener(){
@@ -101,7 +100,7 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
            ClipboardManager clipboard = (ClipboardManager) itemView.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
            ClipData clip = ClipData.newPlainText("ARD","[Q] "+questionTV.getText()+"\n[A] "+answerTV.getText());
            clipboard.setPrimaryClip(clip);
-           Toast.makeText(itemView.getContext(),"Copied To Clipboard",Toast.LENGTH_LONG).show();
+           Toast.makeText(itemView.getContext(),"Copied To Clipboard",Toast.LENGTH_SHORT).show();
            return true;
        });
    }

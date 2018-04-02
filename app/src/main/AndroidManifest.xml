@@ -110,7 +110,6 @@
         </service>
         <service android:name=".services.AnnNotifyService" />
         <service android:name=".services.ForumService" />
-        <service android:name=".services.DeleteService" />
 
         <activity
             android:name=".activities.NewChatActivity"

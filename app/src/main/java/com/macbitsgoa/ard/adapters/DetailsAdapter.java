@@ -25,7 +25,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsViewHolder> {
     private List<String> itemsList;
 
     /**
-     * Constructor for recyclerview adapter.
+     * Constructor for recyclerView adapter.
      * It also initialises list items to be displayed in the details list.
      */
     public DetailsAdapter(final List<String> itemsList) {

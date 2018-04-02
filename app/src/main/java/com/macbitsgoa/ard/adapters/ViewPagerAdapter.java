@@ -6,6 +6,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
+import com.macbitsgoa.ard.fragments.forum.GeneralFragment;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,6 +35,10 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
      */
     public ViewPagerAdapter(@NonNull final FragmentManager manager) {
         super(manager);
+        addFragment(GeneralFragment.newInstance("0"), "Ph.D.");
+        addFragment(GeneralFragment.newInstance("1"), "M.E.");
+        addFragment(GeneralFragment.newInstance("2"), "B.E.");
+        addFragment(GeneralFragment.newInstance("3"), "Others");
     }
 
     @Override

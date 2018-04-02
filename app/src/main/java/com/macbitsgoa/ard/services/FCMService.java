@@ -63,11 +63,6 @@ public class FCMService extends FirebaseMessagingService {
                 createNotification(data);
                 break;
             }
-            case FCMKeys.ACTION_DELETE: {
-                final String id = data.get(FCMKeys.ACTION_DELETE_ID);
-                deleteItemFromRealm(id);
-                break;
-            }
             case FCMKeys.ACTION_ANNOUNCEMENT: {
                 Bundle extras = new Bundle();
                 extras.putString(AnnItemKeys.AUTHOR, data.get(AnnItemKeys.AUTHOR));
@@ -81,15 +76,6 @@ public class FCMService extends FirebaseMessagingService {
                 break;
             }
         }
-    }
-
-    private void deleteItemFromRealm(final String id) {
-        if (id == null) {
-            AHC.logd(TAG, "null id was sent");
-            Crashlytics.log(0, TAG, "Null id was sent for deletion from Realm");
-            return;
-        }
-        startService(new Intent(this, DeleteService.class));
     }
 
     private void createNotification(final Map<String, String> data) {

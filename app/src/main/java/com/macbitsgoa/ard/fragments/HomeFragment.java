@@ -25,18 +25,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
-import com.macbitsgoa.ard.activities.PostDetailsActivity;
 import com.macbitsgoa.ard.adapters.AnnSlideshowAdapter;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.adapters.SlideshowAdapter;
-import com.macbitsgoa.ard.interfaces.OnItemClickListener;
-import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
 import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.SlideshowItem;
-import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -48,7 +44,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import io.realm.OrderedCollectionChangeSet;
 import io.realm.RealmResults;
 import io.realm.Sort;
 
@@ -57,8 +52,7 @@ import io.realm.Sort;
  *
  * @author Vikramaditya Kukreja
  */
-public class HomeFragment extends BaseFragment implements OnItemClickListener,
-        AppBarLayout.OnOffsetChangedListener {
+public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetChangedListener {
 
     /**
      * TAG for this class.
@@ -83,11 +77,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     @BindView(R.id.vp_fragment_home_slideshow)
     public ViewPager slideshowVP;
 
-    /**
-     * HomeAdapter object.
-     */
-    public HomeAdapter homeAdapter;
-
     @BindView(R.id.ab_fragment_home)
     AppBarLayout appBarLayout;
 
@@ -102,7 +91,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     Handler annSlideshowHandler;
     Runnable annSlideshowRunable;
 
-    private RealmResults<HomeItem> homeItems;
     private RealmResults<AnnItem> annItems;
 
     /**
@@ -151,10 +139,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     private ValueEventListener imageSlideShowVEL;
 
     /**
-     * Item touch listener of RecyclerView.
-     */
-    private RecyclerView.OnItemTouchListener onItemTouchListener;
-    /**
      * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
      */
     private int appBarOffset = 0;
@@ -167,9 +151,8 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         unbinder = ButterKnife.bind(this, view);
         homeRV.setHasFixedSize(true);
         homeRV.setLayoutManager(new LinearLayoutManager(getContext()));
-        onItemTouchListener = new RecyclerItemClickListener(getContext(), homeRV, this);
-        homeRV.addOnItemTouchListener(onItemTouchListener);
         homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
+        homeRV.setAdapter(new HomeAdapter(getContext()));
 
         setupSlideshow();
         imageSlideShowVEL = getImageSlideShowVEL();
@@ -185,41 +168,6 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         scrollToTop();
         //hide app bar if orientation is landscape on starting
         hideAppBar();
-
-        //adter super call, database is ready
-        homeItems = database.where(HomeItem.class).findAllSortedAsync(HomeItemKeys.DATE, Sort.DESCENDING);
-        homeAdapter = new HomeAdapter(homeItems, getContext());
-
-        homeRV.setAdapter(homeAdapter);
-
-        homeItems.addChangeListener((collection, changeSet) -> {
-            // `null`  means the async query returns the first time.
-            if (changeSet == null) {
-                homeAdapter.notifyDataSetChanged();
-                return;
-            }
-            // For deletions, the adapter has to be notified in reverse order.
-            OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
-            for (int i = deletions.length - 1; i >= 0; i--) {
-                OrderedCollectionChangeSet.Range range = deletions[i];
-                homeAdapter.notifyItemRangeRemoved(range.startIndex, range.length);
-            }
-
-            OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
-            for (OrderedCollectionChangeSet.Range range : insertions) {
-                homeAdapter.notifyItemRangeInserted(range.startIndex, range.length);
-            }
-
-            OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
-            for (OrderedCollectionChangeSet.Range range : modifications) {
-                homeAdapter.notifyItemRangeChanged(range.startIndex, range.length);
-            }
-            if (homeAdapter.getItemCount() == 0) {
-                //emptyTextView.setVisibility(View.VISIBLE);
-            } else {
-                //emptyTextView.setVisibility(View.GONE);
-            }
-        });
 
         homeRefVEL = getHomeRefVEL();
         annRefVEL = getAnnRefVEL();
@@ -241,12 +189,8 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
         homeRef.removeEventListener(homeRefVEL);
         annRef.removeEventListener(annRefVEL);
 
-        //Remove database change listener
-        homeItems.removeAllChangeListeners();
         annItems.removeAllChangeListeners();
 
-        //null the adapter
-        homeAdapter = null;
         super.onStop();
     }
 
@@ -254,21 +198,7 @@ public class HomeFragment extends BaseFragment implements OnItemClickListener,
     public void onDestroyView() {
         super.onDestroyView();
         imageSlideshowRef.removeEventListener(imageSlideShowVEL);
-        homeRV.removeOnItemTouchListener(onItemTouchListener);
         unbinder.unbind();
-    }
-
-    @Override
-    public void onItemClick(final View view, final int position) {
-        final Intent intent = new Intent(getContext(), PostDetailsActivity.class);
-        final HomeItem hi = homeItems.get(position);
-        intent.putExtra(HomeItemKeys.KEY, hi.getKey());
-        startActivity(intent);
-    }
-
-    @Override
-    public void onLongItemClick(final View view, final int position) {
-        //Not required as of now
     }
 
     @Override

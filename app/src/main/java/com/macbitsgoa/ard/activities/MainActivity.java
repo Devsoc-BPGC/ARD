@@ -8,6 +8,10 @@ import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.view.MenuItem;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
@@ -16,7 +20,12 @@ import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.DetailsFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
-import com.macbitsgoa.ard.services.DeleteService;
+import com.macbitsgoa.ard.keys.AnnItemKeys;
+import com.macbitsgoa.ard.keys.FaqItemKeys;
+import com.macbitsgoa.ard.keys.HomeItemKeys;
+import com.macbitsgoa.ard.models.AnnItem;
+import com.macbitsgoa.ard.models.FaqItem;
+import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.types.MainActivityType;
@@ -27,6 +36,7 @@ import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import io.realm.Realm;
 
 /**
  * Main activity of app.
@@ -76,6 +86,9 @@ public class MainActivity extends BaseActivity
      */
     private DetailsFragment detailFragment;
 
+    private DatabaseReference deletesRef;
+    private ValueEventListener deleteRefVEL;
+
     /**
      * ChatFragment object.
      */
@@ -99,7 +112,6 @@ public class MainActivity extends BaseActivity
             init();
 
             startService(new Intent(this, ForumService.class));
-            startService(new Intent(this, DeleteService.class));
             AHC.startService(this, HomeService.class, HomeService.TAG);
             //AHC.startService(this, MessagingService.class, MessagingService.TAG);
 
@@ -127,6 +139,58 @@ public class MainActivity extends BaseActivity
         //else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
+        deletesRef = getRootReference()
+                .child(AHC.FDR_DELETES);
+
+        deleteRefVEL = getDeletesListener();
+        deletesRef.addValueEventListener(deleteRefVEL);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        deletesRef.removeEventListener(deleteRefVEL);
+    }
+
+    @NonNull
+    private ValueEventListener getDeletesListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null) {
+                    AHC.logd(TAG, "No deletes history");
+                }
+                final Realm database = Realm.getDefaultInstance();
+                for (DataSnapshot childDS : dataSnapshot.getChildren()) {
+                    final String id = childDS.child("key").getValue(String.class);
+                    AHC.logd(TAG, "Delete key " + id + " if present");
+                    database.executeTransaction(r -> {
+                        final HomeItem hi = r.where(HomeItem.class).equalTo(HomeItemKeys.KEY, id)
+                                .findFirst();
+                        if (hi != null) {
+                            AHC.logd(TAG, "Found home item with same id to delete.");
+                            hi.deleteFromRealm();
+                        }
+                        final AnnItem ai = r.where(AnnItem.class).equalTo(AnnItemKeys.KEY, id).findFirst();
+                        if (ai != null) {
+                            AHC.logd(TAG, "Found announcement item with same id to delete.");
+                            ai.deleteFromRealm();
+                        }
+                        final FaqItem fi = r.where(FaqItem.class).equalTo(FaqItemKeys.KEY, id).findFirst();
+                        if (fi != null) {
+                            AHC.logd(TAG, "Found faq item with same id to delete.");
+                            fi.deleteFromRealm();
+                        }
+                    });
+                }
+                database.close();
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                AHC.logd(TAG, "Database read access error");
+            }
+        };
     }
 
     @Override

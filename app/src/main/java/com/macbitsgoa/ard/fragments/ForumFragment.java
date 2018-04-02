@@ -72,14 +72,7 @@ public class ForumFragment extends BaseFragment {
         final View view = inflater.inflate(R.layout.fragment_forum, container, false);
         unbinder = ButterKnife.bind(this, view);
         viewPager.setOffscreenPageLimit(2);
-        final ViewPagerAdapter vpa = new ViewPagerAdapter(getChildFragmentManager());
-
-        vpa.addFragment(GeneralFragment.newInstance("0"), "Ph.D.");
-        vpa.addFragment(GeneralFragment.newInstance("1"), "M.E.");
-        vpa.addFragment(GeneralFragment.newInstance("2"), "B.E.");
-        vpa.addFragment(GeneralFragment.newInstance("3"), "Others");
-
-        viewPager.setAdapter(vpa);
+        viewPager.setAdapter(new ViewPagerAdapter(getChildFragmentManager()));
         tabLayout.setupWithViewPager(viewPager);
 
         getContext().startService(new Intent(getContext(), ForumService.class));

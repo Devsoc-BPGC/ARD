@@ -6,7 +6,7 @@ apply plugin: 'io.fabric'
 
 ext {
     androidTestVer = "0.5"
-    buildToolsVer = "27.0.1"
+    buildToolsVer = "27.0.3"
     butterknifeVer = "8.8.1"
     checkstyleVer = '7.7'
     compileSdkVer = 26
@@ -17,10 +17,10 @@ ext {
     espCoreVer = "2.2.2"
     espIntVer = "2.2.2"
     espUIAVer = "2.1.2"
-    firebaseVer = "11.8.0"
+    firebaseVer = "12.0.1"
     flexboxVer = "0.3.1"
     glideVer = "4.0.0-RC0"
-    playServicesVer = "11.8.0"
+    playServicesVer = firebaseVer
     hamcrestVer = "1.3"
     jacocoVer = "0.7.9"
     junitVer = "4.12"
@@ -142,23 +142,23 @@ dependencies {
     implementation "io.reactivex.rxjava2:rxjava:${rxJava2Ver}"
 
     //Unit test compiles
-    testCompile "junit:junit:${junitVer}"
-    testCompile "org.mockito:mockito-core:${mockitoVer}"
-    testCompile("org.robolectric:robolectric:${roboElecVer}") {
+    testImplementation "junit:junit:${junitVer}"
+    testImplementation "org.mockito:mockito-core:${mockitoVer}"
+    testImplementation("org.robolectric:robolectric:${roboElecVer}") {
         exclude module: 'commons-logging'
         exclude module: 'httpclient'
     }
 
     //Android test compiles
-    androidTestCompile "com.google.dexmaker:dexmaker:${dexMakerVer}"
-    androidTestCompile "com.google.dexmaker:dexmaker-mockito:${dexMakerVer}"
-    androidTestCompile "org.hamcrest:hamcrest-library:${hamcrestVer}"
+    androidTestImplementation "com.google.dexmaker:dexmaker:${dexMakerVer}"
+    androidTestImplementation "com.google.dexmaker:dexmaker-mockito:${dexMakerVer}"
+    androidTestImplementation "org.hamcrest:hamcrest-library:${hamcrestVer}"
 
-    androidTestCompile("com.android.support.test.espresso:espresso-core:${espCoreVer}") {
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:${espCoreVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test.espresso:espresso-contrib:${espContVer}") {
+    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:${espContVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'recyclerview-v7'
@@ -166,19 +166,19 @@ dependencies {
         exclude group: 'com.android.support', module: 'design'
     }
 
-    androidTestCompile("com.android.support.test:runner:${androidTestVer}") {
+    androidTestImplementation("com.android.support.test:runner:${androidTestVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test:rules:${androidTestVer}") {
+    androidTestImplementation("com.android.support.test:rules:${androidTestVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test.espresso:espresso-intents:${espIntVer}") {
+    androidTestImplementation("com.android.support.test.espresso:espresso-intents:${espIntVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test.uiautomator:uiautomator-v18:${espUIAVer}", {
+    androidTestImplementation("com.android.support.test.uiautomator:uiautomator-v18:${espUIAVer}", {
         exclude group: 'com.android.support', module: 'support-annotations'
 
     })
