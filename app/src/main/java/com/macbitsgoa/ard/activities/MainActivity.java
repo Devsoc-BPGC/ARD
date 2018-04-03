@@ -6,12 +6,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
+import android.util.SparseIntArray;
 import android.view.MenuItem;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.GooglePlayDriver;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.RetryStrategy;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
@@ -20,23 +21,14 @@ import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.DetailsFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
-import com.macbitsgoa.ard.keys.AnnItemKeys;
-import com.macbitsgoa.ard.keys.FaqItemKeys;
-import com.macbitsgoa.ard.keys.HomeItemKeys;
-import com.macbitsgoa.ard.models.AnnItem;
-import com.macbitsgoa.ard.models.FaqItem;
-import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.services.HomeService;
+import com.macbitsgoa.ard.services.MaintenanceService;
 import com.macbitsgoa.ard.types.MainActivityType;
 import com.macbitsgoa.ard.utils.AHC;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.realm.Realm;
 
 /**
  * Main activity of app.
@@ -64,7 +56,7 @@ public class MainActivity extends BaseActivity
      * Key {@link MainActivityType}
      * Value : Access order (lower is more recent).
      */
-    HashMap<Integer, Integer> sectionsHistory = new HashMap<>();
+    SparseIntArray sectionsHistory = new SparseIntArray();
 
     /**
      * Fragment manager used to handle the 3 fragments.
@@ -86,8 +78,7 @@ public class MainActivity extends BaseActivity
      */
     private DetailsFragment detailFragment;
 
-    private DatabaseReference deletesRef;
-    private ValueEventListener deleteRefVEL;
+    private FirebaseJobDispatcher bgServicesDispatcher;
 
     /**
      * ChatFragment object.
@@ -139,59 +130,6 @@ public class MainActivity extends BaseActivity
         //else menuId = R.id.bottom_nav_chat;
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
-        deletesRef = getRootReference()
-                .child(AHC.FDR_DELETES);
-
-        deleteRefVEL = getDeletesListener();
-        deletesRef.addValueEventListener(deleteRefVEL);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (deletesRef != null && deleteRefVEL != null)
-            deletesRef.removeEventListener(deleteRefVEL);
-    }
-
-    @NonNull
-    private ValueEventListener getDeletesListener() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot == null) {
-                    AHC.logd(TAG, "No deletes history");
-                }
-                final Realm database = Realm.getDefaultInstance();
-                for (DataSnapshot childDS : dataSnapshot.getChildren()) {
-                    final String id = childDS.child("key").getValue(String.class);
-                    AHC.logd(TAG, "Delete key " + id + " if present");
-                    database.executeTransaction(r -> {
-                        final HomeItem hi = r.where(HomeItem.class).equalTo(HomeItemKeys.KEY, id)
-                                .findFirst();
-                        if (hi != null) {
-                            AHC.logd(TAG, "Found home item with same id to delete.");
-                            hi.deleteFromRealm();
-                        }
-                        final AnnItem ai = r.where(AnnItem.class).equalTo(AnnItemKeys.KEY, id).findFirst();
-                        if (ai != null) {
-                            AHC.logd(TAG, "Found announcement item with same id to delete.");
-                            ai.deleteFromRealm();
-                        }
-                        final FaqItem fi = r.where(FaqItem.class).equalTo(FaqItemKeys.KEY, id).findFirst();
-                        if (fi != null) {
-                            AHC.logd(TAG, "Found faq item with same id to delete.");
-                            fi.deleteFromRealm();
-                        }
-                    });
-                }
-                database.close();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                AHC.logd(TAG, "Database read access error");
-            }
-        };
     }
 
     @Override
@@ -212,13 +150,16 @@ public class MainActivity extends BaseActivity
     }
 
     private void launchFragment(int section) {
-        for (Map.Entry<Integer, Integer> entry : sectionsHistory.entrySet()) {
-            entry.setValue(entry.getValue() + 1);
+        int len;
+        for (len = sectionsHistory.size() - 1; len >= 0; len--) {
+            int key = sectionsHistory.keyAt(len);
+            sectionsHistory.put(key, sectionsHistory.get(key) + 1);
         }
         sectionsHistory.put(currentSection, 0);
 
         currentSection = section;
-        sectionsHistory.remove(currentSection);
+        sectionsHistory.put(currentSection, -1);
+        sectionsHistory.removeAt(sectionsHistory.indexOfKey(currentSection));
 
         BaseFragment baseFragment;
         if (currentSection == MainActivityType.FORUM) baseFragment = forumFragment;
@@ -230,7 +171,7 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onBackPressed() {
-        if (sectionsHistory.isEmpty()) {
+        if (sectionsHistory.size() == 0) {
             // Home should be last section before exit.
             if (currentSection == MainActivityType.HOME) {
                 finish();
@@ -240,17 +181,8 @@ public class MainActivity extends BaseActivity
             }
         }
 
-        Map.Entry<Integer, Integer> e = sectionsHistory.entrySet().iterator().next();
-        int minVal = e.getValue();
-        int lastSection = e.getKey();
-
-        for (Map.Entry<Integer, Integer> entry : sectionsHistory.entrySet()) {
-            if (entry.getValue() < minVal) {
-                minVal = entry.getValue();
-                lastSection = entry.getKey();
-            }
-        }
-
+        int lastSection;
+        lastSection = sectionsHistory.keyAt(0); // SparseArray stores key with smallest value at index 0
         int staleSection = currentSection;
 
         launchFragment(lastSection);
@@ -262,10 +194,45 @@ public class MainActivity extends BaseActivity
         bottomNavigationView.setSelectedItemId(menuId);
         bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
 
-        sectionsHistory.remove(staleSection);
+        sectionsHistory.removeAt(sectionsHistory.indexOfKey(staleSection));
     }
 
-    /*@Override
+    @Override
+    protected void onResume() {
+        super.onResume();
+        pingBgServices();
+    }
+
+    private void pingBgServices() {
+        bgServicesDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        final Job maintenanceJob = bgServicesDispatcher.newJobBuilder()
+                .setService(MaintenanceService.class)
+                .setTag(TAG)
+                .setReplaceCurrent(false)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .build();
+
+        final Job homeServiceJob = bgServicesDispatcher.newJobBuilder()
+                .setService(HomeService.class)
+                .setTag(TAG)
+                .setReplaceCurrent(false)
+                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .build();
+
+        bgServicesDispatcher.mustSchedule(maintenanceJob);
+        bgServicesDispatcher.mustSchedule(homeServiceJob);
+    }
+
+    @Override
+    protected void onStop() {
+        if (bgServicesDispatcher != null) {
+            bgServicesDispatcher.cancelAll();
+        }
+        pingBgServices();
+        super.onStop();
+    }
+
+/*@Override
     public void updateChatFragment() {
 
     }*/

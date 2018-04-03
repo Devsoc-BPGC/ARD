@@ -10,13 +10,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
+import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
+import com.macbitsgoa.ard.models.Slide;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.models.home.PhotoItem;
 import com.macbitsgoa.ard.models.home.TextItem;
 import com.macbitsgoa.ard.types.HomeType;
 import com.macbitsgoa.ard.utils.AHC;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 import io.realm.Realm;
@@ -34,9 +37,9 @@ public class HomeService extends BaseJobService {
      */
     public static final String TAG = HomeService.class.getSimpleName();
 
-    boolean completedHome = false;
-    boolean completedAnn = false;
-    JobParameters job;
+    private boolean completedHome = false;
+    private boolean completedAnn = false;
+    private JobParameters job;
 
     @Override
     public boolean onStartJob(JobParameters job) {
@@ -45,6 +48,9 @@ public class HomeService extends BaseJobService {
         new Thread(() -> {
             final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
             final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
+            final DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
+            imageSlideshowRef.addValueEventListener(getImageSlideShowVEL());
+
             final ValueEventListener homeCEL = getHomeListener();
             final ValueEventListener annRefCEL = getAnnListener();
 
@@ -60,7 +66,6 @@ public class HomeService extends BaseJobService {
      * @return listener for children.
      */
     private ValueEventListener getHomeListener() {
-        //noinspection OverlyLongMethod
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
@@ -76,6 +81,7 @@ public class HomeService extends BaseJobService {
         };
     }
 
+    @SuppressWarnings("OverlyLongMethod")
     public static void saveHomeSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
         if (dataSnapshot == null) return;
         final Realm database = Realm.getDefaultInstance();
@@ -147,6 +153,41 @@ public class HomeService extends BaseJobService {
             }
         };
     }
+
+    private ValueEventListener getImageSlideShowVEL() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null) return;
+                ArrayList<Slide> slides = new ArrayList<>();
+                for (final DataSnapshot cs :
+                        dataSnapshot.getChildren()) {
+                    if (!cs.hasChild(SlideshowItemKeys.PHOTO_URL)
+                            || !cs.hasChild(SlideshowItemKeys.PHOTO_DATE)) continue;
+                    final Slide ssi = new Slide();
+                    ssi.photoUrl = cs.child(SlideshowItemKeys.PHOTO_URL).getValue(String.class);
+                    ssi.photoDate = cs.child(SlideshowItemKeys.PHOTO_DATE).getValue(Date.class);
+                    ssi.photoTitle = cs.child(SlideshowItemKeys.PHOTO_TITLE).getValue(String.class);
+                    ssi.photoDesc = cs.child(SlideshowItemKeys.PHOTO_DESC).getValue(String.class);
+                    ssi.photoTag = cs.child(SlideshowItemKeys.PHOTO_TAG).getValue(String.class);
+                    ssi.photoTagColor = cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class);
+                    ssi.photoTagTextColor = cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class);
+                    slides.add(ssi);
+                }
+                Realm db = Realm.getDefaultInstance();
+                db.beginTransaction();
+                db.where(Slide.class).findAll().deleteAllFromRealm();
+                db.insertOrUpdate(slides);
+                db.commitTransaction();
+            }
+
+            @Override
+            public void onCancelled(final DatabaseError databaseError) {
+                Log.e(TAG, "Error while getting slidehshow images\n" + databaseError.getDetails());
+            }
+        };
+    }
+
 
     public static void saveAnnSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
         if (dataSnapshot == null) return;

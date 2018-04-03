@@ -20,18 +20,19 @@ public class MainActivityType {
      */
     public static final int HOME = 1;
     /**
-     * Int value for chat.
-     */
-    public static final int CHAT = 2;
-    /**
      * Int value for details.
      */
-    public static final int DETAILS = 3;
+    public static final int DETAILS = 2;
+    //    /**
+    //     * Int value for chat.
+    //     */
+    //    public static final int CHAT = 3;
+
 
     /**
      * Only allow fields to be used instead of pure numbers.
      */
-    @IntDef({FORUM, HOME, CHAT,DETAILS})
+    @IntDef({FORUM, HOME, DETAILS/*, CHAT*/})
     @Retention(RetentionPolicy.SOURCE)
     public @interface MAType {
     }

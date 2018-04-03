@@ -13,31 +13,20 @@ import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.github.vivchar.viewpagerindicator.ViewPagerIndicator;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.adapters.AnnSlideshowAdapter;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.adapters.SlideshowAdapter;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
-import com.macbitsgoa.ard.keys.HomeItemKeys;
-import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
-import com.macbitsgoa.ard.models.SlideshowItem;
-import com.macbitsgoa.ard.services.HomeService;
-import com.macbitsgoa.ard.utils.AHC;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import butterknife.BindView;
@@ -104,44 +93,10 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     private SlideshowAdapter slideshowAdapter;
 
     /**
-     * Slideshow list.
-     */
-    private List<SlideshowItem> slideshowItems;
-
-    /**
-     * Firebase database reference to home content.
-     */
-    private DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
-
-    /**
-     * Firebase database reference to announcement content.
-     */
-    private DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
-
-    /**
-     * Reference to slide show image data.
-     */
-    private DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
-
-    /**
-     * Value event listener for {@link #homeRef}.
-     */
-    private ValueEventListener homeRefVEL;
-
-    /**
-     * Value event listener for {@link #annRef}.
-     */
-    private ValueEventListener annRefVEL;
-
-    /**
-     * Value event listener for {@link #imageSlideshowRef}.
-     */
-    private ValueEventListener imageSlideShowVEL;
-
-    /**
      * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
      */
     private int appBarOffset = 0;
+
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
@@ -155,8 +110,6 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         homeRV.setAdapter(new HomeAdapter(getContext()));
 
         setupSlideshow();
-        imageSlideShowVEL = getImageSlideShowVEL();
-        imageSlideshowRef.addValueEventListener(imageSlideShowVEL);
 
         return view;
     }
@@ -168,15 +121,17 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         scrollToTop();
         //hide app bar if orientation is landscape on starting
         hideAppBar();
-
-        homeRefVEL = getHomeRefVEL();
-        annRefVEL = getAnnRefVEL();
-
-        homeRef.orderByChild(HomeItemKeys.DATE + "/time").limitToLast(5).addValueEventListener(homeRefVEL);
-        annRef.addValueEventListener(annRefVEL);
-
         setupAnnouncementSlideshow();
         appBarLayout.offsetTopAndBottom(appBarOffset);
+    }
+
+    private void pingBgServices() {
+            }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        pingBgServices();
     }
 
     @Override
@@ -185,19 +140,14 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         if (annSlideshowHandler != null && annSlideshowRunable != null) {
             annSlideshowHandler.removeCallbacks(annSlideshowRunable);
         }
-        //Remove firebase database listeners
-        homeRef.removeEventListener(homeRefVEL);
-        annRef.removeEventListener(annRefVEL);
-
         annItems.removeAllChangeListeners();
-
+        pingBgServices();
         super.onStop();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
-        imageSlideshowRef.removeEventListener(imageSlideShowVEL);
         unbinder.unbind();
     }
 
@@ -207,8 +157,7 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     }
 
     private void setupSlideshow() {
-        slideshowItems = new ArrayList<>();
-        slideshowAdapter = new SlideshowAdapter(slideshowItems);
+        slideshowAdapter = new SlideshowAdapter();
 
         handler = new Handler();
         update = () -> {
@@ -260,65 +209,7 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         });
     }
 
-    private ValueEventListener getHomeRefVEL() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                AHC.logd(TAG, "query snapshot is " + dataSnapshot.toString());
-                new Thread(() -> HomeService.saveHomeSnapshotToRealm(dataSnapshot)).start();
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Database access error." + databaseError.toString());
-            }
-        };
-    }
-
-    private ValueEventListener getAnnRefVEL() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                new Thread(() -> HomeService.saveAnnSnapshotToRealm(dataSnapshot));
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(TAG, "Database access error." + databaseError.toString());
-            }
-        };
-    }
-
-    private ValueEventListener getImageSlideShowVEL() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                if (dataSnapshot == null) return;
-                //Delete old values
-                slideshowItems.clear();
-                for (final DataSnapshot cs :
-                        dataSnapshot.getChildren()) {
-                    if (!cs.hasChild(SlideshowItemKeys.PHOTO_URL)
-                            || !cs.hasChild(SlideshowItemKeys.PHOTO_DATE)) continue;
-                    final SlideshowItem ssi = new SlideshowItem();
-                    ssi.setPhotoUrl(cs.child(SlideshowItemKeys.PHOTO_URL).getValue(String.class));
-                    ssi.setPhotoDate(cs.child(SlideshowItemKeys.PHOTO_DATE).getValue(Date.class));
-                    ssi.setPhotoTitle(cs.child(SlideshowItemKeys.PHOTO_TITLE).getValue(String.class));
-                    ssi.setPhotoDesc(cs.child(SlideshowItemKeys.PHOTO_DESC).getValue(String.class));
-                    ssi.setPhotoTag(cs.child(SlideshowItemKeys.PHOTO_TAG).getValue(String.class));
-                    ssi.setPhotoTagColor(cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class));
-                    ssi.setPhotoTagTextColor(cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class));
-                    slideshowItems.add(ssi);
-                }
-                slideshowAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(final DatabaseError databaseError) {
-                Log.e(TAG, "Error while getting slidehshow images\n" + databaseError.getDetails());
-            }
-        };
-    }
 
     public void scrollToTop() {
         //App crashes on removing this check
@@ -330,16 +221,13 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         if (annVP == null) return;
         final AnnSlideshowAdapter adapter = new AnnSlideshowAdapter(data);
         if (annSlideshowHandler == null) annSlideshowHandler = new Handler();
-        if (annSlideshowRunable == null) annSlideshowRunable = new Runnable() {
-            @Override
-            public void run() {
-                if (adapter.getCount() == 0) return;
-                int viewpagerpos = annVP.getCurrentItem();
-                viewpagerpos++;
-                viewpagerpos %= adapter.getCount();
-                annVP.setCurrentItem(viewpagerpos);
-                annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
-            }
+        if (annSlideshowRunable == null) annSlideshowRunable = () -> {
+            if (adapter.getCount() == 0) return;
+            int viewpagerpos = annVP.getCurrentItem();
+            viewpagerpos++;
+            viewpagerpos %= adapter.getCount();
+            annVP.setCurrentItem(viewpagerpos);
+            annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
         };
         annVP.setAdapter(adapter);
         annSlideshowHandler.removeCallbacks(annSlideshowRunable);
@@ -356,6 +244,12 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         hideAppBar();
+    }
+
+    @Override
+    public void onDestroy() {
+        if (slideshowAdapter != null) slideshowAdapter.notifyDestruction();
+        super.onDestroy();
     }
 
     //function to hide appbar
