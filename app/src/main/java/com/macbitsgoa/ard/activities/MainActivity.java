@@ -149,7 +149,8 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        deletesRef.removeEventListener(deleteRefVEL);
+        if (deletesRef != null && deleteRefVEL != null)
+            deletesRef.removeEventListener(deleteRefVEL);
     }
 
     @NonNull
