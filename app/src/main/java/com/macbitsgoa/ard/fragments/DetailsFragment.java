@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,20 +19,16 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.AboutMacActivity;
 import com.macbitsgoa.ard.activities.AuthActivity;
-import com.macbitsgoa.ard.adapters.DetailsAdapter;
-import com.macbitsgoa.ard.interfaces.OnItemClickListener;
-import com.macbitsgoa.ard.interfaces.RecyclerItemClickListener;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.Browser;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import butterknife.Unbinder;
 
 /**
@@ -45,18 +39,12 @@ import butterknife.Unbinder;
  * @author Aayush Singla
  * @author Vikramaditya Kukreja
  */
-public class DetailsFragment extends BaseFragment implements OnItemClickListener {
+public class DetailsFragment extends BaseFragment {
 
     /**
      * Tag for this class.
      */
     public static final String TAG = DetailsFragment.class.getSimpleName();
-
-    /**
-     * Recycler View to display details items.
-     */
-    @BindView(R.id.recyclerView_fragment_details)
-    RecyclerView detailRV;
 
     /**
      * User name textview.
@@ -110,19 +98,8 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
                              final Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_detail, container, false);
+        View view = inflater.inflate(R.layout.fragment_detail, container, false);
         unbinder = ButterKnife.bind(this, view);
-
-        detailRV.setHasFixedSize(true);
-        detailRV.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), detailRV, this));
-        detailRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
-
-        final List<String> itemList = new ArrayList<>();
-        itemList.add("About ARD");
-        itemList.add("About app");
-        itemList.add("Sign Out");
-
-        detailRV.setAdapter(new DetailsAdapter(itemList));
 
         if (getUser() == null || getUser().getUid() == null) {
             getActivity().finish();
@@ -149,6 +126,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
 
         return view;
     }
+
 
     @Override
     public void onDestroyView() {
@@ -185,40 +163,38 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         };
     }
 
-    @Override
-    public void onItemClick(final View view, final int position) {
-        if (position == 0) {
-            //About ARD
-            new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
-        } else if (position == 1) {
-            //About MAC
-        } else {
-            //Delete sp
-            getDefaultSharedPref().edit().clear().apply();
-
-            //Stop all intent services if they are running
-            getContext().stopService(new Intent(getContext(), ForumService.class));
-            //getContext().stopService(new Intent(getContext(), SendService.class));
-            //getContext().stopService(new Intent(getContext(), SendDocumentService.class));
-            //getContext().stopService(new Intent(getContext(), NotifyService.class));
-            //Cancel all job intents
-            AHC.getJobDispatcher(getContext()).cancelAll();
-            //After services are stopped, log out user
-            FirebaseAuth.getInstance().signOut();
-            //Reset Realm database
-            database.executeTransaction(r -> {
-                r.deleteAll();
-            });
-
-            //Start Auth activity
-            final Intent intent = new Intent(getContext(), AuthActivity.class);
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-            startActivity(intent);
-        }
+    @OnClick(R.id.tv_vh_details_about_ard)
+    public void aboutARD() {
+        new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
     }
 
-    @Override
-    public void onLongItemClick(final View view, final int position) {
-        //Not used
+    @OnClick(R.id.tv_vh_details_about_app)
+    public void aboutApp() {
+        startActivity(new Intent(getContext(), AboutMacActivity.class));
+    }
+
+    @OnClick(R.id.tv_vh_details_sign_out)
+    public void signOut() {
+        //Delete sp
+        getDefaultSharedPref().edit().clear().apply();
+
+        //Stop all intent services if they are running
+        getContext().stopService(new Intent(getContext(), ForumService.class));
+        //getContext().stopService(new Intent(getContext(), SendService.class));
+        //getContext().stopService(new Intent(getContext(), SendDocumentService.class));
+        //getContext().stopService(new Intent(getContext(), NotifyService.class));
+        //Cancel all job intents
+        AHC.getJobDispatcher(getContext()).cancelAll();
+        //After services are stopped, log out user
+        FirebaseAuth.getInstance().signOut();
+        //Reset Realm database
+        database.executeTransaction(r -> {
+            r.deleteAll();
+        });
+
+        //Start Auth activity
+        final Intent intent = new Intent(getContext(), AuthActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 }

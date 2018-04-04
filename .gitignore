@@ -86,6 +86,8 @@ obj/
 .idea/codeStyleSettings.xml
 .idea/cache/
 .idea/codeStyles/
+.idea/assetWizardSettings.xml
+.idea/caches
 
 # Keystore files
 *.jks
