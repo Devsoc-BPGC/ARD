@@ -1,13 +1,8 @@
 package com.macbitsgoa.ard.fragments;
 
-import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
@@ -27,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.AboutMacActivity;
 import com.macbitsgoa.ard.activities.AuthActivity;
 import com.macbitsgoa.ard.adapters.DetailsAdapter;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
@@ -51,7 +46,7 @@ import butterknife.Unbinder;
  * @author Aayush Singla
  * @author Vikramaditya Kukreja
  */
-public class DetailsFragment extends BaseFragment implements OnItemClickListener,View.OnClickListener {
+public class DetailsFragment extends BaseFragment implements OnItemClickListener, View.OnClickListener {
 
     /**
      * Tag for this class.
@@ -101,32 +96,11 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     @BindView(R.id.tv_about_us)
     TextView aboutUsTV;
 
-    @BindView(R.id.constraint)
-    ViewGroup sceneRoot;
-
-    @BindView(R.id.container)
-    ViewGroup container;
-
-    @BindView(R.id.tv_fragment_detail_app_info)
-    TextView tv_version_name;
-
     /**
      * Butterknife unbinder.
      */
     private Unbinder unbinder;
-    /**
-     * link for fb page of mac and id.
-     */
-    public static String ABOUT_US_FACEBOOK_URL = "https://www.facebook.com/MACBITSGoa";
-    public static String ABOUT_US_FACEBOOK_PAGE_ID = "MACBITSGoa";
-    /**
-     *To check if about mac visible or not.
-     */
-     Boolean clicked;
-    /**
-     * view_aboutMac
-     */
-    View viewClicked;
+
     public DetailsFragment() {
         // Required empty public constructor
     }
@@ -140,9 +114,8 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
                              final Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-       View view = inflater.inflate(R.layout.fragment_detail, container, false);
+        View view = inflater.inflate(R.layout.fragment_detail, container, false);
         unbinder = ButterKnife.bind(this, view);
-        clicked=false;
         detailRV.setHasFixedSize(true);
         detailRV.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), detailRV, this));
         detailRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
@@ -186,7 +159,6 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
 
     @Override
     public void onDestroyView() {
-        viewClicked=null;
         userRef.removeEventListener(userRefVEL);
         userRefVEL = null;
         unbinder.unbind();
@@ -227,7 +199,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
             new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
         } else if (position == 1) {
             //About MAC
-       // } else {
+            // } else {
             //Delete sp
             getDefaultSharedPref().edit().clear().apply();
 
@@ -259,103 +231,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
 
     @Override
     public void onClick(View v) {
-        switch (v.getTag().toString()) {
-            case "playStore":
-                Intent googlePlayIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/developer?id=Mobile+App+Club+-+BITS+Goa"));
-                startActivity(googlePlayIntent);
-                break;
-            case "fb":
-                try {
-                    Intent facebookIntent = new Intent(Intent.ACTION_VIEW);
-                    String facebookUrl = getFacebookPageURL(getContext());
-                    facebookIntent.setData(Uri.parse(facebookUrl));
-                    startActivity(facebookIntent);
-                } catch (ActivityNotFoundException e) {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(ABOUT_US_FACEBOOK_URL));
-                    Toast.makeText(getContext(), "Opening in browser", Toast.LENGTH_SHORT).show();
-                    startActivity(intent);
-                }
-
-                break;
-            case "button":
-
-                if (viewClicked == null) {
-
-                    viewClicked = getLayoutInflater().inflate(R.layout.view_developers, null);
-                    inflateDevelopers(viewClicked);
-                }
-
-                if (clicked) {
-                    sceneRoot.setVisibility(View.VISIBLE);
-                    tv_version_name.setVisibility(View.VISIBLE);
-                    container.removeView(viewClicked);
-                    aboutUsTV.setVisibility(View.VISIBLE);
-                    clicked = false;
-                } else {
-                    sceneRoot.setVisibility(View.GONE);
-                    tv_version_name.setVisibility(View.GONE);
-                    container.addView(viewClicked);
-                    aboutUsTV.setVisibility(View.GONE);
-                    clicked = true;
-                }
-
-        }
-    }
-    void inflateDevelopers(View view){
-
-        //finding views
-        ImageView imageVikram= view.findViewById(R.id.image_vikram);
-        ImageView imageRushikesh= view.findViewById(R.id.image_rushikesh);
-        ImageView imageAayush= view.findViewById(R.id.image_aayush);
-        FloatingActionButton back=view.findViewById(R.id.fab_back);
-
-        //setting onCLickListeners for all views
-        view.findViewById(R.id.image_fb).setOnClickListener(this);
-        view.findViewById(R.id.image_play_store).setOnClickListener(this);
-        back.setOnClickListener(this);
-
-        //loading developers images into all imageViews
-        Glide.with(getContext())
-                .load("https://lh4.googleusercontent.com/-0dhUBhZKH94/AAAAAAAAAAI/AAAAAAAAACQ/F7fd4BSFRsY/s96-c/photo.jpg")
-                .transition(DrawableTransitionOptions.withCrossFade(500))
-                .apply(RequestOptions
-                        .circleCropTransform()
-                        .error(R.drawable.ic_contact))
-                .into(imageVikram);
-
-        Glide.with(getContext())
-                .load("https://lh4.googleusercontent.com/-ooZffw6cRtU/AAAAAAAAAAI/AAAAAAAAEf0/27Nk35sCSr8/s96-c/photo.jpg")
-                .transition(DrawableTransitionOptions.withCrossFade(500))
-                .apply(RequestOptions
-                        .circleCropTransform()
-                        .error(R.drawable.ic_contact))
-                .into(imageRushikesh);
-
-        Glide.with(getContext())
-                .load(getUser().getPhotoUrl())
-                .transition(DrawableTransitionOptions.withCrossFade(500))
-                .apply(RequestOptions
-                        .circleCropTransform()
-                        .error(R.drawable.ic_contact))
-                .into(imageAayush);
-
-
-
-    }
-
-    //method to get the right URL to use in the intent
-    public String getFacebookPageURL(final Context context) {
-         PackageManager packageManager = context.getPackageManager();
-        try {
-            int versionCode = packageManager.getPackageInfo("com.facebook.katana", 0).versionCode;
-            if (versionCode >= 3002850) { //newer versions of fb app
-                return "fb://facewebmodal/f?href=" + ABOUT_US_FACEBOOK_URL;
-            } else { //older versions of fb app
-                return "fb://page/" + ABOUT_US_FACEBOOK_PAGE_ID;
-            }
-        } catch (PackageManager.NameNotFoundException e) {
-            return ABOUT_US_FACEBOOK_URL; //normal web url
-        }
+        startActivity(new Intent(getContext(), AboutMacActivity.class));
     }
 
 }
