@@ -1,16 +1,39 @@
 package com.macbitsgoa.ard.fragments;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
-import android.util.Log;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
+import com.google.firebase.database.DatabaseReference;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.NewChatActivity;
+import com.macbitsgoa.ard.adapters.ChatsAdapter;
 import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
+import com.macbitsgoa.ard.keys.ChatItemKeys;
+import com.macbitsgoa.ard.keys.MessageItemKeys;
+import com.macbitsgoa.ard.models.ChatsItem;
+import com.macbitsgoa.ard.models.MessageItem;
+import com.macbitsgoa.ard.services.MessagingService;
+import com.macbitsgoa.ard.services.SendService;
 import com.macbitsgoa.ard.utils.AHC;
+
+import java.util.Calendar;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.Unbinder;
+import io.realm.RealmList;
+import io.realm.RealmResults;
+import io.realm.Sort;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -22,26 +45,27 @@ import com.macbitsgoa.ard.utils.AHC;
  *
  * @author Vikramaditya Kukreja
  */
-public class ChatFragment extends Fragment {
+public class ChatFragment extends BaseFragment {
 
     /**
-     * Tag for this fragment.
+     * TextView to show in case of no chats.
      */
-    private final String TAG = AHC.TAG + ".fragments." + ChatFragment.class.getSimpleName();
+    @BindView(R.id.tv_fragment_chat_empty)
+    TextView emptyListTV;
 
-    /**
-     * Fragment title to be used.
-     */
-    private String fragmentTitle;
+    @BindView(R.id.recyclerView_fragment_chat)
+    RecyclerView recyclerView;
 
+    Unbinder unbinder;
+
+    RealmResults<ChatsItem> chats;
     /**
-     * Used to communicate with activity.
+     * Used to communicate with {@link com.macbitsgoa.ard.activities.MainActivity}. to notify it
+     * of updates.
      */
     private ChatFragmentListener mListener;
-
-    public ChatFragment() {
-        // Required empty public constructor
-    }
+    private ChatsAdapter chatsAdapter;
+    private DatabaseReference myStatus;
 
     /**
      * Use this factory method to create a new instance of
@@ -59,20 +83,18 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(final Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            fragmentTitle = getArguments().getString(AHC.FRAGMENT_TITLE_KEY);
-        }
-    }
-
-    @Override
-    public View onCreateView(final LayoutInflater inflater, final ViewGroup container,
+    public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
                              final Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         mListener.updateChatFragment();
-        Log.d(TAG, fragmentTitle);
-        return inflater.inflate(R.layout.fragment_chat, container, false);
+        final View view = inflater.inflate(R.layout.fragment_chat, container, false);
+        unbinder = ButterKnife.bind(this, view);
+
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+
+        AHC.startService(getContext(), MessagingService.class, MessagingService.TAG);
+        getContext().startService(new Intent(getContext(), SendService.class));
+        return view;
     }
 
     @Override
@@ -87,9 +109,77 @@ public class ChatFragment extends Fragment {
     }
 
     @Override
+    public void onStart() {
+        super.onStart();
+
+        final String sessionId = Calendar.getInstance().getTime().toString();
+        myStatus = getRootReference()
+                .child(ChatItemKeys.ONLINE)
+                .child(getUser().getUid())
+                .child(sessionId);
+        myStatus.setValue(true);
+        myStatus.onDisconnect().removeValue();
+
+        chats = database.where(ChatsItem.class)
+                .findAllSorted(ChatItemKeys.DB_DATE, Sort.DESCENDING);
+
+        deleteEmptyChats();
+        if (chats.size() == 0) {
+            emptyListTV.setVisibility(View.VISIBLE);
+        } else {
+            emptyListTV.setVisibility(View.GONE);
+        }
+
+        chatsAdapter = new ChatsAdapter(chats, getContext());
+
+        chats.addChangeListener(results -> {
+            if (results.size() == 0) emptyListTV.setVisibility(View.VISIBLE);
+            else emptyListTV.setVisibility(View.GONE);
+            chatsAdapter.notifyDataSetChanged();
+        });
+
+        recyclerView.setAdapter(chatsAdapter);
+    }
+
+    /**
+     * If any chat item has zero messages then don't include it in this RV
+     */
+    private void deleteEmptyChats() {
+        database.executeTransactionAsync(r -> {
+            final RealmList<ChatsItem> allChats = new RealmList<>();
+            allChats.addAll(r.where(ChatsItem.class).findAll());
+            for (final ChatsItem cItem : allChats) {
+                if (r
+                        .where(MessageItem.class)
+                        .equalTo(MessageItemKeys.OTHER_USER_ID, cItem.getId())
+                        .findAll().isEmpty())
+                    cItem.deleteFromRealm();
+            }
+        });
+    }
+
+    @Override
+    public void onStop() {
+        chats.removeAllChangeListeners();
+        myStatus.removeValue();
+        super.onStop();
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mListener = null;
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        unbinder.unbind();
+    }
+
+    @OnClick(R.id.fab_fragment_chat)
+    public void onFabClick() {
+        //Only fab  is registered
+        startActivity(new Intent(getContext(), NewChatActivity.class));
+    }
 }

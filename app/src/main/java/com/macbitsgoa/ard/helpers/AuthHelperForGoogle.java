@@ -25,7 +25,7 @@ public class AuthHelperForGoogle {
     /**
      * Do when signed in to firebase with credential provided by google.
      */
-    public OnCompleteListener<AuthResult> googleAuthCompleteListener;
+    public final OnCompleteListener<AuthResult> googleAuthCompleteListener;
 
     /**
      * Activity that uses this helper.
@@ -42,8 +42,8 @@ public class AuthHelperForGoogle {
      * It also sets up the {@link OnCompleteListener} using the passed
      * activity.
      *
-     * @param hostActivity    calling activity.
-     * @param firebaseAuth    Firebase auth object to use.
+     * @param hostActivity calling activity.
+     * @param firebaseAuth Firebase auth object to use.
      */
     public AuthHelperForGoogle(@NonNull final AuthActivity hostActivity,
                                @NonNull final FirebaseAuth firebaseAuth) {
@@ -87,6 +87,7 @@ public class AuthHelperForGoogle {
 
     /**
      * Pass the {@link GoogleSignInAccount} object to sign in Firebase.
+     *
      * @param account GoogleSignInAccount to use.
      */
     public void signWithCredentials(@NonNull final GoogleSignInAccount account) {
@@ -96,6 +97,7 @@ public class AuthHelperForGoogle {
 
     /**
      * Get auth credentials from GoogleSignInAccount.
+     *
      * @param account Account to use
      * @return {@link AuthCredential} of the account.
      */

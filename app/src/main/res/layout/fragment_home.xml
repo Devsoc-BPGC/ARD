@@ -1,9 +1,58 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_home_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.macbitsgoa.ard.fragments.HomeFragment">
 
-    <include layout="@layout/fragment_home_content" />
-</FrameLayout>
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/ab_fragment_home"
+        android:layout_width="match_parent"
+        android:layout_height="220dp"
+        android:theme="@style/AppTheme.AppBarOverlay"
+        app:expanded="true">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:minHeight="0dp"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed">
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_fragment_home_slideshow"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:layout_collapseMode="parallax"
+                app:layout_scrollFlags="scroll" />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
+        android:id="@+id/nsv_fragment_home"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:scrollbars="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <include layout="@layout/vh_ann_card_fragment_home" />
+
+            <android.support.v7.widget.RecyclerView
+                android:id="@+id/recyclerView_fragment_home"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:nestedScrollingEnabled="false"
+                android:paddingEnd="@dimen/paddingEnd_home_fragment_recyclerView"
+                android:paddingStart="@dimen/paddingStart_home_fragment_recyclerView" />
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+
+</android.support.design.widget.CoordinatorLayout>

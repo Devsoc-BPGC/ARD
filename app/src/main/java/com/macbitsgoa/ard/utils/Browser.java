@@ -27,7 +27,7 @@ import static com.macbitsgoa.ard.utils.BrowserUtil.CLOSE_BUTTON_WIDTH;
 /**
  * Browser opens web links.
  * Includes default customizations which can be overridden.
- *
+ * <p>
  * <h1>Usage</h1>
  * <p>
  * To open url with default customizations
@@ -45,6 +45,7 @@ import static com.macbitsgoa.ard.utils.BrowserUtil.CLOSE_BUTTON_WIDTH;
  * }
  * </pre>
  * </p>
+ *
  * @author Rushikesh Jogdand
  */
 @SuppressWarnings("WeakerAccess")
@@ -77,6 +78,7 @@ public final class Browser {
 
     /**
      * Constructor initiates parameters to default values.
+     *
      * @param hostActivity activity from which wab tab is launched.
      */
     public Browser(final Activity hostActivity) {
@@ -102,6 +104,7 @@ public final class Browser {
 
     /**
      * Sets toolbar color.
+     *
      * @param color The {@link Color}
      * @return current instance.
      */
@@ -112,6 +115,7 @@ public final class Browser {
 
     /**
      * Sets the Close button icon for the custom tab.
+     *
      * @param icon The icon {@link VectorDrawable}
      * @return current instance.
      */
@@ -125,8 +129,9 @@ public final class Browser {
 
     /**
      * Sets the start animations.
+     *
      * @param enterResId Resource ID of the "enter" animation for the browser.
-     * @param exitResId Resource ID of the "exit" animation for the application.
+     * @param exitResId  Resource ID of the "exit" animation for the application.
      * @return current instance.
      */
     public Browser setStartAnimation(@AnimRes final int enterResId, @AnimRes final int exitResId) {
@@ -136,8 +141,9 @@ public final class Browser {
 
     /**
      * Sets the exit animations.
+     *
      * @param enterResId Resource ID of the "enter" animation for the application.
-     * @param exitResId Resource ID of the "exit" animation for the browser.
+     * @param exitResId  Resource ID of the "exit" animation for the browser.
      * @return current instance.
      */
     public Browser setExitAnimations(@AnimRes final int enterResId, @AnimRes final int exitResId) {
@@ -147,6 +153,7 @@ public final class Browser {
 
     /**
      * Should url bar hide when user scrolls.
+     *
      * @param value true to hide.
      * @return current instance.
      */
@@ -157,6 +164,7 @@ public final class Browser {
 
     /**
      * Should the title of web-page be shown.
+     *
      * @param value true to show.
      * @return current instance.
      */
@@ -167,7 +175,8 @@ public final class Browser {
 
     /**
      * Adds a menu item.
-     * @param label Menu label.
+     *
+     * @param label         Menu label.
      * @param pendingIntent Pending intent delivered when the menu item is clicked.
      * @return current instance.
      */
@@ -178,6 +187,7 @@ public final class Browser {
 
     /**
      * Whether to add default share item in menu.
+     *
      * @param value true to add.
      * @return current instance.
      */
@@ -188,11 +198,12 @@ public final class Browser {
 
     /**
      * Sets the action button that is displayed in the Toolbar.
-     * @param icon The {@link Drawable} icon.
-     *             The width:height ratio of icon should be in range [1, 2].
-     * @param description The description for the button. To be used for accessibility.
+     *
+     * @param icon          The {@link Drawable} icon.
+     *                      The width:height ratio of icon should be in range [1, 2].
+     * @param description   The description for the button. To be used for accessibility.
      * @param pendingIntent pending intent delivered when the button is clicked.
-     * @param shouldTint Whether the action button should be tinted.
+     * @param shouldTint    Whether the action button should be tinted.
      * @return current instance.
      */
     public Browser setActionButton(@NonNull final Drawable icon,
@@ -212,6 +223,7 @@ public final class Browser {
 
     /**
      * Launches url in customized tab.
+     *
      * @param url string url.
      */
     public void launchUrl(final String url) {
@@ -220,12 +232,7 @@ public final class Browser {
             initiateIntent();
             mCustomTabsIntent.launchUrl(hostActivity, Uri.parse(saneUrl));
         } else {
-            hostActivity.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    Toast.makeText(hostActivity, "Invalid URL", Toast.LENGTH_SHORT).show();
-                }
-            });
+            hostActivity.runOnUiThread(() -> Toast.makeText(hostActivity, "Invalid URL", Toast.LENGTH_SHORT).show());
         }
     }
 

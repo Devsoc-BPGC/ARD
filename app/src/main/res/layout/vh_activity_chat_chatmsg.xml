@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ll_chatmsg_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="end"
+    android:orientation="vertical">
+
+    <View
+        android:id="@+id/viewHolder_chatmsg_space"
+        android:layout_width="match_parent"
+        android:layout_height="4dp" />
+
+    <LinearLayout
+        android:id="@+id/ll_chatmsg_msg_box"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="4dp"
+        android:layout_marginStart="4dp"
+        android:layout_marginTop="2dp"
+        android:background="@drawable/bg_chat_rcv"
+        android:baselineAligned="true"
+        android:orientation="horizontal"
+        tools:ignore="UselessParent">
+
+        <TextView
+            android:id="@+id/textView_viewHolder_chatmsg_msg"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:autoLink="all"
+            android:linksClickable="true"
+            android:padding="8dp"
+            android:textColor="@color/black"
+            android:textColorLink="@color/blue_500"
+            android:textIsSelectable="true"
+            android:textSize="16sp"
+            tools:ignore="NestedWeights"
+            tools:text="Chat MSG" />
+
+        <TextView
+            android:id="@+id/textView_viewHolder_chatmsg_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:padding="4dp"
+            android:textColor="@color/grey_500"
+            android:textIsSelectable="false"
+            android:textSize="12sp"
+            tools:text="TIME" />
+
+        <ImageView
+            android:id="@+id/imgView_vh_activity_chatmsg_tick"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:layout_marginEnd="4dp"
+            android:contentDescription="@string/msg_wait"
+            android:padding="6dp"
+            android:src="@drawable/ic_wait" />
+    </LinearLayout>
+</LinearLayout>

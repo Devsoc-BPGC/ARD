@@ -1,12 +1,31 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/fragment_chat_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.macbitsgoa.ard.fragments.ChatFragment">
 
-    <View
+    <TextView
+        android:id="@+id/tv_fragment_chat_empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Checkout the Forum page\nbefore sending direct messages!"
+        android:visibility="gone" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recyclerView_fragment_chat"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-</FrameLayout>
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab_fragment_chat"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_plus"
+        app:fabSize="normal" />
+</RelativeLayout>

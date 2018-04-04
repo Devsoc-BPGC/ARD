@@ -2,33 +2,38 @@ apply plugin: 'checkstyle'
 apply plugin: 'com.android.application'
 apply plugin: 'jacoco'
 apply plugin: 'realm-android'
+apply plugin: 'io.fabric'
 
 ext {
     androidTestVer = "0.5"
-    buildToolsVer = "26.0.0"
+    buildToolsVer = "27.0.3"
     butterknifeVer = "8.8.1"
     checkstyleVer = '7.7'
-    compileSdkVer = 25
+    compileSdkVer = 26
     constraintVer = "1.0.2"
+    crashAnalytics = "2.9.1"
     dexMakerVer = "1.2"
     espContVer = "2.2.2"
     espCoreVer = "2.2.2"
     espIntVer = "2.2.2"
     espUIAVer = "2.1.2"
-    firebaseVer = "11.0.0"
+    firebaseVer = "12.0.1"
+    flexboxVer = "0.3.1"
     glideVer = "4.0.0-RC0"
-    playServicesVer = "11.0.0"
+    playServicesVer = firebaseVer
     hamcrestVer = "1.3"
     jacocoVer = "0.7.9"
     junitVer = "4.12"
+    lapismSearchVer = "5.0.0-alpha7"
     minSdkVer = 21
     mockitoVer = "2.9.0"
     roboElecVer = "3.4.2"
     rxJavaVer = "1.3.0"
-    supportVer = "25.4.0"
-    targetSdkVer = 25
-    verCode = 1
-    verName = "1.0"
+    rxJava2Ver = "2.1.6"
+    supportVer = "27.1.0"
+    targetSdkVer = 26
+    verCode = 9
+    verName = "1.7-beta"
 }
 
 def configDir = "${project.rootDir}/config/"
@@ -45,6 +50,7 @@ android {
         versionName verName
         multiDexEnabled true
         vectorDrawables.useSupportLibrary = true
+        resValue "string", "APP_VERSION_NAME", "${verCode}-${verName}-${getDate()}"
     }
     buildTypes {
         debug {
@@ -59,6 +65,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             multiDexKeepFile file("${configDir}/multidex/multidex.txt")
         }
+    }
+    dexOptions {
+        preDexLibraries = false
     }
     packagingOptions {
         exclude 'META-INF/rxjava.properties'
@@ -93,51 +102,60 @@ android {
             keyPassword "android"
         }
     }
-    buildToolsVersion '26.0.2'
+    compileOptions {
+        targetCompatibility 1.8
+        sourceCompatibility 1.8
+    }
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    compile "com.android.support:appcompat-v7:${supportVer}"
-    compile "com.android.support:support-v4:${supportVer}"
-    compile "com.android.support:design:${supportVer}"
-    compile "com.android.support:customtabs:${supportVer}"
-    compile "com.android.support.constraint:constraint-layout:${constraintVer}"
-    compile "com.android.support:cardview-v7:${supportVer}"
+    implementation "com.android.support:appcompat-v7:${supportVer}"
+    implementation "com.android.support:support-v4:${supportVer}"
+    implementation "com.android.support:design:${supportVer}"
+    implementation "com.android.support:customtabs:${supportVer}"
+    implementation "com.android.support.constraint:constraint-layout:${constraintVer}"
+    implementation "com.android.support:cardview-v7:${supportVer}"
+    implementation "com.android.support:support-compat:${supportVer}"
 
-    compile "com.jakewharton:butterknife:${butterknifeVer}"
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+    implementation "com.google.firebase:firebase-core:${firebaseVer}"
+    implementation "com.google.firebase:firebase-database:${firebaseVer}"
+    implementation "com.google.firebase:firebase-storage:${firebaseVer}"
+    implementation "com.google.firebase:firebase-auth:${firebaseVer}"
+    implementation "com.google.android.gms:play-services-auth:${playServicesVer}"
+    implementation "com.google.firebase:firebase-messaging:${firebaseVer}"
+    implementation "com.google.android:flexbox:${flexboxVer}"
+    implementation "com.crashlytics.sdk.android:crashlytics:${crashAnalytics}"
+    implementation 'com.firebase:firebase-jobdispatcher:0.8.5'
+
+    implementation "com.jakewharton:butterknife:${butterknifeVer}"
+    implementation "com.github.bumptech.glide:glide:${glideVer}"
+    implementation "com.lapism:searchview:${lapismSearchVer}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
-    compile "com.google.firebase:firebase-core:${firebaseVer}"
-    compile "com.google.firebase:firebase-database:${firebaseVer}"
-    compile "com.google.firebase:firebase-storage:${firebaseVer}"
-    compile "com.google.firebase:firebase-auth:${firebaseVer}"
-    compile "com.google.android.gms:play-services-auth:${playServicesVer}"
-    compile "com.google.firebase:firebase-messaging:${firebaseVer}"
-
-    compile "com.github.bumptech.glide:glide:${glideVer}"
     annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
 
-    compile "io.reactivex:rxjava:${rxJavaVer}"
+    implementation "io.reactivex.rxjava2:rxjava:${rxJava2Ver}"
 
     //Unit test compiles
-    testCompile "junit:junit:${junitVer}"
-    testCompile "org.mockito:mockito-core:${mockitoVer}"
-    testCompile("org.robolectric:robolectric:${roboElecVer}") {
+    testImplementation "junit:junit:${junitVer}"
+    testImplementation "org.mockito:mockito-core:${mockitoVer}"
+    testImplementation("org.robolectric:robolectric:${roboElecVer}") {
         exclude module: 'commons-logging'
         exclude module: 'httpclient'
     }
 
     //Android test compiles
-    androidTestCompile "com.google.dexmaker:dexmaker:${dexMakerVer}"
-    androidTestCompile "com.google.dexmaker:dexmaker-mockito:${dexMakerVer}"
-    androidTestCompile "org.hamcrest:hamcrest-library:${hamcrestVer}"
+    androidTestImplementation "com.google.dexmaker:dexmaker:${dexMakerVer}"
+    androidTestImplementation "com.google.dexmaker:dexmaker-mockito:${dexMakerVer}"
+    androidTestImplementation "org.hamcrest:hamcrest-library:${hamcrestVer}"
 
-    androidTestCompile("com.android.support.test.espresso:espresso-core:${espCoreVer}") {
+    androidTestImplementation("com.android.support.test.espresso:espresso-core:${espCoreVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test.espresso:espresso-contrib:${espContVer}") {
+    androidTestImplementation("com.android.support.test.espresso:espresso-contrib:${espContVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
         exclude group: 'com.android.support', module: 'support-v4'
         exclude group: 'com.android.support', module: 'recyclerview-v7'
@@ -145,23 +163,27 @@ dependencies {
         exclude group: 'com.android.support', module: 'design'
     }
 
-    androidTestCompile("com.android.support.test:runner:${androidTestVer}") {
+    androidTestImplementation("com.android.support.test:runner:${androidTestVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test:rules:${androidTestVer}") {
+    androidTestImplementation("com.android.support.test:rules:${androidTestVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test.espresso:espresso-intents:${espIntVer}") {
+    androidTestImplementation("com.android.support.test.espresso:espresso-intents:${espIntVer}") {
         exclude group: 'com.android.support', module: 'support-annotations'
     }
 
-    androidTestCompile("com.android.support.test.uiautomator:uiautomator-v18:${espUIAVer}", {
+    androidTestImplementation("com.android.support.test.uiautomator:uiautomator-v18:${espUIAVer}", {
         exclude group: 'com.android.support', module: 'support-annotations'
 
     })
 
+}
+
+def getDate() {
+    new Date().format('yyyyMMdd')
 }
 
 checkstyle {
@@ -182,11 +204,11 @@ tasks.withType(Test) {
     }
 }
 
-clean.dependsOn 'checkstyle'
+//clean.dependsOn 'checkstyle'
 
 task checkstyle(type: Checkstyle) {
-    configFile file("$configDir/checkstyle/checkstyle.xml")
-    configProperties = ["suppressionFile": project(':').file("${configDir}/checkstyle/suppressions.xml")]
+    configFile project(':').file("$configDir/checkstyle/checkstyle.xml")
+    //configProperties = ["suppressionFile": project(':').file("${configDir}/checkstyle/suppressions.xml")]
 
     source 'src'
     include '**/*.java'

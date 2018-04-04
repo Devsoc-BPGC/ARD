@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context="com.macbitsgoa.ard.activities.NewChatActivity"
+    tools:showIn="@layout/activity_new_chat">
+
+    <ProgressBar
+        android:id="@+id/pb_activity_new_chat"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:indeterminate="true"
+        android:indeterminateBehavior="cycle"
+        android:progressTint="@color/colorPrimary"
+        android:indeterminateTint="@color/colorPrimary"
+        android:progressBackgroundTint="@color/colorPrimaryLight" />
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_activity_new_chat"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</LinearLayout>

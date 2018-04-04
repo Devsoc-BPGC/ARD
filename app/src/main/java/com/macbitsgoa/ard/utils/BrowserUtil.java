@@ -2,6 +2,7 @@ package com.macbitsgoa.ard.utils;
 
 /**
  * Constant value definitions for {@link Browser} class.
+ *
  * @author Rushikesh Jogdand
  */
 

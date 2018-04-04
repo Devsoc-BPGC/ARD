@@ -26,11 +26,8 @@ import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.contrib.DrawerActions.close;
 import static android.support.test.espresso.contrib.DrawerActions.open;
 import static android.support.test.espresso.contrib.DrawerMatchers.isClosed;
-import static android.support.test.espresso.matcher.ViewMatchers.Visibility.INVISIBLE;
-import static android.support.test.espresso.matcher.ViewMatchers.Visibility.VISIBLE;
 import static android.support.test.espresso.matcher.ViewMatchers.isDisplayed;
 import static android.support.test.espresso.matcher.ViewMatchers.withContentDescription;
-import static android.support.test.espresso.matcher.ViewMatchers.withEffectiveVisibility;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static android.support.test.espresso.matcher.ViewMatchers.withText;
 import static com.macbitsgoa.ard.THC.childAtPosition;
@@ -88,17 +85,17 @@ public class MainActivityTest {
                 withContentDescription("Home"), isDisplayed()))
                 .perform(click());
         onView(withId(R.id.fragment_home_layout)).check(matches(isDisplayed()));
-        onView(withId(R.id.fragment_faq_layout)).check(doesNotExist());
+        onView(withId(R.id.fragment_forum_layout)).check(doesNotExist());
         onView(withId(R.id.fragment_chat_layout)).check(doesNotExist());
 
-        onView(allOf(withId(R.id.bottom_nav_faq),
+        onView(allOf(withId(R.id.bottom_nav_forum),
                 withContentDescription("F.A.Q."), isDisplayed()))
                 .perform(click());
-        onView(withId(R.id.fragment_faq_layout)).check(matches(isDisplayed()));
+        onView(withId(R.id.fragment_forum_layout)).check(matches(isDisplayed()));
         onView(withId(R.id.fragment_home_layout)).check(doesNotExist());
         onView(withId(R.id.fragment_chat_layout)).check(doesNotExist());
-        onView(withId(R.id.tabLayout_fragment_faq)).check(matches(isDisplayed()));
-        onView(withId(R.id.viewPager_fragment_faq)).check(matches(isDisplayed()));
+        onView(withId(R.id.tabLayout_fragment_forum)).check(matches(isDisplayed()));
+        onView(withId(R.id.viewPager_fragment_forum)).check(matches(isDisplayed()));
         onView(withText("General")).check(matches(isDisplayed()));
 
 
@@ -107,7 +104,7 @@ public class MainActivityTest {
                 .perform(click());
         onView(withId(R.id.fragment_chat_layout)).check(matches(isDisplayed()));
         onView(withId(R.id.fragment_home_layout)).check(doesNotExist());
-        onView(withId(R.id.fragment_faq_layout)).check(doesNotExist());
+        onView(withId(R.id.fragment_forum_layout)).check(doesNotExist());
     }
 
     @Test
@@ -144,34 +141,6 @@ public class MainActivityTest {
         textView2.check(matches(isDisplayed()));
 
         pressBack();
-    }
-
-    @Test
-    public void testFabButtons() throws Exception {
-        activityTestRule.launchActivity(new Intent().putExtra(AuthActivityKeys.USE_DEFAULT, false));
-
-        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
-        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
-        onView(withId(R.id.fab_fragment_home_add)).perform(click());
-        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(VISIBLE)));
-        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(VISIBLE)));
-
-        onView(withId(R.id.fab_fragment_home_add)).perform(click());
-        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
-        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
-
-        onView(withId(R.id.fab_fragment_home_add)).perform(click());
-        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(VISIBLE)));
-        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(VISIBLE)));
-
-        onView(withId(R.id.view_fragment_home_backdrop)).perform(click());
-        onView(withId(R.id.view_fragment_home_backdrop)).check(matches(withEffectiveVisibility(INVISIBLE)));
-        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
-
-        onView(withId(R.id.fab_fragment_home_add)).perform(click());
-        onView(withId(R.id.fab_fragment_home_announce)).perform(click());
-        pressBack();
-        onView(withId(R.id.fab_fragment_home_announce)).check(matches(withEffectiveVisibility(INVISIBLE)));
     }
 
     @Test

@@ -15,9 +15,9 @@ import static org.junit.Assert.assertNotNull;
 public class UserItemTest {
     @Test
     public void testFieldNamesMatchFDR() throws NoSuchFieldException {
-        assertNotNull(UserItem.class.getDeclaredField(UserItemKeys.FDR_USERS_NAME));
-        assertNotNull(UserItem.class.getDeclaredField(UserItemKeys.FDR_USERS_EMAIL));
-        assertNotNull(UserItem.class.getDeclaredField(UserItemKeys.FDR_USERS_PHOTO_URL));
+        assertNotNull(UserItem.class.getDeclaredField(UserItemKeys.NAME));
+        assertNotNull(UserItem.class.getDeclaredField(UserItemKeys.EMAIL));
+        assertNotNull(UserItem.class.getDeclaredField(UserItemKeys.PHOTO_URL));
     }
 
     @Test

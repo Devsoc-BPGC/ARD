@@ -1,34 +1,34 @@
 package com.macbitsgoa.ard.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
-import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DatabaseReference;
+import com.firebase.jobdispatcher.Constraint;
+import com.firebase.jobdispatcher.FirebaseJobDispatcher;
+import com.firebase.jobdispatcher.Job;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.Trigger;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.fragments.ChatFragment;
-import com.macbitsgoa.ard.fragments.FaqFragment;
+import com.macbitsgoa.ard.fragments.BaseFragment;
+import com.macbitsgoa.ard.fragments.DetailsFragment;
+import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
-import com.macbitsgoa.ard.interfaces.ChatFragmentListener;
-import com.macbitsgoa.ard.interfaces.FaqFragmentListener;
-import com.macbitsgoa.ard.interfaces.NavigationDrawerListener;
-import com.macbitsgoa.ard.keys.AuthActivityKeys;
+import com.macbitsgoa.ard.services.ForumService;
+import com.macbitsgoa.ard.services.HomeService;
+import com.macbitsgoa.ard.services.MaintenanceService;
+import com.macbitsgoa.ard.types.MainActivityType;
 import com.macbitsgoa.ard.utils.AHC;
-
-import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,48 +40,12 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        BottomNavigationView.OnNavigationItemSelectedListener,
-        FaqFragmentListener,
-        ChatFragmentListener {
+        BottomNavigationView.OnNavigationItemSelectedListener {
 
     /**
-     * The title of nav Drawer.
+     * Tag for this class.
      */
-    public static String navDrawerTitleText;
-
-    /**
-     * The subtitle of nav Drawer.
-     */
-    public static String navDrawerSubtitleText;
-
-    /**
-     * The array of urls of images used as nav drawer background.
-     */
-    public static ArrayList<String> navDrawerImageList;
-
-    /**
-     * URL of nav drawer background for current instance of app.
-     * Chosen randomly from navDrawerImageList when app launches
-     * and when corresponding list changes in firebase.
-     */
-    public static String navDrawerImageURL;
-
-    /**
-     * Duration of cross fade animation between in nav drawer background images (in milliseconds).
-     */
-    public static final int NAV_DRAWER_BACKGROUND_ANIM_DUR = 50;
-
-    /**
-     * DrawerLayout for nav drawer.
-     */
-    @BindView(R.id.drawer_layout)
-    DrawerLayout drawer;
-
-    /**
-     * Navigation view in drawer.
-     */
-    @BindView(R.id.nav_view)
-    NavigationView navigationView;
+    public static final String TAG = MainActivity.class.getSimpleName();
 
     /**
      * Bottom navigation view.
@@ -90,14 +54,16 @@ public class MainActivity extends BaseActivity
     BottomNavigationView bottomNavigationView;
 
     /**
-     * Fragment manager used to handle the 3 fragments.
+     * int variable storing the currently selected fragment.
+     *
+     * @see MainActivityType
      */
-    private FragmentManager fragmentManager;
+    private int currentSection;
 
     /**
-     * FaqFragment object.
+     * ForumFragment object.
      */
-    private FaqFragment faqFragment;
+    private ForumFragment forumFragment;
 
     /**
      * HomeFragment object.
@@ -105,45 +71,56 @@ public class MainActivity extends BaseActivity
     private HomeFragment homeFragment;
 
     /**
+     * DetailsFragment object.
+     */
+    private DetailsFragment detailFragment;
+
+    /**
+     * Job dispatcher service.
+     */
+    private FirebaseJobDispatcher bgServicesDispatcher;
+
+    private static final String KEY_GPS_AVAILABLE = "MainActivityGPSAvailable";
+
+    /**
      * ChatFragment object.
      */
-    private ChatFragment chatFragment;
-
-    /**
-     * Firebase db ref for navigation drawer.
-     */
-    private DatabaseReference navDrawerDBRef;
-
-    /**
-     * navDrawerListener listens for db changes for nav drawer.
-     */
-    private NavigationDrawerListener navDrawerListener;
-
+    //private ChatFragment chatFragment;
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        SharedPreferences sp = getDefaultSharedPref();
+        if (!sp.getBoolean(KEY_GPS_AVAILABLE, false)) {
+            GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+            int serviceStatus = googleApiAvailability.isGooglePlayServicesAvailable(this);
+            if (serviceStatus == ConnectionResult.SUCCESS) {
+               sp.edit().putBoolean(KEY_GPS_AVAILABLE, true).apply();
+               AHC.logd(TAG, "GPS available");
+            } else {
+                googleApiAvailability.makeGooglePlayServicesAvailable(this).addOnSuccessListener(aVoid -> sp.edit().putBoolean(KEY_GPS_AVAILABLE, true).apply());
+            }
+        }
         //Check if authorised
-        if (!auth(getIntent())) {
+        if (getUser() == null) {
+            AHC.logd(TAG, "Current user null");
             startActivity(new Intent(this, AuthActivity.class));
             finish();
+        } else {
+            AHC.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
+            FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);
+            FirebaseMessaging.getInstance().subscribeToTopic(BuildConfig.BUILD_TYPE);
+            FirebaseMessaging.getInstance().subscribeToTopic("android");
+            FirebaseMessaging.getInstance().subscribeToTopic(getUser().getUid());
+
+            setContentView(R.layout.activity_main);
+            init();
+
+            startService(new Intent(this, ForumService.class));
+            AHC.startService(this, HomeService.class, HomeService.TAG);
+            startBgServices();
+
+            bottomNavigationView.setOnNavigationItemSelectedListener(this);
         }
-
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        init();
-
-        initListeners();
-    }
-
-    /**
-     * Start {@link AuthActivity} if Firebase user object is null.
-     * This also closes the current {@link MainActivity} before launching Auth.
-     *
-     * @param intent Intent object. Should not be null. See <b>MainActivityTest</b>.
-     * @return boolean true if auth is successful, false otherwise.
-     */
-    public boolean auth(@NonNull final Intent intent) {
-        return !intent.getBooleanExtra(AuthActivityKeys.USE_DEFAULT, true)
-                || FirebaseAuth.getInstance().getCurrentUser() != null;
     }
 
     /**
@@ -152,111 +129,93 @@ public class MainActivity extends BaseActivity
     private void init() {
         ButterKnife.bind(this);
 
-        navDrawerDBRef = getRootReference().child(AHC.FDR_NAV_DRAWER);
+        forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
+        homeFragment = new HomeFragment();
+        detailFragment = DetailsFragment.newInstance();
 
-        final View headerView = navigationView.getHeaderView(0);
-        final ImageView navDrawerImage = ButterKnife.findById(headerView, R.id.nav_drawer_image);
-        final TextView navDrawerTitle = ButterKnife.findById(headerView, R.id.nav_drawer_title);
-        final TextView navDrawerSubtitle = ButterKnife.findById(headerView, R.id.nav_drawer_subtitle);
-
-        if (navDrawerTitleText != null) {
-            navDrawerTitle.setText(navDrawerTitleText);
-        }
-
-        if (navDrawerSubtitleText != null) {
-            navDrawerSubtitle.setText(navDrawerSubtitleText);
-        }
-
-        if (navDrawerImageURL != null) {
-            final RequestOptions navDrawerImageOptions = new RequestOptions()
-                    .placeholder(getDrawable(R.drawable.nav_drawer_default_image));
-
-            Glide.with(this)
-                    .load(navDrawerImageURL)
-                    .transition(DrawableTransitionOptions.withCrossFade()
-                            .crossFade(NAV_DRAWER_BACKGROUND_ANIM_DUR)
-                    )
-                    .apply(navDrawerImageOptions)
-                    .into(navDrawerImage);
-        }
-
-        navDrawerListener = new NavigationDrawerListener(
-                this,
-                navDrawerTitle,
-                navDrawerSubtitle,
-                navDrawerImage);
-
-        fragmentManager = getSupportFragmentManager();
-
-        faqFragment = FaqFragment.newInstance(null);
-        homeFragment = HomeFragment.newInstance(null);
-        chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
+        currentSection = MainActivityType.HOME;
+        launchFragment();
 
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
-        fragmentManager.beginTransaction().replace(R.id.frame_content_main, homeFragment,
-                getString(R.string.bottom_nav_home_activity_main)).commit();
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
+        final int id = item.getItemId();
+
+        if (id == R.id.bottom_nav_forum) {
+            currentSection = MainActivityType.FORUM;
+        } else if (id == R.id.bottom_nav_home) {
+            currentSection = MainActivityType.HOME;
+        } else {
+            currentSection = MainActivityType.DETAILS;
+        }
+        launchFragment();
+        return true;
     }
 
     /**
-     * Initialise listeners.
+     * Method to launch a fragment when click on bottom nav.
      */
-    private void initListeners() {
-        navigationView.setNavigationItemSelectedListener(this);
-        bottomNavigationView.setOnNavigationItemSelectedListener(this);
-        navDrawerDBRef.addValueEventListener(navDrawerListener);
+    private void launchFragment() {
+        final BaseFragment baseFragment;
+        if (currentSection == MainActivityType.FORUM) {
+            baseFragment = forumFragment;
+        } else if (currentSection == MainActivityType.HOME) {
+            baseFragment = homeFragment;
+        } else {
+            baseFragment = detailFragment;
+        }
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_content_main, baseFragment)
+                .commit();
     }
 
     @Override
     public void onBackPressed() {
-
-        if (drawer.isDrawerOpen(GravityCompat.START)) {
-            drawer.closeDrawer(GravityCompat.START);
+        if (currentSection != MainActivityType.HOME) {
+            bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
+            currentSection = MainActivityType.HOME;
+            launchFragment();
         } else {
-            super.onBackPressed();
+            finish();
         }
     }
 
-    @SuppressWarnings("StatementWithEmptyBody")
-    @Override
-    public boolean onNavigationItemSelected(@NonNull final MenuItem item) {
-        // Handle navigation view item clicks here.
-        final int id = item.getItemId();
+    /**
+     * Job dispatcher method.
+     */
+    private void startBgServices() {
+        bgServicesDispatcher
+                = AHC.getJobDispatcher(this);
+        final Job maintenanceJob = bgServicesDispatcher.newJobBuilder()
+                .setService(MaintenanceService.class)
+                .setTag(MaintenanceService.TAG)
+                .setReplaceCurrent(true)
+                .setTrigger(Trigger.NOW)
+                .setLifetime(Lifetime.FOREVER)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .build();
+        final Job homeJob = bgServicesDispatcher.newJobBuilder()
+                .setService(HomeService.class)
+                .setTag(HomeService.TAG)
+                .setReplaceCurrent(true)
+                .setTrigger(Trigger.NOW)
+                .setLifetime(Lifetime.FOREVER)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
+                .build();
 
-        if (id == R.id.bottom_nav_faq) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.frame_content_main, faqFragment)
-                    .commit();
-            return true;
-        } else if (id == R.id.bottom_nav_home) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.frame_content_main, homeFragment)
-                    .commit();
-            return true;
-        } else {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.frame_content_main, chatFragment)
-                    .commit();
-            return true;
-        }
-
-        //Not required until we have an item in Nav drawer.
-        //drawer.closeDrawer(GravityCompat.START);
-        //return true;
-    }
-
-    @Override
-    public void updateChatFragment() {
-
-    }
-
-    @Override
-    public void updateFaqFragment() {
-
+        bgServicesDispatcher.schedule(maintenanceJob);
+        bgServicesDispatcher.schedule(homeJob);
     }
 
     @Override
     protected void onDestroy() {
-        navDrawerDBRef.removeEventListener(navDrawerListener);
         super.onDestroy();
+        if (bgServicesDispatcher != null) {
+            //If app is not running we don't need this updated information.
+            bgServicesDispatcher.cancel(MaintenanceService.TAG);
+        }
     }
 }

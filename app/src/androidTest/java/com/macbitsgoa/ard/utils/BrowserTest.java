@@ -27,6 +27,7 @@ import static android.support.test.espresso.intent.matcher.IntentMatchers.hasAct
 
 /**
  * Test for utility "Browser".
+ *
  * @author Rushikesh Jogdand
  */
 @RunWith(AndroidJUnit4.class)
@@ -50,7 +51,7 @@ public class BrowserTest {
     }
 
     @Test
-    public void testAllConfig () {
+    public void testAllConfig() {
         intending(anyIntent()).respondWith(new Instrumentation.ActivityResult(RESULT_CANCELED, null));
         final String url = "example.com";
         final MainActivity mActivity = activityTestRule.getActivity();
@@ -73,7 +74,7 @@ public class BrowserTest {
                 .addMenuItem("Lol2", mPendingIntent)
                 .setShareInMenu(true)
                 .setActionButton(
-                        ContextCompat.getDrawable(mActivity, R.drawable.ic_faq_24dp),
+                        ContextCompat.getDrawable(mActivity, R.drawable.ic_forum_24dp),
                         "lorem ipsum",
                         mPendingIntent,
                         true

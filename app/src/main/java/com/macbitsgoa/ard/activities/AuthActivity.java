@@ -1,13 +1,16 @@
 package com.macbitsgoa.ard.activities;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -19,11 +22,13 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.macbitsgoa.ard.BuildConfig;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.helpers.AuthHelperForGoogle;
 import com.macbitsgoa.ard.keys.AuthActivityKeys;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.utils.AHC;
+import com.macbitsgoa.ard.utils.CenterCropDrawable;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -42,18 +47,22 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     /**
      * TAG for this activity.
      */
-    private static final String TAG = AHC.TAG + ".AuthActivity";
+    public static final String TAG = AuthActivity.class.getSimpleName();
 
     /**
      * AuthHelperForGoogle instance to handle backend functions.
      */
-    public AuthHelperForGoogle mHelper;
+    private AuthHelperForGoogle mHelper;
 
     /**
      * Google Sign In Button.
      */
     @BindView(R.id.btn_content_auth_google)
-    public Button googleSignInButton;
+    Button googleSignInButton;
+    private ProgressDialog pd;
+
+    @BindView(R.id.tv_activity_auth_version)
+    TextView versionTV;
 
     /**
      * Google API Client for login purposes.
@@ -63,9 +72,15 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setBackgroundDrawable(new CenterCropDrawable(ContextCompat.getDrawable(this, R.drawable.auth_bg)));
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
-
+        versionTV.setText(BuildConfig.VERSION_NAME);
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            final Intent intent = new Intent(this, MainActivity.class);
+            startActivity(intent);
+            finish();
+        }
         googleApiClient = setupGoogleApiClient();
         mHelper = new AuthHelperForGoogle(this, FirebaseAuth.getInstance());
 
@@ -95,6 +110,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         //if (requestCode == AuthActivityKeys.RC_GOOGLE_SIGN_IN) {}
         if (resultCode == Activity.RESULT_CANCELED) {
             googleSignInButton.setClickable(true);
+            if (pd != null)
+                pd.cancel();
             showToast("Sign in cancelled");
             return;
         }
@@ -108,6 +125,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     public void handleGoogleSignInFailure() {
         showToast(getString(R.string.error_google_sign_in_failed));
         googleSignInButton.setClickable(true);
+        if (pd != null)
+            pd.cancel();
     }
 
     @Override
@@ -121,6 +140,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     public void onConnectionFailed(@NonNull final ConnectionResult connectionResult) {
         Log.e(TAG, "Connection Failure " + connectionResult);
         handleGoogleSignInFailure();
+        if (pd != null)
+            pd.cancel();
     }
 
     /**
@@ -130,6 +151,8 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      */
     public void launchGoogleSignIn(@NonNull final Intent intent) {
         startActivityForResult(intent, AuthActivityKeys.RC_GOOGLE_SIGN_IN);
+        pd = ProgressDialog.show(this, "Google sign in", "Signing in to ARD");
+        pd.show();
     }
 
     @Override
@@ -150,8 +173,10 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
             return;
         }
         updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
-        startActivity(new Intent(this, MainActivity.class));
+        if (pd != null)
+            pd.cancel();
         finish();
+        startActivity(new Intent(this, MainActivity.class));
     }
 
     /**
@@ -170,6 +195,7 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         final String uid = firebaseUser.getUid();
         final String name = firebaseUser.getDisplayName();
         final String email = firebaseUser.getEmail();
+        final String phoneNumber = firebaseUser.getPhoneNumber();
         final String photoUrl;
         final Uri uri = firebaseUser.getPhotoUrl();
         if (uri == null) {
@@ -178,9 +204,10 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
             photoUrl = uri.toString();
         }
         final DatabaseReference userDb = parentRef.child(uid);
-        userDb.child(UserItemKeys.FDR_USERS_NAME).setValue(name);
-        userDb.child(UserItemKeys.FDR_USERS_EMAIL).setValue(email);
-        userDb.child(UserItemKeys.FDR_USERS_PHOTO_URL).setValue(photoUrl);
+        userDb.child(UserItemKeys.NAME).setValue(name);
+        userDb.child(UserItemKeys.EMAIL).setValue(email);
+        userDb.child(UserItemKeys.PHOTO_URL).setValue(photoUrl);
+        userDb.child(UserItemKeys.PHONE_NUMBER).setValue(phoneNumber);
         return true;
     }
 }

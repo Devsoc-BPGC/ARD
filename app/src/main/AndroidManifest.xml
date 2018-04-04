@@ -8,19 +8,31 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
     <application
         android:name=".ARD"
         android:allowBackup="true"
+        android:appCategory="news"
+        android:description="@string/app_description"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
-        tools:ignore="GoogleAppIndexingWarning">
+        tools:ignore="GoogleAppIndexingWarning,UnusedAttribute">
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorPrimaryDark" />
+
         <activity
             android:name=".activities.MainActivity"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -30,27 +42,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activities.PostActivity"
-            android:label="@string/title_activity_post"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.macbitsgoa.ard.activities.MainActivity" />
-        </activity>
-        <activity
-            android:name=".activities.SettingsActivity"
-            android:label="@string/title_activity_settings"
-            android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.macbitsgoa.ard.activities.MainActivity" />
-        </activity>
-        <activity
             android:name=".activities.AuthActivity"
             android:label="@string/title_activity_auth"
             android:parentActivityName=".activities.MainActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -64,17 +59,84 @@
         <activity
             android:name=".activities.PostDetailsActivity"
             android:label="@string/title_activity_post_details"
-            android:parentActivityName=".activities.MainActivity"
             android:theme="@style/AppTheme.NoActionBar"
-            android:windowSoftInputMode="adjustResize|stateHidden">
+            android:windowSoftInputMode="adjustResize|stateHidden" />
+        <activity
+            android:name=".activities.ChatActivity"
+            android:label="@string/title_activity_chat"
+            android:theme="@style/AppTheme.NoActionBar">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.macbitsgoa.ard.activities.MainActivity" />
+        </activity>
+
+        <service
+            android:name=".services.MessagingService"
+            android:description="@string/messaging_service_desc"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".services.NotificationService"
+            android:description="@string/notification_service_desc"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
+        <service android:name=".services.SendService" />
+        <service android:name=".services.NotifyService" />
+        <service
+            android:name=".services.HomeService"
+            android:description="@string/home_service_desc"
+            android:permission="android.permission.BIND_JOB_SERVICE">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".services.MaintenanceService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
+            </intent-filter>
+        </service>
+        <service android:name=".services.SendDocumentService" />
+        <service
+            android:name=".services.FCMService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <service
+            android:name=".services.InstanceService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
+            </intent-filter>
+        </service>
+        <service android:name=".services.AnnNotifyService" />
+        <service android:name=".services.ForumService" />
+
+        <activity
+            android:name=".activities.NewChatActivity"
+            android:label="@string/title_activity_new_chat"
+            android:parentActivityName=".activities.MainActivity"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.macbitsgoa.ard.activities.MainActivity" />
         </activity>
         <activity
-            android:name=".activities.SearchActivity"
-            android:label="@string/title_activity_search"
-            android:parentActivityName=".activities.MainActivity"
+            android:name=".activities.AnnActivity"
+            android:label="@string/title_activity_ann"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name=".activities.AboutMacActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

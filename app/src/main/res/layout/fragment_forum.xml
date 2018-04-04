@@ -1,0 +1,9 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_forum_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.macbitsgoa.ard.fragments.ForumFragment">
+
+    <include layout="@layout/fragment_forum_content" />
+</FrameLayout>
