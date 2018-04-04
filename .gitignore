@@ -84,6 +84,8 @@ obj/
 .idea/dynamic.xml
 .idea/uiDesigner.xml
 .idea/codeStyleSettings.xml
+.idea/cache/
+.idea/codeStyles/
 
 # Keystore files
 *.jks

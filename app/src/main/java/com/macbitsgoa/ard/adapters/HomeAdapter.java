@@ -85,7 +85,6 @@ public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
 
     @Override
     public void onBindViewHolder(@NonNull final HomeItemViewHolder hivh, final int position) {
-        final HomeItem hi = homeItems.get(position);
         hivh.setData(homeItems.get(position));
     }
 

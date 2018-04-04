@@ -1,7 +1,7 @@
 package com.macbitsgoa.ard.services;
 
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.util.Log;
 
 import com.firebase.jobdispatcher.JobParameters;
 import com.google.firebase.database.DataSnapshot;
@@ -12,14 +12,13 @@ import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
 import com.macbitsgoa.ard.keys.SlideshowItemKeys;
 import com.macbitsgoa.ard.models.AnnItem;
-import com.macbitsgoa.ard.models.Slide;
+import com.macbitsgoa.ard.models.SlideshowItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.models.home.PhotoItem;
 import com.macbitsgoa.ard.models.home.TextItem;
 import com.macbitsgoa.ard.types.HomeType;
 import com.macbitsgoa.ard.utils.AHC;
 
-import java.util.ArrayList;
 import java.util.Date;
 
 import io.realm.Realm;
@@ -39,24 +38,21 @@ public class HomeService extends BaseJobService {
 
     private boolean completedHome = false;
     private boolean completedAnn = false;
+    private boolean completedSlideshow = false;
+
     private JobParameters job;
 
     @Override
     public boolean onStartJob(JobParameters job) {
         this.job = job;
         AHC.logd(TAG, "Starting new thread for job");
-        new Thread(() -> {
-            final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
-            final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
-            final DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
-            imageSlideshowRef.addValueEventListener(getImageSlideShowVEL());
+        final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
+        final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
+        final DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
 
-            final ValueEventListener homeCEL = getHomeListener();
-            final ValueEventListener annRefCEL = getAnnListener();
-
-            homeRef.addListenerForSingleValueEvent(homeCEL);
-            annRef.addListenerForSingleValueEvent(annRefCEL);
-        }).start();
+        homeRef.addListenerForSingleValueEvent(getHomeListener());
+        annRef.addListenerForSingleValueEvent(getAnnListener());
+        imageSlideshowRef.addListenerForSingleValueEvent(getImageSlideShowVEL());
         return true;
     }
 
@@ -69,16 +65,84 @@ public class HomeService extends BaseJobService {
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
-                saveHomeSnapshotToRealm(dataSnapshot);
-                completedHome = true;
+                new Thread(() -> {
+                    saveHomeSnapshotToRealm(dataSnapshot);
+                    completedHome = true;
+                    checkJobStatus();
+                }).start();
             }
 
             @Override
             public void onCancelled(final DatabaseError databaseError) {
-                Log.e(TAG, "Error in getting announcements\n" + databaseError.getDetails());
+                AHC.logd(TAG, "Error in getting announcements\n" + databaseError.getDetails());
                 completedHome = true;
+                checkJobStatus();
             }
         };
+    }
+
+    /**
+     * Method to initialise announcement reference listener object.
+     *
+     * @return ChildEventListener object.
+     */
+    public ValueEventListener getAnnListener() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                new Thread(() -> {
+                    saveAnnSnapshotToRealm(dataSnapshot);
+                    completedAnn = true;
+                    checkJobStatus();
+                }).start();
+            }
+
+            @Override
+            public void onCancelled(final DatabaseError databaseError) {
+                AHC.logd(TAG, "Error in getting announcements\n" + databaseError.getDetails());
+                completedAnn = true;
+                checkJobStatus();
+            }
+        };
+    }
+
+    private ValueEventListener getImageSlideShowVEL() {
+        return new ValueEventListener() {
+            @Override
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                if (dataSnapshot == null) return;
+                new Thread(() -> {
+                    saveSlideshowSnapshotToRealm(dataSnapshot);
+                    completedSlideshow = true;
+                    checkJobStatus();
+                }).start();
+            }
+
+            @Override
+            public void onCancelled(final DatabaseError databaseError) {
+                AHC.logd(TAG, "Error while getting slidehshow images\n" + databaseError.getDetails());
+                completedSlideshow = true;
+                checkJobStatus();
+            }
+        };
+    }
+
+    private void saveSlideshowSnapshotToRealm(@NonNull DataSnapshot dataSnapshot) {
+        final Realm database = Realm.getDefaultInstance();
+        for (final DataSnapshot cs : dataSnapshot.getChildren()) {
+            database.executeTransaction(r -> {
+                final SlideshowItem ssi = new SlideshowItem();
+                ssi.setPhotoUrl(cs.child(SlideshowItemKeys.PHOTO_URL).getValue(String.class));
+                ssi.setPhotoDate(cs.child(SlideshowItemKeys.PHOTO_DATE).getValue(Date.class));
+                ssi.setPhotoTitle(cs.child(SlideshowItemKeys.PHOTO_TITLE).getValue(String.class));
+                ssi.setPhotoDesc(cs.child(SlideshowItemKeys.PHOTO_DESC).getValue(String.class));
+                ssi.setPhotoTag(cs.child(SlideshowItemKeys.PHOTO_TAG).getValue(String.class));
+                ssi.setPhotoTagColor(cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class));
+                ssi.setPhotoTagTextColor(cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class));
+                r.insertOrUpdate(ssi);
+            });
+        }
+        database.close();
     }
 
     @SuppressWarnings("OverlyLongMethod")
@@ -98,7 +162,7 @@ public class HomeService extends BaseJobService {
                 if (hi == null) {
                     hi = r.createObject(HomeItem.class, key);
                     AHC.logd(TAG, "Creating new home item");
-                } else if (hi.getDate().getTime() == date.getTime()){
+                } else if (hi.getDate().getTime() == date.getTime()) {
                     return;
                 }
                 hi.setAuthor(author);
@@ -131,64 +195,6 @@ public class HomeService extends BaseJobService {
         database.close();
     }
 
-
-    /**
-     * Method to initialise announcement reference listener object.
-     *
-     * @return ChildEventListener object.
-     */
-    public ValueEventListener getAnnListener() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                saveAnnSnapshotToRealm(dataSnapshot);
-                completedAnn = true;
-                checkJobStatus();
-            }
-
-            @Override
-            public void onCancelled(final DatabaseError databaseError) {
-                Log.e(TAG, "Error in getting announcements\n" + databaseError.getDetails());
-                completedAnn = true;
-            }
-        };
-    }
-
-    private ValueEventListener getImageSlideShowVEL() {
-        return new ValueEventListener() {
-            @Override
-            public void onDataChange(final DataSnapshot dataSnapshot) {
-                if (dataSnapshot == null) return;
-                ArrayList<Slide> slides = new ArrayList<>();
-                for (final DataSnapshot cs :
-                        dataSnapshot.getChildren()) {
-                    if (!cs.hasChild(SlideshowItemKeys.PHOTO_URL)
-                            || !cs.hasChild(SlideshowItemKeys.PHOTO_DATE)) continue;
-                    final Slide ssi = new Slide();
-                    ssi.photoUrl = cs.child(SlideshowItemKeys.PHOTO_URL).getValue(String.class);
-                    ssi.photoDate = cs.child(SlideshowItemKeys.PHOTO_DATE).getValue(Date.class);
-                    ssi.photoTitle = cs.child(SlideshowItemKeys.PHOTO_TITLE).getValue(String.class);
-                    ssi.photoDesc = cs.child(SlideshowItemKeys.PHOTO_DESC).getValue(String.class);
-                    ssi.photoTag = cs.child(SlideshowItemKeys.PHOTO_TAG).getValue(String.class);
-                    ssi.photoTagColor = cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class);
-                    ssi.photoTagTextColor = cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class);
-                    slides.add(ssi);
-                }
-                Realm db = Realm.getDefaultInstance();
-                db.beginTransaction();
-                db.where(Slide.class).findAll().deleteAllFromRealm();
-                db.insertOrUpdate(slides);
-                db.commitTransaction();
-            }
-
-            @Override
-            public void onCancelled(final DatabaseError databaseError) {
-                Log.e(TAG, "Error while getting slidehshow images\n" + databaseError.getDetails());
-            }
-        };
-    }
-
-
     public static void saveAnnSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
         if (dataSnapshot == null) return;
         final Realm database = Realm.getDefaultInstance();
@@ -220,6 +226,6 @@ public class HomeService extends BaseJobService {
 
     private void checkJobStatus() {
         AHC.logd(TAG, "Status of jobs is " + completedAnn + " and " + completedHome);
-        if (completedAnn && completedHome) jobFinished(job, false);
+        if (completedAnn && completedHome && completedSlideshow) jobFinished(job, false);
     }
 }

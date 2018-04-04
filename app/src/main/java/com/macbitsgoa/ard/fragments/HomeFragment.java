@@ -23,18 +23,11 @@ import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.adapters.AnnSlideshowAdapter;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.adapters.SlideshowAdapter;
-import com.macbitsgoa.ard.keys.AnnItemKeys;
-import com.macbitsgoa.ard.models.AnnItem;
-
-import java.util.ArrayList;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import io.realm.RealmResults;
-import io.realm.Sort;
 
 /**
  * A simple {@link Fragment} subclass to display home content.
@@ -75,12 +68,10 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     @BindView(R.id.nsv_fragment_home)
     NestedScrollView nsv;
 
-    Handler handler;
-    Runnable update;
+    Handler imageSlideshowHandler;
+    Runnable imageSlideshowRunnable;
     Handler annSlideshowHandler;
     Runnable annSlideshowRunable;
-
-    private RealmResults<AnnItem> annItems;
 
     /**
      * Unbinder for ButterKnife.
@@ -91,6 +82,8 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
      * Slideshow adapter.
      */
     private SlideshowAdapter slideshowAdapter;
+
+    private AnnSlideshowAdapter annAdapter;
 
     /**
      * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
@@ -109,7 +102,7 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         homeRV.addItemDecoration(new DividerItemDecoration(getContext(), DividerItemDecoration.VERTICAL));
         homeRV.setAdapter(new HomeAdapter(getContext()));
 
-        setupSlideshow();
+        setupSlideshows();
 
         return view;
     }
@@ -121,33 +114,16 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         scrollToTop();
         //hide app bar if orientation is landscape on starting
         hideAppBar();
-        setupAnnouncementSlideshow();
         appBarLayout.offsetTopAndBottom(appBarOffset);
-    }
-
-    private void pingBgServices() {
-            }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        pingBgServices();
-    }
-
-    @Override
-    public void onStop() {
-        handler.removeCallbacks(update);
-        if (annSlideshowHandler != null && annSlideshowRunable != null) {
-            annSlideshowHandler.removeCallbacks(annSlideshowRunable);
-        }
-        annItems.removeAllChangeListeners();
-        pingBgServices();
-        super.onStop();
     }
 
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+        imageSlideshowHandler.removeCallbacks(imageSlideshowRunnable);
+        annSlideshowHandler.removeCallbacks(annSlideshowRunable);
+        annAdapter.notifyOfDesctruction();
+        slideshowAdapter.notifyOfDestruction();
         unbinder.unbind();
     }
 
@@ -156,60 +132,36 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         appBarOffset = verticalOffset;
     }
 
-    private void setupSlideshow() {
+    private void setupSlideshows() {
+        //Image slideshow
         slideshowAdapter = new SlideshowAdapter();
+        //Ann slideshow
+        annAdapter = new AnnSlideshowAdapter();
 
-        handler = new Handler();
-        update = () -> {
-            if (slideshowVP == null || slideshowAdapter == null) return;
+        imageSlideshowHandler = new Handler();
+        annSlideshowHandler = new Handler();
+
+        imageSlideshowRunnable = () -> {
             int newPos = slideshowVP.getCurrentItem() + 1;
             newPos %= slideshowAdapter.getCount();
             slideshowVP.setCurrentItem(newPos, true);
+            imageSlideshowHandler.postDelayed(imageSlideshowRunnable, 5000);
+        };
+        annSlideshowRunable = () -> {
+            if (annAdapter.getCount() == 0) return;
+            int newPos = annVP.getCurrentItem() + 1;
+            newPos %= annAdapter.getCount();
+            annVP.setCurrentItem(newPos, true);
+            annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
         };
 
-        handler.postDelayed(update, 5000);
         slideshowVP.setAdapter(slideshowAdapter);
         pagerIndicator.setupWithViewPager(slideshowVP);
-        pagerIndicator.addOnPageChangeListener(getVopl());
-        slideshowVP.addOnPageChangeListener(getVopl());
+        annVP.setAdapter(annAdapter);
+
+        imageSlideshowHandler.postDelayed(imageSlideshowRunnable, 5000);
+        annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
     }
-
-    @NonNull
-    private ViewPager.OnPageChangeListener getVopl() {
-        return new ViewPager.OnPageChangeListener() {
-            @Override
-            public void onPageScrolled(final int position, final float positionOffset,
-                                       final int positionOffsetPixels) {
-            }
-
-            @Override
-            public void onPageSelected(final int position) {
-
-            }
-
-            @Override
-            public void onPageScrollStateChanged(final int state) {
-                if (state == ViewPager.SCROLL_STATE_IDLE) {
-                    handler.removeCallbacks(update);
-                    handler.postDelayed(update, 5000);
-                }
-            }
-        };
-    }
-
-    private void setupAnnouncementSlideshow() {
-        annItems = database.where(AnnItem.class).findAllSorted(AnnItemKeys.DATE, Sort.DESCENDING);
-        final List<String> annItemsText = new ArrayList<>();
-        for (AnnItem ai : annItems) annItemsText.add(ai.getData());
-        setTextData(annItemsText);
-        annItems.addChangeListener((collection, changeSet) -> {
-            annItemsText.clear();
-            for (AnnItem ai : annItems) annItemsText.add(ai.getData());
-            setTextData(annItemsText);
-        });
-    }
-
-
 
     public void scrollToTop() {
         //App crashes on removing this check
@@ -217,39 +169,15 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         if (nsv != null) nsv.scrollTo(0, 0);
     }
 
-    public void setTextData(final List<String> data) {
-        if (annVP == null) return;
-        final AnnSlideshowAdapter adapter = new AnnSlideshowAdapter(data);
-        if (annSlideshowHandler == null) annSlideshowHandler = new Handler();
-        if (annSlideshowRunable == null) annSlideshowRunable = () -> {
-            if (adapter.getCount() == 0) return;
-            int viewpagerpos = annVP.getCurrentItem();
-            viewpagerpos++;
-            viewpagerpos %= adapter.getCount();
-            annVP.setCurrentItem(viewpagerpos);
-            annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
-        };
-        annVP.setAdapter(adapter);
-        annSlideshowHandler.removeCallbacks(annSlideshowRunable);
-        annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
-    }
-
-    @OnClick(R.id.ann_card_fragment_home)
+    @OnClick(R.id.itemView_ann_card)
     public void openAnnActivity() {
         startActivity(new Intent(getContext(), AnnActivity.class));
     }
 
-    //called everytime orientation changes
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         hideAppBar();
-    }
-
-    @Override
-    public void onDestroy() {
-        if (slideshowAdapter != null) slideshowAdapter.notifyDestruction();
-        super.onDestroy();
     }
 
     //function to hide appbar

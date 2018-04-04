@@ -5,14 +5,14 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.FragmentManager;
-import android.util.SparseIntArray;
 import android.view.MenuItem;
 
+import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
-import com.firebase.jobdispatcher.RetryStrategy;
+import com.firebase.jobdispatcher.Lifetime;
+import com.firebase.jobdispatcher.Trigger;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
@@ -45,23 +45,13 @@ public class MainActivity extends BaseActivity
      */
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    private static int currentSection = MainActivityType.HOME;
     /**
      * Bottom navigation view.
      */
     @BindView(R.id.bottom_nav_activity_main)
     BottomNavigationView bottomNavigationView;
 
-    /**
-     * Key {@link MainActivityType}
-     * Value : Access order (lower is more recent).
-     */
-    SparseIntArray sectionsHistory = new SparseIntArray();
-
-    /**
-     * Fragment manager used to handle the 3 fragments.
-     */
-    private FragmentManager fragmentManager;
+    private int currentSection;
 
     /**
      * ForumFragment object.
@@ -104,7 +94,7 @@ public class MainActivity extends BaseActivity
 
             startService(new Intent(this, ForumService.class));
             AHC.startService(this, HomeService.class, HomeService.TAG);
-            //AHC.startService(this, MessagingService.class, MessagingService.TAG);
+            startBgServices();
 
             bottomNavigationView.setOnNavigationItemSelectedListener(this);
         }
@@ -116,20 +106,14 @@ public class MainActivity extends BaseActivity
     private void init() {
         ButterKnife.bind(this);
 
-        fragmentManager = getSupportFragmentManager();
-
         forumFragment = ForumFragment.newInstance(getString(R.string.bottom_nav_forum_activity_main));
         homeFragment = new HomeFragment();
-        //chatFragment = ChatFragment.newInstance(getString(R.string.bottom_nav_chat_activity_main));
         detailFragment = DetailsFragment.newInstance();
-        launchFragment(currentSection);
-        final int menuId;
-        if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
-        else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
-        else /*if (currentSection == MainActivityType.DETAILS)*/ menuId = R.id.bottom_nav_details;
-        //else menuId = R.id.bottom_nav_chat;
-        bottomNavigationView.setSelectedItemId(menuId);
-        bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
+
+        currentSection = MainActivityType.HOME;
+        launchFragment();
+
+        bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
     }
 
     @Override
@@ -137,103 +121,73 @@ public class MainActivity extends BaseActivity
         final int id = item.getItemId();
 
         if (id == R.id.bottom_nav_forum) {
-            launchFragment(MainActivityType.FORUM);
+            currentSection = MainActivityType.FORUM;
         } else if (id == R.id.bottom_nav_home) {
-            launchFragment(MainActivityType.HOME);
-            homeFragment.scrollToTop();
-        } else /*if (id == R.id.bottom_nav_details)*/ {
-            launchFragment(MainActivityType.DETAILS);
-        /*} else {
-            launchFragment(MainActivityType.CHAT);*/
+            currentSection = MainActivityType.HOME;
+        } else {
+            currentSection = MainActivityType.DETAILS;
         }
+        launchFragment();
         return true;
     }
 
-    private void launchFragment(int section) {
-        int len;
-        for (len = sectionsHistory.size() - 1; len >= 0; len--) {
-            int key = sectionsHistory.keyAt(len);
-            sectionsHistory.put(key, sectionsHistory.get(key) + 1);
+    private void launchFragment() {
+        final BaseFragment baseFragment;
+        if (currentSection == MainActivityType.FORUM) {
+            baseFragment = forumFragment;
+        } else if (currentSection == MainActivityType.HOME) {
+            baseFragment = homeFragment;
+        } else {
+            baseFragment = detailFragment;
         }
-        sectionsHistory.put(currentSection, 0);
-
-        currentSection = section;
-        sectionsHistory.put(currentSection, -1);
-        sectionsHistory.removeAt(sectionsHistory.indexOfKey(currentSection));
-
-        BaseFragment baseFragment;
-        if (currentSection == MainActivityType.FORUM) baseFragment = forumFragment;
-        else if (currentSection == MainActivityType.HOME) baseFragment = homeFragment;
-        else /*if (currentSection == MainActivityType.DETAILS)*/ baseFragment = detailFragment;
-        //else baseFragment = chatFragment;
-        fragmentManager.beginTransaction().replace(R.id.frame_content_main, baseFragment).commit();
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.frame_content_main, baseFragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
     public void onBackPressed() {
-        if (sectionsHistory.size() == 0) {
-            // Home should be last section before exit.
-            if (currentSection == MainActivityType.HOME) {
-                finish();
-                return;
-            } else {
-                sectionsHistory.put(MainActivityType.HOME, 0);
-            }
+        if (currentSection != MainActivityType.HOME) {
+            bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
+            currentSection = MainActivityType.HOME;
+            launchFragment();
+        } else {
+            finish();
         }
-
-        int lastSection;
-        lastSection = sectionsHistory.keyAt(0); // SparseArray stores key with smallest value at index 0
-        int staleSection = currentSection;
-
-        launchFragment(lastSection);
-        final int menuId;
-        if (currentSection == MainActivityType.FORUM) menuId = R.id.bottom_nav_forum;
-        else if (currentSection == MainActivityType.HOME) menuId = R.id.bottom_nav_home;
-        else /*if (currentSection == MainActivityType.DETAILS)*/ menuId = R.id.bottom_nav_details;
-        //else menuId = R.id.bottom_nav_chat;
-        bottomNavigationView.setSelectedItemId(menuId);
-        bottomNavigationView.getMenu().findItem(menuId).setChecked(true);
-
-        sectionsHistory.removeAt(sectionsHistory.indexOfKey(staleSection));
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        pingBgServices();
-    }
-
-    private void pingBgServices() {
-        bgServicesDispatcher = new FirebaseJobDispatcher(new GooglePlayDriver(this));
+    private void startBgServices() {
+        bgServicesDispatcher =
+                new FirebaseJobDispatcher(new GooglePlayDriver(this));
         final Job maintenanceJob = bgServicesDispatcher.newJobBuilder()
                 .setService(MaintenanceService.class)
-                .setTag(TAG)
-                .setReplaceCurrent(false)
-                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .setTag(MaintenanceService.TAG)
+                .setReplaceCurrent(true)
+                .setTrigger(Trigger.NOW)
+                .setLifetime(Lifetime.FOREVER)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
-
-        final Job homeServiceJob = bgServicesDispatcher.newJobBuilder()
+        final Job homeJob = bgServicesDispatcher.newJobBuilder()
                 .setService(HomeService.class)
-                .setTag(TAG)
-                .setReplaceCurrent(false)
-                .setRetryStrategy(RetryStrategy.DEFAULT_LINEAR)
+                .setTag(HomeService.TAG)
+                .setReplaceCurrent(true)
+                .setTrigger(Trigger.NOW)
+                .setLifetime(Lifetime.FOREVER)
+                .setConstraints(Constraint.ON_ANY_NETWORK)
                 .build();
 
-        bgServicesDispatcher.mustSchedule(maintenanceJob);
-        bgServicesDispatcher.mustSchedule(homeServiceJob);
+        bgServicesDispatcher.schedule(maintenanceJob);
+        bgServicesDispatcher.schedule(homeJob);
     }
 
     @Override
-    protected void onStop() {
+    protected void onDestroy() {
+        super.onDestroy();
         if (bgServicesDispatcher != null) {
-            bgServicesDispatcher.cancelAll();
+            //If app is not running we don't need this updated information.
+            bgServicesDispatcher.cancel(MaintenanceService.TAG);
         }
-        pingBgServices();
-        super.onStop();
     }
-
-/*@Override
-    public void updateChatFragment() {
-
-    }*/
 }
