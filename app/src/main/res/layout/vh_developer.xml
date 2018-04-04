@@ -1,80 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/card_developer"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="4dp"
-    android:layout_marginEnd="4dp"
-    android:layout_marginStart="4dp"
-    app:cardCornerRadius="4dp">
+    android:layout_margin="12dp">
 
-    <android.support.constraint.ConstraintLayout
-        android:layout_width="match_parent"
+    <ImageView
+        android:id="@+id/iv_avatar"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@drawable/ic_contact"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tv_vh_developer_name"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="12dp">
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingStart="21dp"
+        android:paddingTop="5dp"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_avatar" />
 
-        <ImageView
-            android:id="@+id/iv_avatar"
-            android:layout_width="96dp"
-            android:layout_height="96dp"
-            android:src="@drawable/ic_person"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:ignore="ContentDescription" />
+    <TextView
+        android:id="@+id/tv_vh_developer_phone"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:autoLink="phone"
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingStart="21dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:textColorLink="@color/colorPrimary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_developer_name" />
 
-        <TextView
-            android:id="@+id/tv_name"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:paddingEnd="5dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingStart="21dp"
-            android:textColor="@color/colorPrimaryDark"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@id/iv_avatar"
-            tools:text="Rushikesh Jogdand" />
+    <TextView
+        android:id="@+id/tv_vh_developer_email"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:autoLink="email"
+        android:paddingBottom="5dp"
+        android:paddingEnd="5dp"
+        android:paddingStart="21dp"
+        android:paddingTop="5dp"
+        android:textColor="@color/colorPrimaryDark"
+        android:textColorLink="@color/colorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/iv_avatar"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_developer_phone" />
 
-        <TextView
-            android:id="@+id/tv_phone"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:autoLink="phone"
-            android:fontFamily="monospace"
-            android:paddingEnd="5dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingStart="21dp"
-            android:textColor="@color/colorPrimaryDark"
-            android:textColorLink="@color/colorPrimary"
-            android:textSize="16sp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
-            app:layout_constraintTop_toBottomOf="@+id/tv_name"
-            tools:text="+917083413997" />
-
-        <TextView
-            android:id="@+id/tv_email"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:autoLink="email"
-            android:fontFamily="monospace"
-            android:paddingEnd="5dp"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp"
-            android:paddingStart="21dp"
-            android:textColor="@color/colorPrimaryDark"
-            android:textColorLink="@color/colorPrimary"
-            android:textSize="16sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/iv_avatar"
-            app:layout_constraintTop_toBottomOf="@+id/tv_phone"
-            tools:text="rushikeshjogdand1@gmail.com" />
-
-    </android.support.constraint.ConstraintLayout>
-</android.support.v7.widget.CardView>
+</android.support.constraint.ConstraintLayout>

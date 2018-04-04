@@ -1,69 +1,66 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_marginBottom="16dp"
-    android:layout_marginTop="16dp"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:paddingBottom="16dp">
 
     <ImageView
-        android:id="@+id/iv_mac_logo"
-        android:layout_width="144dp"
-        android:layout_height="144dp"
-        android:layout_gravity="start"
-        android:src="@drawable/android"
+        android:id="@+id/imgView_vh_mac_desc_logo"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:src="@drawable/maclogopng"
+        android:tint="@color/colorPrimaryDark"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/tv_mac_desc"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tv_mac_desc"
+        android:id="@+id/tv_vh_mac_desc_desc"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:padding="8dp"
         android:text="@string/default_mac_desc"
-        android:textColor="@color/colorPrimaryDark"
-        android:textSize="16sp"
-        app:layout_constraintTop_toBottomOf="@+id/iv_mac_logo" />
-
-    <ImageButton
-        android:id="@+id/ib_github"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@color/transparent"
-        android:src="@drawable/ic_github_circle"
-        app:layout_constraintEnd_toStartOf="@id/ib_play_store"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/tv_mac_desc"
-        tools:ignore="ContentDescription" />
-
-
-    <ImageButton
-        android:id="@+id/ib_play_store"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@color/transparent"
-        android:src="@drawable/ic_ps"
-        android:tint="@color/orange_800"
-        app:layout_constraintEnd_toStartOf="@id/ib_fb"
-        app:layout_constraintStart_toEndOf="@id/ib_github"
-        app:layout_constraintTop_toBottomOf="@id/tv_mac_desc"
-        tools:ignore="ContentDescription" />
-
-    <ImageButton
-        android:id="@+id/ib_fb"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:background="@color/transparent"
-        android:src="@drawable/ic_fb"
-        android:tag="fb"
-        android:tint="@color/blue_900"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/ib_play_store"
-        app:layout_constraintTop_toBottomOf="@id/tv_mac_desc"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/imgView_vh_mac_desc_logo" />
+
+    <ImageButton
+        android:id="@+id/imgBtn_vh_mac_desc_github"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/ic_github_circle"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imgBtn_vh_mac_desc_play_store"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_mac_desc_desc" />
+
+
+    <ImageButton
+        android:id="@+id/imgBtn_vh_mac_desc_play_store"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/ic_ps"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/imgBtn_vh_mac_desc_fb"
+        app:layout_constraintStart_toEndOf="@+id/imgBtn_vh_mac_desc_github"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_mac_desc_desc" />
+
+    <ImageButton
+        android:id="@+id/imgBtn_vh_mac_desc_fb"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="?selectableItemBackgroundBorderless"
+        android:padding="8dp"
+        android:src="@drawable/ic_fb"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/imgBtn_vh_mac_desc_play_store"
+        app:layout_constraintTop_toBottomOf="@+id/tv_vh_mac_desc_desc" />
 
 </android.support.constraint.ConstraintLayout>

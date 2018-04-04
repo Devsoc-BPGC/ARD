@@ -14,6 +14,7 @@ import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.BaseActivity;
 import com.macbitsgoa.ard.models.Developer;
+import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.viewholders.DeveloperViewHolder;
 
 import java.util.ArrayList;
@@ -23,15 +24,21 @@ import java.util.ArrayList;
  */
 public class AboutMacAdapter extends RecyclerView.Adapter<DeveloperViewHolder> implements ValueEventListener {
 
-    @SuppressWarnings("WeakerAccess")
+    public static final String TAG = AboutMacAdapter.class.getSimpleName();
+
     public static final int VT_MAC = 0;
+
     public static final int VT_DEV = 1;
+
     private ArrayList<Developer> developers;
+
     private Activity activity;
 
     public AboutMacAdapter( BaseActivity activity) {
         this.activity = activity;
-        DatabaseReference devRef = activity.getRootReference().child("aboutMAC").child("developers");
+        DatabaseReference devRef = activity.getRootReference()
+                .child(AHC.FDR_ABOUT_MAC)
+                .child("developers");
         populate();
         devRef.addValueEventListener(this);
         devRef.keepSynced(true);
@@ -40,8 +47,8 @@ public class AboutMacAdapter extends RecyclerView.Adapter<DeveloperViewHolder> i
     @NonNull
     @Override
     public DeveloperViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        View view;
+        final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        final View view;
         if (viewType == VT_MAC) {
             view = inflater.inflate(R.layout.vh_mac_desc, parent, false);
         } else {
@@ -69,12 +76,12 @@ public class AboutMacAdapter extends RecyclerView.Adapter<DeveloperViewHolder> i
         developers = new ArrayList<>();
         developers.add(new Developer(
                 "Vikramaditya Kukreja",
-                "",
-                "vicky@macbitsgoa.com",
+                "+919619104435",
+                "kukreja.vikramaditya@gmail.com",
                 "https://github.com/kukreja-vikramaditya",
                 "https://lh4.googleusercontent.com/-0dhUBhZKH94/AAAAAAAAAAI/AAAAAAAAACQ/F7fd4BSFRsY/s96-c/photo.jpg"));
         developers.add(new Developer(
-                "Rushiesh Jogdand",
+                "Rushikesh Jogdand",
                 "+917083413997",
                 "rushikesh@jogdand.com",
                 "https://jogdand.com",
@@ -100,6 +107,6 @@ public class AboutMacAdapter extends RecyclerView.Adapter<DeveloperViewHolder> i
 
     @Override
     public void onCancelled(DatabaseError databaseError) {
-
+        AHC.logd(TAG, "Error accessing Firebase data for developers");
     }
 }

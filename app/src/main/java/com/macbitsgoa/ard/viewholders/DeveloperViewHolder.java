@@ -33,18 +33,18 @@ public class DeveloperViewHolder extends RecyclerView.ViewHolder implements View
     public DeveloperViewHolder(View itemView, int viewType, Activity activity) {
         super(itemView);
         if (viewType == VT_DEV) {
-            nameTv = itemView.findViewById(R.id.tv_name);
+            nameTv = itemView.findViewById(R.id.tv_vh_developer_name);
             avatarIv = itemView.findViewById(R.id.iv_avatar);
-            phoneTv = itemView.findViewById(R.id.tv_phone);
-            emailTv = itemView.findViewById(R.id.tv_email);
+            phoneTv = itemView.findViewById(R.id.tv_vh_developer_phone);
+            emailTv = itemView.findViewById(R.id.tv_vh_developer_email);
             itemView.setOnClickListener(this);
         } else {
             fbUrl = activity.getString(R.string.url_mac_fb);
             playStoreUrl = activity.getString(R.string.url_mac_play_store);
             githubUrl = activity.getString(R.string.url_mac_github);
-            ImageButton playBtn = itemView.findViewById(R.id.ib_play_store);
-            ImageButton githubBtn = itemView.findViewById(R.id.ib_github);
-            ImageButton fbBtn = itemView.findViewById(R.id.ib_fb);
+            ImageButton playBtn = itemView.findViewById(R.id.imgBtn_vh_mac_desc_play_store);
+            ImageButton githubBtn = itemView.findViewById(R.id.imgBtn_vh_mac_desc_github);
+            ImageButton fbBtn = itemView.findViewById(R.id.imgBtn_vh_mac_desc_fb);
             playBtn.setOnClickListener(this);
             githubBtn.setOnClickListener(this);
             fbBtn.setOnClickListener(this);
@@ -59,25 +59,29 @@ public class DeveloperViewHolder extends RecyclerView.ViewHolder implements View
         phoneTv.setText(developer.phone);
         Glide.with(avatarIv).load(developer.photoUrl)
                 .transition(DrawableTransitionOptions.withCrossFade(500))
-                .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_person))
+                .apply(RequestOptions.circleCropTransform().error(R.drawable.ic_contact))
                 .into(avatarIv);
     }
 
     @Override
     public void onClick(View v) {
-        switch (v.getId()) {// Clicked developer card
-            case R.id.card_developer:
-                new Browser(activity).launchUrl(developer.web);
-                break;
-            case R.id.ib_fb:
+        switch (v.getId()) {
+            case R.id.imgBtn_vh_mac_desc_fb: {
                 new Browser(activity).launchUrl(fbUrl);
                 break;
-            case R.id.ib_play_store:
+            }
+            case R.id.imgBtn_vh_mac_desc_play_store: {
                 new Browser(activity).launchUrl(playStoreUrl);
                 break;
-            case R.id.ib_github:
+            }
+            case R.id.imgBtn_vh_mac_desc_github: {
                 new Browser(activity).launchUrl(githubUrl);
                 break;
+            }
+            default: {
+                new Browser(activity).launchUrl(developer.web);
+                break;
+            }
         }
     }
 }

@@ -185,6 +185,11 @@ public class AHC {
     public static final String ARD_REDIRECT_URL = "ard-bits.firebaseapp.com/ard";
 
     /**
+     * Firebase reference for "aboutMAC".
+     */
+    public static final String FDR_ABOUT_MAC = "aboutMAC";
+
+    /**
      * Method to get pixel value corresponding to input dp.
      *
      * @param context of calling method.
