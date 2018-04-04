@@ -19,6 +19,8 @@ import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.viewholders.HomeItemViewHolder;
 import com.macbitsgoa.ard.viewholders.ImageViewHolder;
 
+import javax.annotation.Nullable;
+
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
@@ -30,7 +32,8 @@ import io.realm.Sort;
  * @author Vikramaditya Kukreja
  */
 public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
-        ImageViewHolder.ImageClickListener {
+        ImageViewHolder.ImageClickListener,
+        OrderedRealmCollectionChangeListener<RealmResults<HomeItem>> {
 
     /**
      * TAG for class.
@@ -45,12 +48,12 @@ public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
     /**
      * Context for use with glide.
      */
-    private Context context;
+    private final Context context;
 
     /**
      * Notification listener.
      */
-    private AdapterNotificationListener anl;
+    private final AdapterNotificationListener anl;
 
     /**
      * Constructor that populates recyclerView.
@@ -68,18 +71,19 @@ public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
     }
 
     @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
-        homeItems = database.where(HomeItem.class)
+        homeItems = database
+                .where(HomeItem.class)
                 .findAllSortedAsync(HomeItemKeys.DATE, Sort.DESCENDING);
-        homeItems.addChangeListener(getRealmChangeListener());
+        homeItems.addChangeListener(this);
     }
 
     @NonNull
     @Override
     public HomeItemViewHolder onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-        final View view = inflater.inflate(R.layout.vh_home_item_1, parent, false);
+        final View view = inflater.inflate(R.layout.vh_home_item, parent, false);
         return new HomeItemViewHolder(view, context);
     }
 
@@ -94,14 +98,16 @@ public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
     }
 
     @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onDetachedFromRecyclerView(@NonNull final RecyclerView recyclerView) {
         homeItems.removeAllChangeListeners();
         super.onDetachedFromRecyclerView(recyclerView);
     }
 
     @Override
     public void onImageClick(final Uri uri) {
-        if (uri == null) return;
+        if (uri == null) {
+            return;
+        }
         try {
             context.startActivity(new Intent(Intent.ACTION_VIEW, uri));
         } catch (final ActivityNotFoundException e) {
@@ -110,36 +116,35 @@ public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
         }
     }
 
-    private OrderedRealmCollectionChangeListener<RealmResults<HomeItem>> getRealmChangeListener() {
-        return (collection, changeSet) -> {
-            // `null`  means the async query returns the first time.
-            if (changeSet == null) {
-                homeItems = collection;
-                notifyDataSetChanged();
-                if (anl != null) {
-                    anl.onAdapterNotified(getItemCount());
-                }
-                return;
-            }
-            // For deletions, the adapter has to be notified in reverse order.
-            final OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
-            for (int i = deletions.length - 1; i >= 0; i--) {
-                final OrderedCollectionChangeSet.Range range = deletions[i];
-                notifyItemRangeRemoved(range.startIndex, range.length);
-            }
-
-            final OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
-            for (final OrderedCollectionChangeSet.Range range : insertions) {
-                notifyItemRangeInserted(range.startIndex, range.length);
-            }
-
-            final OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
-            for (final OrderedCollectionChangeSet.Range range : modifications) {
-                notifyItemRangeChanged(range.startIndex, range.length);
-            }
+    @Override
+    public void onChange(@NonNull final RealmResults<HomeItem> homeItems,
+                         @Nullable final OrderedCollectionChangeSet changeSet) {
+        // `null`  means the async query returns the first time.
+        if (changeSet == null) {
+            notifyDataSetChanged();
             if (anl != null) {
                 anl.onAdapterNotified(getItemCount());
             }
-        };
+            return;
+        }
+        // For deletions, the adapter has to be notified in reverse order.
+        final OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+        for (int i = deletions.length - 1; i >= 0; i--) {
+            final OrderedCollectionChangeSet.Range range = deletions[i];
+            notifyItemRangeRemoved(range.startIndex, range.length);
+        }
+
+        final OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+        for (final OrderedCollectionChangeSet.Range range : insertions) {
+            notifyItemRangeInserted(range.startIndex, range.length);
+        }
+
+        final OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+        for (final OrderedCollectionChangeSet.Range range : modifications) {
+            notifyItemRangeChanged(range.startIndex, range.length);
+        }
+        if (anl != null) {
+            anl.onAdapterNotified(getItemCount());
+        }
     }
 }

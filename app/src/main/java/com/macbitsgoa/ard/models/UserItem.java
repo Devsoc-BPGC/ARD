@@ -6,9 +6,6 @@ import android.support.annotation.Nullable;
 import com.google.firebase.auth.FirebaseUser;
 import com.macbitsgoa.ard.utils.AHC;
 
-import io.realm.RealmObject;
-import io.realm.annotations.PrimaryKey;
-
 /**
  * Model class 'UserItem'.
  * This data is stored in firebase directory {@link AHC#FDR_USERS} with uid
@@ -19,6 +16,9 @@ import io.realm.annotations.PrimaryKey;
  */
 public class UserItem implements Comparable<UserItem> {
 
+    /**
+     * User unique id.
+     */
     private String uid;
 
     /**
@@ -49,8 +49,9 @@ public class UserItem implements Comparable<UserItem> {
         desc = "";
     }
 
-    public UserItem(@NonNull String uid, @Nullable String name, @Nullable String email,
-                    @Nullable String photoUrl, @Nullable String desc) {
+    public UserItem(@NonNull final String uid, @Nullable final String name,
+                    @Nullable final String email, @Nullable final String photoUrl,
+                    @Nullable final String desc) {
         this.uid = uid;
         setName(name);
         setEmail(email);
@@ -63,7 +64,7 @@ public class UserItem implements Comparable<UserItem> {
         return uid;
     }
 
-    public void setUid(String uid) {
+    public void setUid(final String uid) {
         this.uid = uid == null ? "" : uid;
     }
 
@@ -72,7 +73,7 @@ public class UserItem implements Comparable<UserItem> {
         return desc;
     }
 
-    public void setDesc(String desc) {
+    private void setDesc(final String desc) {
         this.desc = desc == null ? "" : desc;
     }
 
@@ -104,7 +105,7 @@ public class UserItem implements Comparable<UserItem> {
     }
 
     @Override
-    public boolean equals(Object obj) {
+    public boolean equals(final Object obj) {
         return obj instanceof UserItem && ((UserItem) obj).getUid().equals(this.uid);
     }
 
@@ -120,7 +121,7 @@ public class UserItem implements Comparable<UserItem> {
     }
 
     @Override
-    public int compareTo(@NonNull UserItem o) {
+    public int compareTo(@NonNull final UserItem o) {
         return this.name.compareTo(o.name);
     }
 }

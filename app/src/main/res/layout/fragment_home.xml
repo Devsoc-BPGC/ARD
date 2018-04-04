@@ -5,7 +5,6 @@
     android:id="@+id/fragment_home_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:context="com.macbitsgoa.ard.fragments.HomeFragment">
 
     <android.support.design.widget.AppBarLayout
@@ -28,18 +27,6 @@
                 app:layout_collapseMode="parallax"
                 app:layout_scrollFlags="scroll" />
 
-            <com.github.vivchar.viewpagerindicator.ViewPagerIndicator
-                android:id="@+id/ci_fragment_home"
-                android:layout_width="match_parent"
-                android:layout_height="16dp"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="4dp"
-                android:gravity="center"
-                app:delimiterSize="8dp"
-                app:itemIcon="@drawable/white_circle"
-                app:itemSize="8dp"
-                app:layout_collapseMode="parallax"
-                app:layout_collapseParallaxMultiplier="5" />
         </android.support.design.widget.CollapsingToolbarLayout>
     </android.support.design.widget.AppBarLayout>
 

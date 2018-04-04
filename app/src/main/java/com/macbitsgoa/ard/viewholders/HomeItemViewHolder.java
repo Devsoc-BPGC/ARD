@@ -57,7 +57,7 @@ public class HomeItemViewHolder extends RecyclerView.ViewHolder {
 
     private HomeItem hi;
 
-    private Context context;
+    private final Context context;
 
     /**
      * Constructor taking item view as param

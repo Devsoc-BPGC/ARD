@@ -17,7 +17,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.github.vivchar.viewpagerindicator.ViewPagerIndicator;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.adapters.AnnSlideshowAdapter;
@@ -45,33 +44,51 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
      * RecyclerView to display Home content.
      */
     @BindView(R.id.recyclerView_fragment_home)
-    public RecyclerView homeRV;
-
-    /**
-     * Viewpager indicator.
-     */
-    @BindView(R.id.ci_fragment_home)
-    public ViewPagerIndicator pagerIndicator;
+    RecyclerView homeRV;
 
     /**
      * ViewPager for image slideshow.
      */
     @BindView(R.id.vp_fragment_home_slideshow)
-    public ViewPager slideshowVP;
+    ViewPager slideshowVP;
 
+    /**
+     * Top appbar layout to hide in case of orientation change.
+     */
     @BindView(R.id.ab_fragment_home)
     AppBarLayout appBarLayout;
 
+    /**
+     * Viewpager to show ann data.
+     */
     @BindView(R.id.vp_vh_announcement)
     ViewPager annVP;
 
+    /**
+     * Nested scroll view for ann and rv.
+     */
     @BindView(R.id.nsv_fragment_home)
     NestedScrollView nsv;
 
-    Handler imageSlideshowHandler;
-    Runnable imageSlideshowRunnable;
-    Handler annSlideshowHandler;
-    Runnable annSlideshowRunable;
+    /**
+     * Handler to run {@link #imageSlideshowRunnable}.
+     */
+    private Handler imageSlideshowHandler;
+
+    /**
+     * Runnable for images slideshow.
+     */
+    private Runnable imageSlideshowRunnable;
+
+    /**
+     * Handler to run {@link #annSlideshowRunable}.
+     */
+    private Handler annSlideshowHandler;
+
+    /**
+     * Runnable for ann slideshow text.
+     */
+    private Runnable annSlideshowRunable;
 
     /**
      * Unbinder for ButterKnife.
@@ -83,13 +100,15 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
      */
     private SlideshowAdapter slideshowAdapter;
 
+    /**
+     * Announcement slideshow adapter.
+     */
     private AnnSlideshowAdapter annAdapter;
 
     /**
      * {@link View#offsetTopAndBottom(int)} of {@link #appBarLayout}.
      */
-    private int appBarOffset = 0;
-
+    private int appBarOffset;
 
     @Override
     public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
@@ -132,6 +151,9 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
         appBarOffset = verticalOffset;
     }
 
+    /**
+     * Method to setup both slideshows.
+     */
     private void setupSlideshows() {
         //Image slideshow
         slideshowAdapter = new SlideshowAdapter();
@@ -145,28 +167,38 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
             int newPos = slideshowVP.getCurrentItem() + 1;
             newPos %= slideshowAdapter.getCount();
             slideshowVP.setCurrentItem(newPos, true);
-            imageSlideshowHandler.postDelayed(imageSlideshowRunnable, 5000);
+            imageSlideshowHandler.postDelayed(imageSlideshowRunnable,
+                    getInteger(R.integer.image_slideshow_period));
         };
         annSlideshowRunable = () -> {
-            if (annAdapter.getCount() == 0) return;
+            if (annAdapter.getCount() == 0) {
+                return;
+            }
             int newPos = annVP.getCurrentItem() + 1;
             newPos %= annAdapter.getCount();
             annVP.setCurrentItem(newPos, true);
-            annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
+            annSlideshowHandler.postDelayed(annSlideshowRunable,
+                    getInteger(R.integer.ann_slideshow_period));
         };
 
         slideshowVP.setAdapter(slideshowAdapter);
-        pagerIndicator.setupWithViewPager(slideshowVP);
         annVP.setAdapter(annAdapter);
 
-        imageSlideshowHandler.postDelayed(imageSlideshowRunnable, 5000);
-        annSlideshowHandler.postDelayed(annSlideshowRunable, 2500);
+        imageSlideshowHandler.postDelayed(imageSlideshowRunnable,
+                getInteger(R.integer.image_slideshow_period));
+        annSlideshowHandler.postDelayed(annSlideshowRunable,
+                getInteger(R.integer.ann_slideshow_period));
     }
 
-    public void scrollToTop() {
+    /**
+     * Method to scroll nsv to the top.
+     */
+    private void scrollToTop() {
         //App crashes on removing this check
         //TODO fix required
-        if (nsv != null) nsv.scrollTo(0, 0);
+        if (nsv != null) {
+            nsv.scrollTo(0, 0);
+        }
     }
 
     @OnClick(R.id.itemView_ann_card)
@@ -175,15 +207,17 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     }
 
     @Override
-    public void onConfigurationChanged(Configuration newConfig) {
+    public void onConfigurationChanged(final Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         hideAppBar();
     }
 
-    //function to hide appbar
+    /**
+     * Function to hide appbar depending on orientation.
+     */
     private void hideAppBar() {
-        final CoordinatorLayout.LayoutParams params =
-                (CoordinatorLayout.LayoutParams) nsv.getLayoutParams();
+        final CoordinatorLayout.LayoutParams params
+                = (CoordinatorLayout.LayoutParams) nsv.getLayoutParams();
 
         // Checks the orientation of the screen
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {

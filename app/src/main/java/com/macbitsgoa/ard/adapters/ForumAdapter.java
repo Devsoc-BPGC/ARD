@@ -14,6 +14,8 @@ import com.macbitsgoa.ard.keys.FaqItemKeys;
 import com.macbitsgoa.ard.models.FaqItem;
 import com.macbitsgoa.ard.viewholders.FaqViewHolder;
 
+import javax.annotation.Nullable;
+
 import io.realm.OrderedCollectionChangeSet;
 import io.realm.OrderedRealmCollectionChangeListener;
 import io.realm.RealmResults;
@@ -24,18 +26,19 @@ import io.realm.Sort;
  *
  * @author Vikramaditya Kukreja
  */
-public class ForumAdapter extends BaseAdapter<FaqViewHolder> {
+public class ForumAdapter extends BaseAdapter<FaqViewHolder>
+        implements OrderedRealmCollectionChangeListener<RealmResults<FaqItem>> {
 
     /**
      * Item list to use as data source.
      */
     private RealmResults<FaqItem> faqItems;
 
-    private String section;
+    private final String section;
 
     private Sort defaultSort;
 
-    private AdapterNotificationListener anl;
+    private final AdapterNotificationListener anl;
     /**
      * Maintains expanded text info.
      */
@@ -64,7 +67,7 @@ public class ForumAdapter extends BaseAdapter<FaqViewHolder> {
                 .equalTo(FaqItemKeys.SECTION, section)
                 .findAllSortedAsync(new String[]{FaqItemKeys.SUB_SECTION, FaqItemKeys.UPDATE},
                         new Sort[]{Sort.ASCENDING, defaultSort});
-        faqItems.addChangeListener(getChangeListener());
+        faqItems.addChangeListener(this);
         sba = new SparseBooleanArray(getItemCount());
     }
 
@@ -114,42 +117,40 @@ public class ForumAdapter extends BaseAdapter<FaqViewHolder> {
         faqItems.removeAllChangeListeners();
         faqItems = faqItems.sort(new String[]{FaqItemKeys.SUB_SECTION, fieldName},
                 new Sort[]{Sort.ASCENDING, defaultSort});
-        sba = new SparseBooleanArray(getItemCount());
+        sba.clear();
         notifyDataSetChanged();
         if (anl != null) anl.onAdapterNotified(getItemCount());
-        faqItems.addChangeListener(getChangeListener());
+        faqItems.addChangeListener(this);
     }
 
-    @NonNull
-    private OrderedRealmCollectionChangeListener<RealmResults<FaqItem>> getChangeListener() {
-        return (collection, changeSet) -> {
-            // `null`  means the async query returns the first time.
-            //We are not listening for each and every update but only for the first one.
-            if (changeSet == null) {
-                faqItems = collection;
-                notifyDataSetChanged();
-                if (anl != null) anl.onAdapterNotified(getItemCount());
-                return;
-            }
-            // For deletions, the adapter has to be notified in reverse order.
-            final OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
-            for (int i = deletions.length - 1; i >= 0; i--) {
-                final OrderedCollectionChangeSet.Range range = deletions[i];
-                notifyItemRangeRemoved(range.startIndex, range.length);
-            }
+    @Override
+    public void onChange(@NonNull final RealmResults<FaqItem> faqItems,
+                         @Nullable final OrderedCollectionChangeSet changeSet) {
+        // `null`  means the async query returns the first time.
+        //We are not listening for each and every update but only for the first one.
+        if (changeSet == null) {
+            notifyDataSetChanged();
+            if (anl != null) anl.onAdapterNotified(getItemCount());
+            return;
+        }
+        // For deletions, the adapter has to be notified in reverse order.
+        final OrderedCollectionChangeSet.Range[] deletions = changeSet.getDeletionRanges();
+        for (int i = deletions.length - 1; i >= 0; i--) {
+            final OrderedCollectionChangeSet.Range range = deletions[i];
+            notifyItemRangeRemoved(range.startIndex, range.length);
+        }
 
-            final OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
-            for (final OrderedCollectionChangeSet.Range range : insertions) {
-                notifyItemRangeInserted(range.startIndex, range.length);
-            }
+        final OrderedCollectionChangeSet.Range[] insertions = changeSet.getInsertionRanges();
+        for (final OrderedCollectionChangeSet.Range range : insertions) {
+            notifyItemRangeInserted(range.startIndex, range.length);
+        }
 
-            final OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
-            for (final OrderedCollectionChangeSet.Range range : modifications) {
-                notifyItemRangeChanged(range.startIndex, range.length);
-            }
-            if (anl != null) {
-                anl.onAdapterNotified(getItemCount());
-            }
-        };
+        final OrderedCollectionChangeSet.Range[] modifications = changeSet.getChangeRanges();
+        for (final OrderedCollectionChangeSet.Range range : modifications) {
+            notifyItemRangeChanged(range.startIndex, range.length);
+        }
+        if (anl != null) {
+            anl.onAdapterNotified(getItemCount());
+        }
     }
 }

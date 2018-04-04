@@ -34,7 +34,6 @@ ext {
     targetSdkVer = 26
     verCode = 7
     verName = "1.5-beta"
-    vPagerIndVer = "1.0.2"
 }
 
 def configDir = "${project.rootDir}/config/"
@@ -134,10 +133,8 @@ dependencies {
     implementation "com.jakewharton:butterknife:${butterknifeVer}"
     implementation "com.github.bumptech.glide:glide:${glideVer}"
     implementation "com.lapism:searchview:${lapismSearchVer}"
-    implementation "com.github.vivchar:ViewPagerIndicator:${vPagerIndVer}"
     annotationProcessor "com.jakewharton:butterknife-compiler:${butterknifeVer}"
     annotationProcessor "com.github.bumptech.glide:compiler:${glideVer}"
-    implementation 'com.github.turing-tech:MaterialScrollBar:12.+'
 
     implementation "io.reactivex.rxjava2:rxjava:${rxJava2Ver}"
 
@@ -210,8 +207,8 @@ tasks.withType(Test) {
 //clean.dependsOn 'checkstyle'
 
 task checkstyle(type: Checkstyle) {
-    configFile file("$configDir/checkstyle/checkstyle.xml")
-    configProperties = ["suppressionFile": project(':').file("${configDir}/checkstyle/suppressions.xml")]
+    configFile project(':').file("$configDir/checkstyle/checkstyle.xml")
+    //configProperties = ["suppressionFile": project(':').file("${configDir}/checkstyle/suppressions.xml")]
 
     source 'src'
     include '**/*.java'

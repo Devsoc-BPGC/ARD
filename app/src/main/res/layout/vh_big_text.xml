@@ -1,14 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tv_vh_big_text"
     android:layout_width="match_parent"
-    android:descendantFocusability="afterDescendants"
-    android:layout_height="wrap_content">
-
-    <TextView
-        android:id="@+id/tv_vh_big_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="16dp"
-        android:textIsSelectable="true"
-        android:textSize="18sp" />
-</LinearLayout>
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:textIsSelectable="true"
+    android:textSize="18sp" />

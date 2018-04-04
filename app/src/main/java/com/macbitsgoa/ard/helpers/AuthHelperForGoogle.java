@@ -23,17 +23,19 @@ import com.macbitsgoa.ard.activities.AuthActivity;
 public class AuthHelperForGoogle {
 
     /**
+     * Do when signed in to firebase with credential provided by google.
+     */
+    public final OnCompleteListener<AuthResult> googleAuthCompleteListener;
+
+    /**
      * Activity that uses this helper.
      */
     private final AuthActivity hostActivity;
+
     /**
      * FirebaseAuth object to use throughout this class.
      */
     private final FirebaseAuth firebaseAuth;
-    /**
-     * Do when signed in to firebase with credential provided by google.
-     */
-    public OnCompleteListener<AuthResult> googleAuthCompleteListener;
 
     /**
      * Constructor that takes in activity and auth object.

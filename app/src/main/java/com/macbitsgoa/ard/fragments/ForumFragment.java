@@ -12,7 +12,6 @@ import android.view.ViewGroup;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.ViewPagerAdapter;
-import com.macbitsgoa.ard.fragments.forum.GeneralFragment;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.utils.AHC;
 
@@ -38,13 +37,13 @@ public class ForumFragment extends BaseFragment {
      * Viewpager to display inner fragments.
      */
     @BindView(R.id.viewPager_fragment_forum)
-    public ViewPager viewPager;
+    ViewPager viewPager;
 
     /**
      * Tab layout used with viewpager.
      */
     @BindView(R.id.tabLayout_fragment_forum)
-    public TabLayout tabLayout;
+    TabLayout tabLayout;
 
     /**
      * Unbinder to remove views.

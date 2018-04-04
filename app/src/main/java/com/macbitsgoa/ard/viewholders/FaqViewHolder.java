@@ -6,6 +6,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.SparseBooleanArray;
 import android.view.View;
 import android.widget.TextView;
@@ -15,6 +16,8 @@ import com.macbitsgoa.ard.R;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
+import butterknife.OnLongClick;
 
 /**
  * ViewHolder for {@link com.macbitsgoa.ard.models.FaqItem} used in
@@ -39,7 +42,7 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.tv_vh_fg_forum_general_sub_section)
     TextView subSectionTV;
 
-    private SparseBooleanArray sba;
+    private final SparseBooleanArray sba;
 
     /**
      * Default constructor.
@@ -50,12 +53,12 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
         super(itemView);
         ButterKnife.bind(this, itemView);
         this.sba = sba;
-        sba.put(getAdapterPosition(), false);
-        setCopyListener();
-        itemView.setOnClickListener(v -> showAnswer());
+        this.sba.put(getAdapterPosition(), false);
+        answerTV.setMovementMethod(LinkMovementMethod.getInstance());
     }
 
-    private void showAnswer() {
+    @OnClick(R.id.tv_vh_fg_forum_general_question)
+    void showAnswer() {
         if (!sba.get(getAdapterPosition())) {
             sba.put(getAdapterPosition(), true);
             answerTV.setVisibility(View.VISIBLE);
@@ -66,6 +69,17 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
         }
     }
 
+    @OnLongClick(R.id.tv_vh_fg_forum_general_question)
+    boolean copyContent() {
+        final ClipboardManager clipboard
+                = (ClipboardManager) itemView.getContext()
+                .getSystemService(Context.CLIPBOARD_SERVICE);
+        ClipData clip = ClipData.newPlainText("ARD", "[Q] " + questionTV.getText()
+                + "\n[A] " + answerTV.getText());
+        clipboard.setPrimaryClip(clip);
+        Toast.makeText(itemView.getContext(), "Copied To Clipboard", Toast.LENGTH_SHORT).show();
+        return true;
+    }
 
     public void setQuestionTV(final String question) {
         this.questionTV.setText(question);
@@ -94,14 +108,4 @@ public class FaqViewHolder extends RecyclerView.ViewHolder {
             answerTV.setVisibility(View.GONE);
         }
     }
-
-   private void setCopyListener(){
-           itemView.setOnLongClickListener(v -> {
-           ClipboardManager clipboard = (ClipboardManager) itemView.getContext().getSystemService(Context.CLIPBOARD_SERVICE);
-           ClipData clip = ClipData.newPlainText("ARD","[Q] "+questionTV.getText()+"\n[A] "+answerTV.getText());
-           clipboard.setPrimaryClip(clip);
-           Toast.makeText(itemView.getContext(),"Copied To Clipboard",Toast.LENGTH_SHORT).show();
-           return true;
-       });
-   }
 }

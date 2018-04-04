@@ -9,12 +9,6 @@ import com.macbitsgoa.ard.models.UserItem;
  */
 public class UserItemKeys {
 
-
-    /**
-     * Field {@link UserItem#uid} (uid field).
-     */
-    public static final String UID = "uid";
-
     /**
      * Token key for use with Firebase. Not saved in local database.
      */

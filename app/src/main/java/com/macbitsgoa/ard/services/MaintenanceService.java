@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import com.firebase.jobdispatcher.JobParameters;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
@@ -27,30 +28,46 @@ public class MaintenanceService extends BaseJobService {
      * Tag for this class.
      */
     public static final String TAG = MaintenanceService.class.getSimpleName();
+
+    /**
+     * Current job parameters.
+     */
     private JobParameters jobParameters;
 
+    DatabaseReference deleteRef;
+    ValueEventListener deleteRefVEL;
+
     @Override
-    public boolean onStartJob(JobParameters job) {
+    public boolean onStartJob(final JobParameters job) {
         jobParameters = job;
-        AHC.logd(TAG, "Starting maintenance service");
-        getRootReference()
-                .child(AHC.FDR_DELETES)
-                .addListenerForSingleValueEvent(getDeletesListener());
+        AHC.logd(TAG, "Starting " + TAG);
+        showDebugToast("Running " + TAG);
+        deleteRef = getRootReference()
+                .child(AHC.FDR_DELETES);
+        deleteRefVEL = getDeletesListener();
+        deleteRef.addValueEventListener(deleteRefVEL);
         return true;
     }
 
+    /**
+     * Method to get value event listener for deleted items.
+     *
+     * @return ValueEvenetListener
+     */
     @NonNull
     private ValueEventListener getDeletesListener() {
         return new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
                 if (dataSnapshot == null) {
                     AHC.logd(TAG, "No deletes history");
+                    deleteRef.removeEventListener(this);
                     jobFinished(jobParameters, false);
                 }
                 new Thread(() -> {
+                    AHC.logd(TAG, "Running thread to parse data");
                     final Realm database = Realm.getDefaultInstance();
-                    for (DataSnapshot childDS : dataSnapshot.getChildren()) {
+                    for (final DataSnapshot childDS : dataSnapshot.getChildren()) {
                         final String id = childDS.child("key").getValue(String.class);
                         AHC.logd(TAG, "Delete key " + id + " if present");
                         database.executeTransaction(r -> {
@@ -73,15 +90,23 @@ public class MaintenanceService extends BaseJobService {
                         });
                     }
                     database.close();
+                    deleteRef.removeEventListener(deleteRefVEL);
                     jobFinished(jobParameters, false);
                 }).start();
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(final DatabaseError databaseError) {
                 AHC.logd(TAG, "Database read access error");
+                deleteRef.removeEventListener(this);
                 jobFinished(jobParameters, false);
             }
         };
+    }
+
+    @Override
+    public boolean onStopJob(JobParameters job) {
+        deleteRef.removeEventListener(deleteRefVEL);
+        return super.onStopJob(job);
     }
 }

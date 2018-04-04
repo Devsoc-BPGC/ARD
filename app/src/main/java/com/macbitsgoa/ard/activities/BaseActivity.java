@@ -43,7 +43,7 @@ public class BaseActivity extends AppCompatActivity {
      * Activities that extend this class should call all closing functions before the
      * {@code super.onDestroy()} method to prevent ANR because of closed Realm database.
      */
-    public Realm database;
+    Realm database;
 
     /**
      * Get {@link SharedPreferences} for the app.
@@ -106,7 +106,7 @@ public class BaseActivity extends AppCompatActivity {
      * @return Firebase user. May be null
      */
     @Nullable
-    public FirebaseUser getUser() {
+    FirebaseUser getUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 
@@ -117,7 +117,7 @@ public class BaseActivity extends AppCompatActivity {
      *
      * @param message Message to be displayed.
      */
-    public void showToast(final String message) {
+    void showToast(final String message) {
         showToast(message, Toast.LENGTH_SHORT);
     }
 
@@ -131,9 +131,9 @@ public class BaseActivity extends AppCompatActivity {
      * @param message   Message that the toast must show.
      * @param toastType Duration for which the toast must be visible.
      */
-    public void showToast(final String message,
-                          @IntRange(from = Toast.LENGTH_SHORT,
-                                  to = Toast.LENGTH_LONG) final int toastType) {
+    private void showToast(final String message,
+                           @IntRange(from = Toast.LENGTH_SHORT,
+                                   to = Toast.LENGTH_LONG) final int toastType) {
         Toast.makeText(this, message, toastType).show();
     }
 
@@ -161,7 +161,7 @@ public class BaseActivity extends AppCompatActivity {
      * @param message Message to be displayed.
      * @param length  Int value to be used as length.
      */
-    public void showSnack(@NonNull final String message, final int length) {
+    private void showSnack(@NonNull final String message, final int length) {
         showSnack(getWindow().getDecorView(), message, length);
     }
 
@@ -180,8 +180,8 @@ public class BaseActivity extends AppCompatActivity {
      * @param message Message to be displayed.
      * @param length  Int value to be used as length.
      */
-    public void showSnack(@NonNull final View view,
-                          @NonNull final String message, final int length) {
+    private void showSnack(@NonNull final View view,
+                           @NonNull final String message, final int length) {
         showSnack(message, length, getWindow().getDecorView(), R.color.white, R.color.black);
     }
 
@@ -203,9 +203,9 @@ public class BaseActivity extends AppCompatActivity {
      * @param textColor       Color res for textColor.
      * @param backgroundColor Color res for backgroundColor.
      */
-    public void showSnack(@NonNull final String message, final int length,
-                          @NonNull final View view, @ColorRes final int textColor,
-                          @ColorRes final int backgroundColor) {
+    private void showSnack(@NonNull final String message, final int length,
+                           @NonNull final View view, @ColorRes final int textColor,
+                           @ColorRes final int backgroundColor) {
         final Snackbar snackbar = Snackbar.make(view, message, length);
         final TextView snackBarText = snackbar.getView()
                 .findViewById(R.id.snackbar_text);

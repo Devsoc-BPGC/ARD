@@ -13,7 +13,7 @@ import android.widget.TextView;
  */
 
 public class TextViewHolder extends RecyclerView.ViewHolder {
-    private TextView text;
+    private final TextView text;
 
     public TextViewHolder(final View itemView, @IdRes final int resourceId) {
         super(itemView);

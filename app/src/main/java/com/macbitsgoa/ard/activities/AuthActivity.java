@@ -47,19 +47,19 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     /**
      * TAG for this activity.
      */
-    private static final String TAG = AHC.TAG + ".AuthActivity";
+    public static final String TAG = AuthActivity.class.getSimpleName();
 
     /**
      * AuthHelperForGoogle instance to handle backend functions.
      */
-    public AuthHelperForGoogle mHelper;
+    private AuthHelperForGoogle mHelper;
 
     /**
      * Google Sign In Button.
      */
     @BindView(R.id.btn_content_auth_google)
     Button googleSignInButton;
-    ProgressDialog pd;
+    private ProgressDialog pd;
 
     @BindView(R.id.tv_activity_auth_version)
     TextView versionTV;

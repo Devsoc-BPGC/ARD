@@ -22,7 +22,7 @@ public class DetailsAdapter extends RecyclerView.Adapter<DetailsViewHolder> {
     /**
      * List to store titles of all the options in details list.
      */
-    private List<String> itemsList;
+    private final List<String> itemsList;
 
     /**
      * Constructor for recyclerView adapter.

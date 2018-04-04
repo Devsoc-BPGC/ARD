@@ -18,16 +18,17 @@ import io.realm.RealmResults;
 import io.realm.Sort;
 
 /**
- * Created by vikramaditya on 14/11/17.
+ * Adapter to display ann slideshow content.
+ *
+ * @author Vikramaditya Kukreja
  */
-
 public class AnnSlideshowAdapter extends PagerAdapter
         implements RealmChangeListener<RealmResults<AnnItem>> {
 
     /**
      * Realm database reference.
      */
-    private Realm database;
+    private final Realm database;
 
     /**
      * Realm results for ann data.
@@ -73,9 +74,6 @@ public class AnnSlideshowAdapter extends PagerAdapter
 
     @Override
     public void onChange(@NonNull final RealmResults<AnnItem> annItems) {
-        this.annItems.removeAllChangeListeners();
-        this.annItems = annItems;
-        this.annItems.addChangeListener(this);
         notifyDataSetChanged();
     }
 

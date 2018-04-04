@@ -6,6 +6,7 @@ import android.util.Log;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
 import com.macbitsgoa.ard.models.FaqItem;
@@ -23,18 +24,23 @@ import io.realm.Realm;
 
 public class ForumService extends BaseIntentService {
 
+    /**
+     * Tag for this class.
+     */
     public static final String TAG = ForumService.class.getSimpleName();
 
     public ForumService() {
         super(TAG);
     }
 
+    DatabaseReference forumRef;
+
     @Override
-    protected void onHandleIntent(@Nullable Intent intent) {
+    protected void onHandleIntent(@Nullable final Intent intent) {
         super.onHandleIntent(intent);
-        getRootReference()
-                .child(AHC.FDR_FORUM)
-                .addListenerForSingleValueEvent(getForumVEL());
+        setIntentRedelivery(true);
+        forumRef = getRootReference().child(AHC.FDR_FORUM);
+        forumRef.addValueEventListener(getForumVEL());
     }
 
     /**
@@ -42,7 +48,7 @@ public class ForumService extends BaseIntentService {
      *
      * @return ValueEventListener
      */
-    public ValueEventListener getForumVEL() {
+    private ValueEventListener getForumVEL() {
         return new ValueEventListener() {
             private Realm database;
 
@@ -53,9 +59,11 @@ public class ForumService extends BaseIntentService {
                     AHC.logd(TAG, "No faq data at all");
                     return;
                 }
+                showDebugToast("Updating forum content");
                 database = Realm.getDefaultInstance();
                 faqParse(dataSnapshot.child(FaqItemKeys.FDR_FAQ));
                 database.close();
+                forumRef.removeEventListener(this);
             }
 
             private void faqParse(final DataSnapshot faqSnapshot) {
@@ -67,17 +75,15 @@ public class ForumService extends BaseIntentService {
                 for (final DataSnapshot child : faqSnapshot.getChildren()) {
                     final String key = child.getKey();
                     final Date updateDate = child.child(FaqItemKeys.UPDATE).getValue(Date.class);
-                    if (updateDate == null) continue;
-                    AHC.logd(TAG, "Faq last update " + updateDate);
                     database.executeTransaction(r -> {
                         FaqItem fi = r.where(FaqItem.class)
                                 .equalTo(FaqItemKeys.KEY, key).findFirst();
                         if (fi == null) {
                             fi = r.createObject(FaqItem.class, key);
-                            AHC.logd(TAG, "Creating new faq");
                         } else if (fi.getUpdateDate().getTime() == updateDate.getTime()) {
                             return;
                         }
+                        AHC.logd(TAG, "Creating/Updating faq " + key);
                         fi.setQuestion(child.child(FaqItemKeys.QUES).getValue(String.class));
                         fi.setAnswer(child.child(FaqItemKeys.ANS).getValue(String.class));
                         fi.setAuthor(child.child(FaqItemKeys.AUTHOR).getValue(String.class));
@@ -94,6 +100,7 @@ public class ForumService extends BaseIntentService {
             @Override
             public void onCancelled(final DatabaseError databaseError) {
                 Log.e(TAG, "Database read error for forum node\n" + databaseError.toString());
+                forumRef.removeEventListener(this);
             }
         };
     }

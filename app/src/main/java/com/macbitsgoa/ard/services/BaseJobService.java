@@ -1,7 +1,9 @@
 package com.macbitsgoa.ard.services;
 
 import android.annotation.SuppressLint;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.widget.Toast;
 
 import com.firebase.jobdispatcher.JobParameters;
 import com.firebase.jobdispatcher.JobService;
@@ -15,10 +17,17 @@ import com.macbitsgoa.ard.BuildConfig;
 
 /**
  * Created by vikramaditya on 20/3/18.
+ *
+ * @author Vikramaditya Kukreja
  */
-
 @SuppressLint("Registered")
 public class BaseJobService extends JobService {
+
+    protected void showDebugToast(@NonNull final String message) {
+        if (BuildConfig.DEBUG) {
+            Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+        }
+    }
 
     protected DatabaseReference getRootReference() {
         return FirebaseDatabase.getInstance().getReference().child(BuildConfig.BUILD_TYPE);
@@ -29,17 +38,17 @@ public class BaseJobService extends JobService {
     }
 
     @Nullable
-    protected FirebaseUser getUser() {
+    FirebaseUser getUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
     }
 
     @Override
-    public boolean onStartJob(JobParameters job) {
+    public boolean onStartJob(final JobParameters job) {
         return false;
     }
 
     @Override
-    public boolean onStopJob(JobParameters job) {
+    public boolean onStopJob(final JobParameters job) {
         return true;
     }
 }

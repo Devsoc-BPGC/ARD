@@ -9,8 +9,8 @@ import android.view.View;
  */
 public interface OnItemClickListener {
 
-    void onItemClick(final View view, final int position);
+    void onItemClick(View view, int position);
 
-    void onLongItemClick(final View view, final int position);
+    void onLongItemClick(View view, int position);
 
 }

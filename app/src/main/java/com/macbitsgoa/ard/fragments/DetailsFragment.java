@@ -53,7 +53,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     public static final String TAG = DetailsFragment.class.getSimpleName();
 
     /**
-     * Recycler View to display details items
+     * Recycler View to display details items.
      */
     @BindView(R.id.recyclerView_fragment_details)
     RecyclerView detailRV;
@@ -101,19 +101,13 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         // Required empty public constructor
     }
 
-
     public static DetailsFragment newInstance() {
         return new DetailsFragment();
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-    }
-
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(@NonNull final LayoutInflater inflater, final ViewGroup container,
+                             final Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
         final View view = inflater.inflate(R.layout.fragment_detail, container, false);
@@ -128,8 +122,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         itemList.add("About app");
         itemList.add("Sign Out");
 
-        DetailsAdapter detailsAdapter = new DetailsAdapter(itemList);
-        detailRV.setAdapter(detailsAdapter);
+        detailRV.setAdapter(new DetailsAdapter(itemList));
 
         if (getUser() == null || getUser().getUid() == null) {
             getActivity().finish();
@@ -147,7 +140,8 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         userEmailTV.setText(getUser().getEmail());
         Glide.with(getContext())
                 .load(getUser().getPhotoUrl())
-                .transition(DrawableTransitionOptions.withCrossFade(500))
+                .transition(DrawableTransitionOptions
+                        .withCrossFade(getInteger(R.integer.default_glide_load_fade)))
                 .apply(RequestOptions
                         .circleCropTransform()
                         .error(R.drawable.ic_contact))
@@ -164,10 +158,15 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
         super.onDestroyView();
     }
 
+    /**
+     * Method to return a VEL for user desc.
+     *
+     * @return ValueEventListener
+     */
     private ValueEventListener getData() {
         return new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot ds) {
+            public void onDataChange(final DataSnapshot ds) {
                 //Ds should never be null as the only way a user get this snapshot is if they are in
                 //the list. Else we handle it in onCancelled.
                 if (ds.hasChild(UserItemKeys.DESC)) {
@@ -179,7 +178,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(final DatabaseError databaseError) {
                 AHC.logd(TAG, "Database read error for admin info. User not an admin.");
                 userDescTV.setText(getString(R.string.not_admin_placeholder));
             }
@@ -187,7 +186,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     }
 
     @Override
-    public void onItemClick(View view, int position) {
+    public void onItemClick(final View view, final int position) {
         if (position == 0) {
             //About ARD
             new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
@@ -219,7 +218,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     }
 
     @Override
-    public void onLongItemClick(View view, int position) {
+    public void onLongItemClick(final View view, final int position) {
         //Not used
     }
 }

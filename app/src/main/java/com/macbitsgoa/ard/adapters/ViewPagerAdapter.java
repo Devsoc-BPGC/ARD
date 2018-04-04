@@ -21,12 +21,12 @@ public class ViewPagerAdapter extends FragmentPagerAdapter {
     /**
      * List to hold fragments objects.
      */
-    private List<Fragment> fragmentList = new ArrayList<>();
+    private final List<Fragment> fragmentList = new ArrayList<>();
 
     /**
      * List to hold fragment titles.
      */
-    private List<String> fragmentTitlesList = new ArrayList<>();
+    private final List<String> fragmentTitlesList = new ArrayList<>();
 
     /**
      * Constructor with args.

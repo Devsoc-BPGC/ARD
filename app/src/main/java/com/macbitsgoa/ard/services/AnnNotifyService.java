@@ -21,10 +21,9 @@ import com.macbitsgoa.ard.utils.AHC;
  * as id is contant value. This service also checks if {@link AnnActivity} is running or not before
  * posting the notification.
  *
- * @author Vikramaditya Kukreja.
+ * @author Vikramaditya Kukreja
  * @see #NOTIFICATION_ID
  */
-
 public class AnnNotifyService extends BaseJobService {
 
     /**
@@ -38,9 +37,11 @@ public class AnnNotifyService extends BaseJobService {
     public static final int NOTIFICATION_ID = 223;
 
     @Override
-    public boolean onStartJob(JobParameters job) {
+    public boolean onStartJob(final JobParameters job) {
         //Don't display notification if AnnActivity is running
-        if (AnnActivity.inForeground) return false;
+        if (AnnActivity.inForeground) {
+            return false;
+        }
 
         final Bundle extras = job.getExtras();
         final String author = extras.getString(AnnItemKeys.AUTHOR, AHC.DEFAULT_AUTHOR);
@@ -73,7 +74,7 @@ public class AnnNotifyService extends BaseJobService {
     }
 
     @Override
-    public boolean onStopJob(JobParameters job) {
+    public boolean onStopJob(final JobParameters job) {
         return true;
     }
 }

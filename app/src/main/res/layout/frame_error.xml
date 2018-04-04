@@ -31,7 +31,6 @@
         tools:layout_editor_absoluteY="135dp" />
 
     <TextView
-        android:id="@+id/tv_frame_error_desc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="24dp"

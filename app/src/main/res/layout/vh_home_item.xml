@@ -6,16 +6,16 @@
     android:clickable="true"
     android:focusable="true"
     android:foreground="?selectableItemBackground"
-    android:paddingTop="4dp">
+    android:padding="2dp">
 
     <ImageView
         android:id="@+id/imgView_home_item"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:foreground="@drawable/gradient"
         android:maxHeight="200dp"
         android:minHeight="150dp"
-        android:scaleType="fitCenter"
+        android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -45,22 +45,20 @@
         android:paddingTop="4dp"
         android:text="News"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_vh_home_item_1" />
 
     <LinearLayout
         android:id="@+id/ll_vh_home_status"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="8dp"
-        android:layout_marginEnd="8dp"
+        android:layout_margin="8dp"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@+id/tv_vh_home_item_1"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintBottom_toBottomOf="@+id/imgView_home_item"
+        app:layout_constraintEnd_toEndOf="@+id/imgView_home_item">
 
 
         <ImageView
-            android:id="@+id/imgView_vh_home_item_comment_ic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_comment_count_24dp" />
@@ -76,7 +74,6 @@
             android:textColor="?fillColor_vh_home_item_status" />
 
         <ImageView
-            android:id="@+id/imgView_vh_home_item_image_ic"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:srcCompat="@drawable/ic_image_count_24dp" />

@@ -29,17 +29,28 @@ import com.macbitsgoa.ard.viewholders.TextViewHolder;
 import java.util.List;
 
 /**
- * Created by vikramaditya on 22/3/18.
+ * Adapter to display {@link com.macbitsgoa.ard.models.home.HomeItem} object. Called from contructor
+ * by passing key value to display.
+ *
+ * @author Vikramaditya Kukreja
  */
-
-public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements ImageViewHolder.ImageClickListener {
+public class PostDetailsAdapter extends BaseAdapter<RecyclerView.ViewHolder>
+        implements ImageViewHolder.ImageClickListener {
 
     /**
      * Tag for this class.
      */
     public static final String TAG = PostDetailsAdapter.class.getSimpleName();
-    private Context context;
-    private List<TypeItem> items;
+
+    /**
+     * Context required for image clicking.
+     */
+    private final Context context;
+
+    /**
+     * Items to display.
+     */
+    private final List<TypeItem> items;
 
     public PostDetailsAdapter(List<TypeItem> items, final Context context) {
         this.context = context;
@@ -53,9 +64,6 @@ public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
         final LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         final View view;
         switch (viewType) {
-            case PostType.ANNOUNCEMENT:
-                view = inflater.inflate(R.layout.vh_ann_activity_item, parent, false);
-                return new AnnViewHolder(view);
             case HomeType.TEXT_ITEM:
                 view = inflater.inflate(R.layout.vh_big_text, parent, false);
                 return new TextViewHolder(view, R.id.tv_vh_big_text);
@@ -67,19 +75,10 @@ public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull final RecyclerView.ViewHolder holder,
+                                 final int position) {
         final Object obj = items.get(position).getData();
         switch (holder.getItemViewType()) {
-            case PostType.ANNOUNCEMENT: {
-                final AnnViewHolder anvh = (AnnViewHolder) holder;
-                final AnnItem ai = (AnnItem) obj;
-                anvh.data.setText(Html.fromHtml(ai.getData()));
-                anvh.extras.setText(Html.fromHtml(ai.getAuthor() + AHC.SEPARATOR
-                        + AHC.getSimpleDayOrTime(ai.getDate())));
-                anvh.data.setMovementMethod(LinkMovementMethod.getInstance());
-                anvh.extras.setMovementMethod(LinkMovementMethod.getInstance());
-                break;
-            }
             case HomeType.TEXT_ITEM: {
                 final TextViewHolder tvh = (TextViewHolder) holder;
                 final TextItem ti = (TextItem) obj;
@@ -96,7 +95,7 @@ public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
-    public int getItemViewType(int position) {
+    public int getItemViewType(final int position) {
         return items.get(position).getType();
     }
 
@@ -106,7 +105,7 @@ public class PostDetailsAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     }
 
     @Override
-    public void onImageClick(Uri uri) {
+    public void onImageClick(final Uri uri) {
         if (uri == null) return;
         try {
             context.startActivity(new Intent(Intent.ACTION_VIEW, uri));

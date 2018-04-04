@@ -42,17 +42,30 @@ public class HomeService extends BaseJobService {
 
     private JobParameters job;
 
+    DatabaseReference homeRef;
+    DatabaseReference annRef;
+    DatabaseReference imageSlideshowRef;
+
+    ValueEventListener homeRefVEL;
+    ValueEventListener annRefVEL;
+    ValueEventListener imageRefVEL;
+
     @Override
     public boolean onStartJob(JobParameters job) {
         this.job = job;
         AHC.logd(TAG, "Starting new thread for job");
-        final DatabaseReference homeRef = getRootReference().child(AHC.FDR_HOME);
-        final DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
-        final DatabaseReference imageSlideshowRef = getRootReference().child(AHC.FDR_EXTRAS).child("home").child("slideshow");
+        homeRef = getRootReference().child(AHC.FDR_HOME);
+        annRef = getRootReference().child(AHC.FDR_ANN);
+        imageSlideshowRef = getRootReference()
+                .child(AHC.FDR_EXTRAS).child("home").child("slideshow");
 
-        homeRef.addListenerForSingleValueEvent(getHomeListener());
-        annRef.addListenerForSingleValueEvent(getAnnListener());
-        imageSlideshowRef.addListenerForSingleValueEvent(getImageSlideShowVEL());
+        homeRefVEL = getHomeListener();
+        annRefVEL = getAnnListener();
+        imageRefVEL = getImageSlideShowVEL();
+
+        homeRef.addValueEventListener(homeRefVEL);
+        annRef.addValueEventListener(annRefVEL);
+        imageSlideshowRef.addValueEventListener(imageRefVEL);
         return true;
     }
 
@@ -65,6 +78,7 @@ public class HomeService extends BaseJobService {
         return new ValueEventListener() {
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
+                showDebugToast("Updating home service");
                 new Thread(() -> {
                     saveHomeSnapshotToRealm(dataSnapshot);
                     completedHome = true;
@@ -86,7 +100,7 @@ public class HomeService extends BaseJobService {
      *
      * @return ChildEventListener object.
      */
-    public ValueEventListener getAnnListener() {
+    private ValueEventListener getAnnListener() {
         return new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -146,7 +160,7 @@ public class HomeService extends BaseJobService {
     }
 
     @SuppressWarnings("OverlyLongMethod")
-    public static void saveHomeSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
+    private static void saveHomeSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
         if (dataSnapshot == null) return;
         final Realm database = Realm.getDefaultInstance();
         for (DataSnapshot child : dataSnapshot.getChildren()) {
@@ -226,6 +240,11 @@ public class HomeService extends BaseJobService {
 
     private void checkJobStatus() {
         AHC.logd(TAG, "Status of jobs is " + completedAnn + " and " + completedHome);
-        if (completedAnn && completedHome && completedSlideshow) jobFinished(job, false);
+        if (completedAnn && completedHome && completedSlideshow) {
+            homeRef.removeEventListener(homeRefVEL);
+            annRef.removeEventListener(annRefVEL);
+            imageSlideshowRef.removeEventListener(imageRefVEL);
+            jobFinished(job, false);
+        }
     }
 }

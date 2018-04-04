@@ -14,12 +14,6 @@ public class AnnItemKeys {
     public static final String KEY = "key";
 
     /**
-     * This key is used to differentiate a object of AnnItem from HomeItem when passing data
-     * to {@link com.macbitsgoa.ard.activities.PostDetailsActivity} via intent.
-     */
-    public static final String SECONDARY_KEY = "annItem";
-
-    /**
      * Key for {@link com.macbitsgoa.ard.models.AnnItem#data} field.
      */
     public static final String DATA = "data";

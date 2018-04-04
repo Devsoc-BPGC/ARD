@@ -15,19 +15,19 @@ public class BaseAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerVie
     Realm database;
 
     @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         database = Realm.getDefaultInstance();
     }
 
     @NonNull
     @Override
-    public VH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public VH onCreateViewHolder(@NonNull final ViewGroup parent, final int viewType) {
         return null;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull VH holder, int position) {
+    public void onBindViewHolder(@NonNull final VH holder, final int position) {
 
     }
 
@@ -37,7 +37,7 @@ public class BaseAdapter<VH extends RecyclerView.ViewHolder> extends RecyclerVie
     }
 
     @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onDetachedFromRecyclerView(@NonNull final RecyclerView recyclerView) {
         super.onDetachedFromRecyclerView(recyclerView);
         database.close();
     }

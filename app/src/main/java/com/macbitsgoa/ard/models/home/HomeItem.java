@@ -10,6 +10,7 @@ import java.util.Date;
 
 import io.realm.RealmList;
 import io.realm.RealmObject;
+import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
 /**
@@ -35,6 +36,7 @@ public class HomeItem extends RealmObject {
      * Date of update/creation.
      */
     @NonNull
+    @Index
     private Date date = Calendar.getInstance().getTime();
 
     /**
@@ -101,7 +103,7 @@ public class HomeItem extends RealmObject {
         return date;
     }
 
-    public void setDate(@Nullable Date date) {
+    public void setDate(@Nullable final Date date) {
         if (date != null) {
             this.date = date;
         }

@@ -45,8 +45,8 @@
             android:name=".activities.AuthActivity"
             android:label="@string/title_activity_auth"
             android:parentActivityName=".activities.MainActivity"
-            android:theme="@style/AppTheme.NoActionBar"
-            android:screenOrientation="portrait">
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme.NoActionBar">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".activities.MainActivity" />
@@ -86,9 +86,8 @@
                 <action android:name="com.firebase.jobdispatcher.ACTION_EXECUTE" />
             </intent-filter>
         </service>
-        <service android:name=".services.SendService"/>
-        <service
-            android:name=".services.NotifyService" />
+        <service android:name=".services.SendService" />
+        <service android:name=".services.NotifyService" />
         <service
             android:name=".services.HomeService"
             android:description="@string/home_service_desc"
@@ -106,12 +105,16 @@
             </intent-filter>
         </service>
         <service android:name=".services.SendDocumentService" />
-        <service android:name=".services.FCMService">
+        <service
+            android:name=".services.FCMService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <service android:name=".services.InstanceService">
+        <service
+            android:name=".services.InstanceService"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
             </intent-filter>

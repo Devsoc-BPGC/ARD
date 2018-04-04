@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Animation duration for fabs in Home fragment -->
-    <integer name="anim_fab_duration">300</integer>
+    <!-- Animation duration for slideshows in Home fragment -->
+    <integer name="image_slideshow_period">5000</integer>
+    <integer name="ann_slideshow_period">2500</integer>
 
-    <!-- Max message length for announcements in Home Ann Fragment -->
-    <integer name="ann_max_char">140</integer>
-
+    <integer name="default_glide_load_fade">500</integer>
 </resources>

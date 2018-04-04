@@ -5,7 +5,7 @@ package com.macbitsgoa.ard.types;
  *
  * @author Vikramaditya Kukreja
  */
-public class ForumType {
+class ForumType {
 
     /**
      * Simple question and answer based faq item code.

@@ -39,7 +39,7 @@ public class SlideshowAdapter extends PagerAdapter
     /**
      * Realm database.
      */
-    private Realm database;
+    private final Realm database;
 
     /**
      * Realm results for slideshow data.
@@ -127,9 +127,6 @@ public class SlideshowAdapter extends PagerAdapter
 
     @Override
     public void onChange(@NonNull final RealmResults<SlideshowItem> slideshowItems) {
-        this.slideshowItems.removeAllChangeListeners();
-        this.slideshowItems = slideshowItems;
-        this.slideshowItems.addChangeListener(this);
         notifyDataSetChanged();
     }
 

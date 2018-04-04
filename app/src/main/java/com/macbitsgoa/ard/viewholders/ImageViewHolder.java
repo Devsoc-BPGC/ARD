@@ -20,8 +20,8 @@ import com.macbitsgoa.ard.R;
  * @author Vikramaditya Kukreja.
  */
 public class ImageViewHolder extends RecyclerView.ViewHolder {
-    private ImageView imageView;
-    private Context context;
+    private final ImageView imageView;
+    private final Context context;
 
     /**
      * Current url being displayed.

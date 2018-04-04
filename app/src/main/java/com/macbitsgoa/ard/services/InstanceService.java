@@ -14,7 +14,7 @@ public class InstanceService extends FirebaseInstanceIdService {
     /**
      * Tag for this class.
      */
-    private static final String TAG = InstanceService.class.getSimpleName();
+    public static final String TAG = InstanceService.class.getSimpleName();
 
     /**
      * Called if InstanceID token is updated. This may occur if the security of
@@ -24,7 +24,7 @@ public class InstanceService extends FirebaseInstanceIdService {
     @Override
     public void onTokenRefresh() {
         // Get updated InstanceID token.
-        String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+        final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
         AHC.logd(TAG, "Refreshed token: " + refreshedToken);
         AHC.sendRegistrationToServer(refreshedToken);
     }

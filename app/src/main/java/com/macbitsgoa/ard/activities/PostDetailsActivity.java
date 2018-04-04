@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.PostDetailsAdapter;
@@ -46,16 +47,10 @@ public class PostDetailsActivity extends BaseActivity {
     Toolbar toolbar;
 
     /**
-     * Recyclerview used to display post content.
+     * RecyclerView used to display post content.
      */
     @BindView(R.id.rv_content_post_details_post)
     RecyclerView recyclerView;
-
-    /**
-     * Framelayout to display when there is an error.
-     */
-    @BindView(R.id.frameLayout_content_post_details_empty)
-    FrameLayout errorLayout;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
@@ -65,10 +60,8 @@ public class PostDetailsActivity extends BaseActivity {
 
         //If opening intent is null, we don't have data to show
         //exit this activity
-        //If intent is not null but does not extras to decide what data is to be shown, exit again
         if (getIntent() == null
-                || !(getIntent().hasExtra(HomeItemKeys.KEY)
-                || getIntent().hasExtra(AnnItemKeys.SECONDARY_KEY))) {
+                || !(getIntent().hasExtra(HomeItemKeys.KEY))) {
             finish();
         }
 
@@ -79,18 +72,9 @@ public class PostDetailsActivity extends BaseActivity {
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
 
-        String key = getIntent().getStringExtra(HomeItemKeys.KEY);
+        final String key = getIntent().getStringExtra(HomeItemKeys.KEY);
 
-        List<TypeItem> postItems;
-        if (key == null) {
-            //KEY fields are same in both classes and extra chars are required to differentiate
-            //if key is null, then it is possible we passed a different key
-            key = getIntent().getStringExtra(AnnItemKeys.SECONDARY_KEY);
-            postItems = handleAnnItem(key);
-        } else {
-            postItems = handleHomeItem(key);
-        }
-        final PostDetailsAdapter pdAdapter = new PostDetailsAdapter(postItems, this);
+        final PostDetailsAdapter pdAdapter = new PostDetailsAdapter(handleHomeItem(key), this);
         recyclerView.setAdapter(pdAdapter);
     }
 
@@ -109,11 +93,9 @@ public class PostDetailsActivity extends BaseActivity {
         final List<TypeItem> pItems = new ArrayList<>();
 
         if (post == null) {
-            errorLayout.addView(View.inflate(this, R.layout.frame_error, null));
-            errorLayout.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
+            showToast("Could not load post");
+            finish();
         } else {
-            errorLayout.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
 
             int i = 0;
@@ -137,22 +119,6 @@ public class PostDetailsActivity extends BaseActivity {
             for (; j < images.size(); j++)
                 pItems.add(new TypeItem(images.get(j), HomeType.PHOTO_ITEM));
 
-        }
-        return pItems;
-    }
-
-    private List<TypeItem> handleAnnItem(final String key) {
-        final AnnItem ai = database.where(AnnItem.class).equalTo(AnnItemKeys.KEY, key)
-                .findFirst();
-        final List<TypeItem> pItems = new ArrayList<>();
-        if (ai == null) {
-            errorLayout.addView(View.inflate(this, R.layout.frame_error, null));
-            errorLayout.setVisibility(View.VISIBLE);
-            recyclerView.setVisibility(View.GONE);
-        } else {
-            errorLayout.setVisibility(View.GONE);
-            recyclerView.setVisibility(View.VISIBLE);
-            pItems.add(new TypeItem(ai, PostType.ANNOUNCEMENT));
         }
         return pItems;
     }

@@ -57,10 +57,15 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
     @BindView(R.id.tv_fg_forum_general_empty)
     TextView emptyTextView;
 
-
+    /**
+     * Sort order image button.
+     */
     @BindView(R.id.imgView_fragment_forum_general_sort_order)
     ImageButton sortOrderImg;
 
+    /**
+     * Sort image button.
+     */
     @BindView(R.id.imgView_fragment_forum_general_sort)
     ImageButton sortImg;
 
@@ -69,12 +74,10 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
      */
     private ForumAdapter forumAdapter;
 
-    Animatable toDesc, toAsc, sortAnimatable;
-
     /**
      * Refers to "Last modified".
      */
-    int currentSortOrder = 2;
+    private int currentSortOrder = 2;
 
     /**
      * Use this method to create a new instance of the fragment.
@@ -106,15 +109,15 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
         forumAdapter = new ForumAdapter(getArguments().getString(SECTION_KEY), this);
         recyclerView.setAdapter(forumAdapter);
 
-        toDesc = (Animatable) sortOrderImg.getDrawable();
-        sortAnimatable = (Animatable) sortImg.getDrawable();
-
         return view;
     }
 
+    /**
+     * Sort direction change listener.
+     */
     @OnClick(R.id.imgView_fragment_forum_general_sort_order)
     public void onSortDirectionChanged() {
-        String fieldName;
+        final String fieldName;
         if (currentSortOrder == 0) {
             fieldName = FaqItemKeys.QUES;
         } else if (currentSortOrder == 1) {
@@ -125,9 +128,12 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
         forumAdapter.sortBy(fieldName, false);
     }
 
+    /**
+     * On sort button press.
+     */
     @OnClick(R.id.imgView_fragment_forum_general_sort)
     public void onSortPressed() {
-        sortAnimatable.start();
+        ((Animatable) sortImg.getDrawable()).start();
         final CharSequence[] sortOrders = new CharSequence[]{
                 "Alphabetical",
                 "Last Created",
@@ -135,7 +141,7 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
         };
         new AlertDialog.Builder(getActivity()).setSingleChoiceItems(sortOrders, currentSortOrder,
                 (dialog, which) -> {
-                    String fieldName;
+                    final String fieldName;
                     if (which == 0) {
                         currentSortOrder = 0;
                         fieldName = FaqItemKeys.QUES;
@@ -164,12 +170,10 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
     public void onSortOrderChanged(final Sort newSortOrder) {
         if (newSortOrder == Sort.DESCENDING) {
             sortOrderImg.setImageResource(R.drawable.avd_anim_desc);
-            toDesc = (Animatable) sortOrderImg.getDrawable();
-            toDesc.start();
+            ((Animatable) sortOrderImg.getDrawable()).start();
         } else {
             sortOrderImg.setImageResource(R.drawable.avd_anim_asc);
-            toAsc = (Animatable) sortOrderImg.getDrawable();
-            toAsc.start();
+            ((Animatable) sortOrderImg.getDrawable()).start();
         }
     }
 }

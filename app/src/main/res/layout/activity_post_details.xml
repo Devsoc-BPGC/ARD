@@ -21,6 +21,11 @@
 
     </android.support.design.widget.AppBarLayout>
 
-    <include layout="@layout/content_post_details" />
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/rv_content_post_details_post"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:descendantFocusability="afterDescendants" />
 
 </android.support.design.widget.CoordinatorLayout>

@@ -23,7 +23,7 @@
     <property name="fileExtensions" value="java, xml"/>
 
     <module name="SuppressionFilter">
-        <property name="file" value="${suppressionFile}"/>
+        <property name="file" value="config/checkstyle/suppressions.xml"/>
     </module>
 
     <module name="FileTabCharacter">
@@ -292,5 +292,5 @@
             <property name="allowEmptyCatches" value="true"/>
         </module>
 
-    </module>
+    </module> 
 </module>

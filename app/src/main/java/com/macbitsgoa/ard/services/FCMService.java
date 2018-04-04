@@ -9,7 +9,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
-import com.crashlytics.android.Crashlytics;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 import com.macbitsgoa.ard.R;
@@ -39,9 +38,8 @@ public class FCMService extends FirebaseMessagingService {
     public static final String TAG = FCMService.class.getSimpleName();
 
     @Override
-    public void onMessageReceived(RemoteMessage remoteMessage) {
+    public void onMessageReceived(final RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
-        AHC.logd(TAG, "New FCM from " + remoteMessage.getFrom());
         final Map<String, String> data = remoteMessage.getData();
         if (data.size() == 0) {
             AHC.logd(TAG, "No data in FCM message");
@@ -50,6 +48,8 @@ public class FCMService extends FirebaseMessagingService {
         //Data message
         final String action = data.get(FCMKeys.ACTION);
         AHC.logd(TAG, "Action received from FCM " + action);
+        //TODO send fcm for deletes also in ARDI. then remove this line
+        AHC.startService(this, MaintenanceService.class, MaintenanceService.TAG);
         switch (action) {
             case FCMKeys.ACTION_SERVICE: {
                 try {
@@ -64,11 +64,15 @@ public class FCMService extends FirebaseMessagingService {
                 break;
             }
             case FCMKeys.ACTION_ANNOUNCEMENT: {
-                Bundle extras = new Bundle();
+                final Bundle extras = new Bundle();
                 extras.putString(AnnItemKeys.AUTHOR, data.get(AnnItemKeys.AUTHOR));
                 extras.putString(AnnItemKeys.DATA, data.get(AnnItemKeys.DATA));
                 AHC.startService(this, AnnNotifyService.class, AnnNotifyService.TAG, extras);
                 AHC.startService(this, HomeService.class, HomeService.TAG);
+                break;
+            }
+            case FCMKeys.ACTION_DELETE: {
+                AHC.startService(this, MaintenanceService.class, MaintenanceService.TAG);
                 break;
             }
             default: {
@@ -91,7 +95,7 @@ public class FCMService extends FirebaseMessagingService {
         final String text = data.get(FCMKeys.ACTION_VIEW_TEXT);
         final int notificationId = Integer.parseInt(data.get(FCMKeys.ID));
 
-        PendingIntent pi;
+        final PendingIntent pi;
         if (uri == null) {
             pi = PendingIntent.getActivity(this, _ID,
                     new Intent(this, AnnActivity.class), PendingIntent.FLAG_UPDATE_CURRENT);
@@ -100,9 +104,10 @@ public class FCMService extends FirebaseMessagingService {
                     new Intent(Intent.ACTION_VIEW, uri), PendingIntent.FLAG_UPDATE_CURRENT);
         }
 
-        NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        final NotificationManager nm
+                = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         AHC.createChannels(nm);
-        NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, AHC.ARD)
+        final NotificationCompat.Builder ncb = new NotificationCompat.Builder(this, AHC.ARD)
                 .setContentTitle(title)
                 .setContentIntent(pi)
                 .setAutoCancel(true)
@@ -110,15 +115,24 @@ public class FCMService extends FirebaseMessagingService {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setOnlyAlertOnce(true)
                 .setCategory(NotificationCompat.CATEGORY_RECOMMENDATION)
-                .setStyle(new NotificationCompat.BigTextStyle().bigText(text).setBigContentTitle(title).setSummaryText(AHC.ARD))
+                .setStyle(new NotificationCompat.BigTextStyle()
+                        .bigText(text)
+                        .setBigContentTitle(title)
+                        .setSummaryText(AHC.ARD))
                 .setSmallIcon(R.mipmap.ic_launcher);
 
         nm.notify(notificationId, ncb.build());
     }
 
-    private void scheduleJob(Map<String, String> data) throws ClassNotFoundException {
+    /**
+     * Schedule job depending on remote message data.
+     *
+     * @param data Map data from remote message of FCM.
+     * @throws ClassNotFoundException In case the required service was not found.
+     */
+    private void scheduleJob(final Map<String, String> data) throws ClassNotFoundException {
         AHC.logd(TAG, "Action is " + FCMKeys.ACTION_SERVICE);
-        String service = data.get(FCMKeys.ACTION_SERVICE_NAME);
+        final String service = data.get(FCMKeys.ACTION_SERVICE_NAME);
         if (!service.contains("Service")) {
             AHC.logd(TAG, "Action does not have a valid service. Found " + service);
             throw new ClassNotFoundException("Not a valid service");

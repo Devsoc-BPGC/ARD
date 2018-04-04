@@ -2,6 +2,7 @@ package com.macbitsgoa.ard.fragments;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.support.annotation.IntegerRes;
 import android.support.v4.app.Fragment;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -16,13 +17,22 @@ import javax.annotation.Nullable;
 import io.realm.Realm;
 
 /**
- * Created by vikramaditya on 26/10/17.
+ * Base fragment with useful methods.
+ *
+ * @author Vikramaditya Kukreja
  */
-
 public class BaseFragment extends Fragment {
 
+    /**
+     * Realm database field.
+     */
     protected Realm database;
 
+    /**
+     * Get root reference depending on build config value.
+     *
+     * @return Database root reference for current app.
+     */
     protected DatabaseReference getRootReference() {
         return FirebaseDatabase.getInstance().getReference().child(BuildConfig.BUILD_TYPE);
     }
@@ -32,10 +42,25 @@ public class BaseFragment extends Fragment {
      *
      * @return app shared pref {@link AHC#SP_APP} in private mode.
      */
-    public SharedPreferences getDefaultSharedPref() {
+    protected SharedPreferences getDefaultSharedPref() {
         return getContext().getSharedPreferences(AHC.SP_APP, Context.MODE_PRIVATE);
     }
 
+    /**
+     * Get integer resource.
+     *
+     * @param resourceId Int resource id.
+     * @return int value.
+     */
+    protected int getInteger(@IntegerRes final int resourceId) {
+        return getResources().getInteger(resourceId);
+    }
+
+    /**
+     * Method to get current user.
+     *
+     * @return Firebase user. Value is nullable.
+     */
     @Nullable
     protected FirebaseUser getUser() {
         return FirebaseAuth.getInstance().getCurrentUser();

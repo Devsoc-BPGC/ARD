@@ -9,7 +9,6 @@ import android.view.MenuItem;
 
 import com.firebase.jobdispatcher.Constraint;
 import com.firebase.jobdispatcher.FirebaseJobDispatcher;
-import com.firebase.jobdispatcher.GooglePlayDriver;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
@@ -37,8 +36,7 @@ import butterknife.ButterKnife;
  */
 public class MainActivity extends BaseActivity
         implements NavigationView.OnNavigationItemSelectedListener,
-        BottomNavigationView.OnNavigationItemSelectedListener //,
-        /*ChatFragmentListener*/ {
+        BottomNavigationView.OnNavigationItemSelectedListener {
 
     /**
      * Tag for this class.
@@ -51,6 +49,11 @@ public class MainActivity extends BaseActivity
     @BindView(R.id.bottom_nav_activity_main)
     BottomNavigationView bottomNavigationView;
 
+    /**
+     * int variable storing the currently selected fragment.
+     *
+     * @see MainActivityType
+     */
     private int currentSection;
 
     /**
@@ -68,6 +71,9 @@ public class MainActivity extends BaseActivity
      */
     private DetailsFragment detailFragment;
 
+    /**
+     * Job dispatcher service.
+     */
     private FirebaseJobDispatcher bgServicesDispatcher;
 
     /**
@@ -131,6 +137,9 @@ public class MainActivity extends BaseActivity
         return true;
     }
 
+    /**
+     * Method to launch a fragment when click on bottom nav.
+     */
     private void launchFragment() {
         final BaseFragment baseFragment;
         if (currentSection == MainActivityType.FORUM) {
@@ -143,7 +152,6 @@ public class MainActivity extends BaseActivity
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.frame_content_main, baseFragment)
-                .addToBackStack(null)
                 .commit();
     }
 
@@ -158,9 +166,12 @@ public class MainActivity extends BaseActivity
         }
     }
 
+    /**
+     * Job dispatcher method.
+     */
     private void startBgServices() {
-        bgServicesDispatcher =
-                new FirebaseJobDispatcher(new GooglePlayDriver(this));
+        bgServicesDispatcher
+                = AHC.getJobDispatcher(this);
         final Job maintenanceJob = bgServicesDispatcher.newJobBuilder()
                 .setService(MaintenanceService.class)
                 .setTag(MaintenanceService.TAG)
