@@ -6,38 +6,48 @@ import android.support.annotation.Nullable;
 import java.util.Calendar;
 import java.util.Date;
 
+import io.realm.RealmObject;
+import io.realm.annotations.PrimaryKey;
+
 /**
  * Class to represent a slideshow image.
  *
  * @author Vikramaditya Kukreja
+ * @author Rushikesh Jogdand
  */
-public class SlideshowItem {
+public class SlideshowItem extends RealmObject {
 
-    /**
-     * Url of slideshow image. Cannot be null.
+    /*
+     * Note: There is no primary key for this item.
+     * Hence, only batch addition/removal should be done
      */
-    @NonNull
+
+    @PrimaryKey
     private String photoUrl;
 
-    /**
-     * Photo title to display.
-     */
-    @Nullable
+    @NonNull
     private String photoTitle;
+
     @NonNull
     private Date photoDate;
-    @Nullable
+
+    @NonNull
     private String photoDesc;
+
     @Nullable
     private String photoTag;
+
     @Nullable
     private String photoTagColor;
+
     @Nullable
     private String photoTagTextColor;
 
     public SlideshowItem() {
         photoUrl = "https://picsum.photos/640/400/?random";
         photoDate = Calendar.getInstance().getTime();
+        photoTitle = "";
+        photoDesc = "";
     }
 
     @NonNull
@@ -45,16 +55,16 @@ public class SlideshowItem {
         return photoUrl;
     }
 
-    public void setPhotoUrl(@NonNull final String photoUrl) {
+    public void setPhotoUrl(@NonNull String photoUrl) {
         this.photoUrl = photoUrl;
     }
 
-    @Nullable
+    @NonNull
     public String getPhotoTitle() {
         return photoTitle;
     }
 
-    public void setPhotoTitle(@Nullable final String photoTitle) {
+    public void setPhotoTitle(@NonNull String photoTitle) {
         this.photoTitle = photoTitle;
     }
 
@@ -63,16 +73,16 @@ public class SlideshowItem {
         return photoDate;
     }
 
-    public void setPhotoDate(@NonNull final Date photoDate) {
+    public void setPhotoDate(@NonNull Date photoDate) {
         this.photoDate = photoDate;
     }
 
-    @Nullable
+    @NonNull
     public String getPhotoDesc() {
         return photoDesc;
     }
 
-    public void setPhotoDesc(@Nullable final String photoDesc) {
+    public void setPhotoDesc(@NonNull String photoDesc) {
         this.photoDesc = photoDesc;
     }
 
@@ -81,7 +91,7 @@ public class SlideshowItem {
         return photoTag;
     }
 
-    public void setPhotoTag(@Nullable final String photoTag) {
+    public void setPhotoTag(@Nullable String photoTag) {
         this.photoTag = photoTag;
     }
 
@@ -90,7 +100,7 @@ public class SlideshowItem {
         return photoTagColor;
     }
 
-    public void setPhotoTagColor(@Nullable final String photoTagColor) {
+    public void setPhotoTagColor(@Nullable String photoTagColor) {
         this.photoTagColor = photoTagColor;
     }
 
@@ -99,7 +109,7 @@ public class SlideshowItem {
         return photoTagTextColor;
     }
 
-    public void setPhotoTagTextColor(@Nullable final String photoTagTextColor) {
+    public void setPhotoTagTextColor(@Nullable String photoTagTextColor) {
         this.photoTagTextColor = photoTagTextColor;
     }
 }
