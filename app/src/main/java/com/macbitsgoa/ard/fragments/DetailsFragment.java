@@ -21,6 +21,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
+import com.macbitsgoa.ard.activities.AboutMacActivity;
 import com.macbitsgoa.ard.activities.AuthActivity;
 import com.macbitsgoa.ard.adapters.DetailsAdapter;
 import com.macbitsgoa.ard.interfaces.OnItemClickListener;
@@ -45,7 +46,7 @@ import butterknife.Unbinder;
  * @author Aayush Singla
  * @author Vikramaditya Kukreja
  */
-public class DetailsFragment extends BaseFragment implements OnItemClickListener {
+public class DetailsFragment extends BaseFragment implements OnItemClickListener, View.OnClickListener {
 
     /**
      * Tag for this class.
@@ -92,6 +93,9 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
      */
     private DatabaseReference userRef;
 
+    @BindView(R.id.tv_about_us)
+    TextView aboutUsTV;
+
     /**
      * Butterknife unbinder.
      */
@@ -110,16 +114,15 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
                              final Bundle savedInstanceState) {
 
         // Inflate the layout for this fragment
-        final View view = inflater.inflate(R.layout.fragment_detail, container, false);
+        View view = inflater.inflate(R.layout.fragment_detail, container, false);
         unbinder = ButterKnife.bind(this, view);
-
         detailRV.setHasFixedSize(true);
         detailRV.addOnItemTouchListener(new RecyclerItemClickListener(getContext(), detailRV, this));
         detailRV.setLayoutManager(new LinearLayoutManager(getContext(), LinearLayoutManager.VERTICAL, false));
 
         final List<String> itemList = new ArrayList<>();
         itemList.add("About ARD");
-        itemList.add("About app");
+        //itemList.add("About app");
         itemList.add("Sign Out");
 
         detailRV.setAdapter(new DetailsAdapter(itemList));
@@ -147,8 +150,12 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
                         .error(R.drawable.ic_contact))
                 .into(userPhotoIV);
 
+
+        aboutUsTV.setOnClickListener(this);
+
         return view;
     }
+
 
     @Override
     public void onDestroyView() {
@@ -192,7 +199,7 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
             new Browser(getActivity()).launchUrl(AHC.ARD_REDIRECT_URL);
         } else if (position == 1) {
             //About MAC
-        } else {
+            // } else {
             //Delete sp
             getDefaultSharedPref().edit().clear().apply();
 
@@ -221,4 +228,10 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
     public void onLongItemClick(final View view, final int position) {
         //Not used
     }
+
+    @Override
+    public void onClick(View v) {
+        startActivity(new Intent(getContext(), AboutMacActivity.class));
+    }
+
 }
