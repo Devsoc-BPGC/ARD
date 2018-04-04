@@ -1,6 +1,7 @@
 package com.macbitsgoa.ard.activities;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
@@ -12,6 +13,9 @@ import com.firebase.jobdispatcher.FirebaseJobDispatcher;
 import com.firebase.jobdispatcher.Job;
 import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
@@ -76,6 +80,8 @@ public class MainActivity extends BaseActivity
      */
     private FirebaseJobDispatcher bgServicesDispatcher;
 
+    private static final String KEY_GPS_AVAILABLE = "MainActivityGPSAvailable";
+
     /**
      * ChatFragment object.
      */
@@ -83,6 +89,17 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences sp = getDefaultSharedPref();
+        if (!sp.getBoolean(KEY_GPS_AVAILABLE, false)) {
+            GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+            int serviceStatus = googleApiAvailability.isGooglePlayServicesAvailable(this);
+            if (serviceStatus == ConnectionResult.SUCCESS) {
+               sp.edit().putBoolean(KEY_GPS_AVAILABLE, true).apply();
+               AHC.logd(TAG, "GPS available");
+            } else {
+                googleApiAvailability.makeGooglePlayServicesAvailable(this).addOnSuccessListener(aVoid -> sp.edit().putBoolean(KEY_GPS_AVAILABLE, true).apply());
+            }
+        }
         //Check if authorised
         if (getUser() == null) {
             AHC.logd(TAG, "Current user null");

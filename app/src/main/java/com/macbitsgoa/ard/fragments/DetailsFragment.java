@@ -36,6 +36,7 @@ import java.util.List;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import io.realm.exceptions.RealmException;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -207,7 +208,11 @@ public class DetailsFragment extends BaseFragment implements OnItemClickListener
             FirebaseAuth.getInstance().signOut();
             //Reset Realm database
             database.executeTransaction(r -> {
-                r.deleteAll();
+                try {
+                    r.deleteAll();
+                } catch (RealmException e) {
+                    AHC.logd(TAG, e.getMessage());
+                }
             });
 
             //Start Auth activity
