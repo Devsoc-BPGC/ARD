@@ -57,7 +57,7 @@
         android:clickable="true"
         android:focusable="true"
         android:padding="16dp"
-        android:text="About ARD"
+        android:text="@string/about_ard"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_vh_details_email" />
@@ -70,7 +70,7 @@
         android:clickable="true"
         android:focusable="true"
         android:padding="16dp"
-        android:text="About app"
+        android:text="@string/about_app"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_vh_details_about_ard" />
@@ -83,7 +83,7 @@
         android:clickable="true"
         android:focusable="true"
         android:padding="16dp"
-        android:text="Sign out"
+        android:text="@string/sign_out"
         app:layout_constraintBottom_toTopOf="@+id/tv_fragment_detail_app_info"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
