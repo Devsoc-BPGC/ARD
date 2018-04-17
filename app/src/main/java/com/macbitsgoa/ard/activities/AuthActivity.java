@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
@@ -42,7 +43,7 @@ import butterknife.ButterKnife;
  * @author Rushikesh Jogdand
  */
 public class AuthActivity extends BaseActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener, OnCompleteListener<AuthResult> {
+        GoogleApiClient.OnConnectionFailedListener, OnCompleteListener<AuthResult>, GoogleApiClient.ConnectionCallbacks {
 
     /**
      * TAG for this activity.
@@ -82,9 +83,21 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
             finish();
         }
         googleApiClient = setupGoogleApiClient();
+        googleApiClient.registerConnectionCallbacks(this);
         mHelper = new AuthHelperForGoogle(this, FirebaseAuth.getInstance());
+    }
 
-        googleSignInButton.setOnClickListener(this);
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (!googleApiClient.isConnected()) googleApiClient.connect();
+    }
+
+
+    @Override
+    protected void onStop() {
+        if (googleApiClient.isConnected()) googleApiClient.disconnect();
+        super.onStop();
     }
 
     /**
@@ -210,5 +223,27 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         userDb.child(UserItemKeys.PHOTO_URL).setValue(photoUrl);
         userDb.child(UserItemKeys.PHONE_NUMBER).setValue(phoneNumber);
         return true;
+    }
+
+    /**
+     * Connect to GoogleApiClient -> SignOut from Google account if Signed in -> enable onClick
+     * GoogleApiClient connected.
+     * @param bundle ignored.
+     */
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(status -> googleSignInButton.setOnClickListener(this));
+    }
+
+    /**
+     * {@link GoogleApiClient#connect()} failed.
+     * @param i the cause of failure. One of {@link com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks#CAUSE_NETWORK_LOST}
+     *          or {@link com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks#CAUSE_SERVICE_DISCONNECTED}.
+     */
+    @Override
+    public void onConnectionSuspended(int i) {
+        if (i == CAUSE_NETWORK_LOST) {
+            AuthActivity.this.showToast(getString(R.string.network_lost));
+        }
     }
 }
