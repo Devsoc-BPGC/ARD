@@ -30,12 +30,13 @@
     <!-- AnnItem ViewHolder -->
     <string name="text_viewHolder_ann_extras_default">Author, Date</string>
     <string name="text_viewHolder_ann_data_default">Announcement</string>
-    <string name="contentDesc_viewHolder_ann_icon">Announcement viewholder icon</string>
+    <string name="contentDesc_viewHolder_ann_icon">Announcement viewHolder icon</string>
 
     <!-- Strings related to login -->
     <string name="banner_text_ard" translatable="false">ARD</string>
     <string name="google_sign_in">Sign in with Google</string>
     <string name="error_google_sign_in_failed">Google sign in failed</string>
+    <string name="network_lost">Network lost, please connect to the internet</string>
 
     <!--Firebase related values-->
     <string name="firebase_web_client_id" translatable="false">895100654158-136bgaosvno98ebaebrdm6cra8ckp0gu.apps.googleusercontent.com</string>
@@ -52,7 +53,10 @@
     <string name="not_admin_placeholder">User</string>
     <string name="default_mac_desc">This app was made by following team of Mobile Applications Club, BITS Goa under the guidance of Dr. Prasanta Kumar Das, Dean Academic Reserach Division, BITS Goa. You can reach us via following media.</string>
 
-    <string name="url_mac_fb">https://www.facebook.com/MACBITSGoa</string>
-    <string name="url_mac_play_store">https://play.google.com/store/apps/developer?id=Mobile+App+Club+-+BITS+Goa</string>
-    <string name="url_mac_github">https://github.com/MobileApplicationsClub/</string>
+    <string name="url_mac_fb" translatable="false">https://www.facebook.com/MACBITSGoa</string>
+    <string name="url_mac_play_store" translatable="false">https://play.google.com/store/apps/developer?id=Mobile+App+Club+-+BITS+Goa</string>
+    <string name="url_mac_github" translatable="false">https://github.com/MobileApplicationsClub/</string>
+    <string name="about_ard">About ARD</string>
+    <string name="about_app">About app</string>
+    <string name="sign_out">Sign out</string>
 </resources>
