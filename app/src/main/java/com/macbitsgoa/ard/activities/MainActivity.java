@@ -103,8 +103,9 @@ public class MainActivity extends BaseActivity
         //Check if authorised
         if (getUser() == null) {
             AHC.logd(TAG, "Current user null");
-            startActivity(new Intent(this, AuthActivity.class));
-            finish();
+            final Intent intent = new Intent(this, AuthActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
         } else {
             AHC.sendRegistrationToServer(FirebaseInstanceId.getInstance().getToken());
             FirebaseMessaging.getInstance().subscribeToTopic(AHC.FDR_USERS);

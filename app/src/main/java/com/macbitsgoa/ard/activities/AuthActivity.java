@@ -175,8 +175,9 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
         if (pd != null)
             pd.cancel();
-        finish();
-        startActivity(new Intent(this, MainActivity.class));
+        final Intent intent = new Intent(this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
     }
 
     /**

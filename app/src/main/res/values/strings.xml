@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">ARD</string>
+    <string name="app_ard_desc" translatable="false">Academic Research Division, BITS Pilani K K Birla Goa Campus</string>
     <string name="app_description">ARD - Brought to you by the Mobile Applications Club, BITS Pilani K K Birla Goa Campus</string>
 
     <!--Services description -->
@@ -52,7 +53,7 @@
     <string name="not_admin_placeholder">User</string>
     <string name="default_mac_desc">This app was made by following team of Mobile Applications Club, BITS Goa under the guidance of Dr. Prasanta Kumar Das, Dean Academic Reserach Division, BITS Goa. You can reach us via following media.</string>
 
-    <string name="url_mac_fb">https://www.facebook.com/MACBITSGoa</string>
-    <string name="url_mac_play_store">https://play.google.com/store/apps/developer?id=Mobile+App+Club+-+BITS+Goa</string>
-    <string name="url_mac_github">https://github.com/MobileApplicationsClub/</string>
+    <string name="url_mac_fb" translatable="false">https://www.facebook.com/MACBITSGoa</string>
+    <string name="url_mac_play_store" translatable="false">https://play.google.com/store/apps/developer?id=Mobile+App+Club+-+BITS+Goa</string>
+    <string name="url_mac_github" translatable="false">https://github.com/MobileApplicationsClub/</string>
 </resources>
