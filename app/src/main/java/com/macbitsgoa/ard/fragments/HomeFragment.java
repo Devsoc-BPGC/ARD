@@ -22,6 +22,7 @@ import com.macbitsgoa.ard.activities.AnnActivity;
 import com.macbitsgoa.ard.adapters.AnnSlideshowAdapter;
 import com.macbitsgoa.ard.adapters.HomeAdapter;
 import com.macbitsgoa.ard.adapters.SlideshowAdapter;
+import com.macbitsgoa.ard.utils.NoSwipeViewPager;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -62,7 +63,7 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
      * Viewpager to show ann data.
      */
     @BindView(R.id.vp_vh_announcement)
-    ViewPager annVP;
+    NoSwipeViewPager annVP;
 
     /**
      * Nested scroll view for ann and rv.
@@ -136,6 +137,12 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     }
 
     @Override
+    public void onStop() {
+        super.onStop();
+        appBarLayout.removeOnOffsetChangedListener(this);
+    }
+
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         imageSlideshowHandler.removeCallbacks(imageSlideshowRunnable);
@@ -195,7 +202,6 @@ public class HomeFragment extends BaseFragment implements AppBarLayout.OnOffsetC
     private void scrollToTop() {
         nsv.fullScroll(View.FOCUS_UP);
         nsv.scrollTo(0, 0);
-
     }
 
     @OnClick(R.id.itemView_ann_card)
