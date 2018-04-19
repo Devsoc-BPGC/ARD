@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.interfaces.AdapterNotificationListener;
+import com.macbitsgoa.ard.interfaces.SortOrderChangeListener;
 import com.macbitsgoa.ard.keys.FaqItemKeys;
 import com.macbitsgoa.ard.models.FaqItem;
 import com.macbitsgoa.ard.viewholders.FaqViewHolder;
@@ -31,6 +32,7 @@ public class ForumAdapter extends BaseAdapter<FaqViewHolder>
 
     private final String section;
     private final AdapterNotificationListener anl;
+    private final SortOrderChangeListener socl;
     /**
      * Item list to use as data source.
      */
@@ -55,10 +57,15 @@ public class ForumAdapter extends BaseAdapter<FaqViewHolder>
         } else {
             anl = null;
         }
+        if (bf instanceof SortOrderChangeListener) {
+            socl = (SortOrderChangeListener) bf;
+        } else {
+            socl = null;
+        }
     }
 
     @Override
-    public void onAttachedToRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onAttachedToRecyclerView(@NonNull final RecyclerView recyclerView) {
         super.onAttachedToRecyclerView(recyclerView);
         faqItems = database.where(FaqItem.class)
                 .equalTo(FaqItemKeys.SECTION, section)
@@ -96,7 +103,7 @@ public class ForumAdapter extends BaseAdapter<FaqViewHolder>
     }
 
     @Override
-    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+    public void onDetachedFromRecyclerView(@NonNull final RecyclerView recyclerView) {
         faqItems.removeAllChangeListeners();
         super.onDetachedFromRecyclerView(recyclerView);
     }
@@ -110,6 +117,7 @@ public class ForumAdapter extends BaseAdapter<FaqViewHolder>
             } else {
                 defaultSort = Sort.DESCENDING;
             }
+            if (socl != null) socl.onSortOrderChanged(defaultSort);
         }
         faqItems.removeAllChangeListeners();
         faqItems = faqItems.sort(new String[]{FaqItemKeys.SUB_SECTION, fieldName},

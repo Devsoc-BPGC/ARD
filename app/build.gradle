@@ -32,8 +32,8 @@ ext {
     rxJava2Ver = "2.1.6"
     supportVer = "27.1.1"
     targetSdkVer = 26
-    verCode = 9
-    verName = "1.7-beta"
+    verCode = 10
+    verName = "1.8"
 }
 
 def configDir = "${project.rootDir}/config/"

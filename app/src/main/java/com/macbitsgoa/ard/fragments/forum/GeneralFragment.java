@@ -154,6 +154,7 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
                     }
                     forumAdapter.sortBy(fieldName, true);
                     AHC.logd(TAG, "Notifying faq adapter of sort change");
+                    dialog.dismiss();
                 }).show();
     }
 
@@ -168,12 +169,11 @@ public class GeneralFragment extends BaseFragment implements AdapterNotification
 
     @Override
     public void onSortOrderChanged(final Sort newSortOrder) {
-        if (newSortOrder == Sort.DESCENDING) {
+        if (newSortOrder != Sort.DESCENDING) {
             sortOrderImg.setImageResource(R.drawable.avd_anim_desc);
-            ((Animatable) sortOrderImg.getDrawable()).start();
         } else {
             sortOrderImg.setImageResource(R.drawable.avd_anim_asc);
-            ((Animatable) sortOrderImg.getDrawable()).start();
         }
+        ((Animatable) sortOrderImg.getDrawable()).start();
     }
 }
