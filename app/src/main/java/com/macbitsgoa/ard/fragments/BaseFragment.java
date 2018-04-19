@@ -42,7 +42,7 @@ public class BaseFragment extends Fragment {
      *
      * @return app shared pref {@link AHC#SP_APP} in private mode.
      */
-    protected SharedPreferences getDefaultSharedPref() {
+    public SharedPreferences getDefaultSharedPref() {
         return getContext().getSharedPreferences(AHC.SP_APP, Context.MODE_PRIVATE);
     }
 

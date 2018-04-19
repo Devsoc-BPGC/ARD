@@ -3,6 +3,7 @@ package com.macbitsgoa.ard.utils;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -27,9 +28,13 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.macbitsgoa.ard.BuildConfig;
+import com.macbitsgoa.ard.activities.AuthActivity;
+import com.macbitsgoa.ard.activities.BaseActivity;
+import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.keys.UserItemKeys;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.services.AnnNotifyService;
+import com.macbitsgoa.ard.services.ForumService;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -39,6 +44,9 @@ import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Nonnull;
+
+import io.realm.Realm;
+import io.realm.exceptions.RealmException;
 
 /**
  * Helper class for ARD.
@@ -418,5 +426,83 @@ public class AHC {
             logd(AnnNotifyService.TAG, "Build Version < Android O. " +
                     "Skipping channel creation.");
         }
+    }
+
+    /**
+     * Sign out user from app.
+     * Deletes shared preferences, Job services, realm database and finally signs out from firebase.
+     *
+     * @param activity BaseActivity object.
+     */
+    public static void signOutApp(final BaseActivity activity) {
+        //Delete sp
+        activity.getDefaultSharedPref().edit().clear().apply();
+
+        //Stop all intent services if they are running
+        activity.stopService(new Intent(activity, ForumService.class));
+        //activity.stopService(new Intent(getContext(), SendService.class));
+        //activity.stopService(new Intent(getContext(), SendDocumentService.class));
+        //activity.stopService(new Intent(getContext(), NotifyService.class));
+
+        //Cancel all job intents
+        AHC.getJobDispatcher(activity).cancelAll();
+
+        //After services are stopped, log out user
+        FirebaseAuth.getInstance().signOut();
+
+        //Reset Realm database
+        final Realm database = Realm.getDefaultInstance();
+        database.executeTransaction(r -> {
+            try {
+                r.deleteAll();
+            } catch (RealmException e) {
+                AHC.logd(TAG, e.getMessage());
+            }
+        });
+
+        //Start Auth activity
+        final Intent intent = new Intent(activity, AuthActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
+    }
+
+    /**
+     * Sign out user from app.
+     * Deletes shared preferences, Job services, realm database and finally signs out from firebase.
+     *
+     * @param baseFragment BaseFragment object.
+     */
+    public static void signOutApp(final BaseFragment baseFragment) {
+        //Delete sp
+        baseFragment.getDefaultSharedPref().edit().clear().apply();
+
+        final Context context = baseFragment.getContext();
+
+        //Stop all intent services if they are running
+        context.stopService(new Intent(context, ForumService.class));
+        //activity.stopService(new Intent(getContext(), SendService.class));
+        //activity.stopService(new Intent(getContext(), SendDocumentService.class));
+        //activity.stopService(new Intent(getContext(), NotifyService.class));
+
+        //Cancel all job intents
+        AHC.getJobDispatcher(context).cancelAll();
+
+        //After services are stopped, log out user
+        FirebaseAuth.getInstance().signOut();
+
+        //Reset Realm database
+        final Realm database = Realm.getDefaultInstance();
+        database.executeTransaction(r -> {
+            try {
+                r.deleteAll();
+            } catch (RealmException e) {
+                AHC.logd(TAG, e.getMessage());
+            }
+        });
+
+        //Start Auth activity
+        final Intent intent = new Intent(context, AuthActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        context.startActivity(intent);
     }
 }

@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -42,8 +41,11 @@ import butterknife.ButterKnife;
  *
  * @author Rushikesh Jogdand
  */
-public class AuthActivity extends BaseActivity implements View.OnClickListener,
-        GoogleApiClient.OnConnectionFailedListener, OnCompleteListener<AuthResult>, GoogleApiClient.ConnectionCallbacks {
+public class AuthActivity extends BaseActivity implements
+        View.OnClickListener,
+        GoogleApiClient.OnConnectionFailedListener,
+        OnCompleteListener<AuthResult>,
+        GoogleApiClient.ConnectionCallbacks {
 
     /**
      * TAG for this activity.
@@ -51,19 +53,26 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     public static final String TAG = AuthActivity.class.getSimpleName();
 
     /**
+     * Google Sign In Button.
+     */
+    @BindView(R.id.btn_content_auth_google)
+    Button googleSignInButton;
+
+    /**
+     * Textview to show current app version.
+     */
+    @BindView(R.id.tv_activity_auth_version)
+    TextView versionTV;
+
+    /**
      * AuthHelperForGoogle instance to handle backend functions.
      */
     private AuthHelperForGoogle mHelper;
 
     /**
-     * Google Sign In Button.
+     * Dialog to show when signing in.
      */
-    @BindView(R.id.btn_content_auth_google)
-    Button googleSignInButton;
     private ProgressDialog pd;
-
-    @BindView(R.id.tv_activity_auth_version)
-    TextView versionTV;
 
     /**
      * Google API Client for login purposes.
@@ -73,31 +82,21 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        getWindow().setBackgroundDrawable(new CenterCropDrawable(ContextCompat.getDrawable(this, R.drawable.auth_bg)));
+        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
+            final Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
+        getWindow().setBackgroundDrawable(new CenterCropDrawable(this, R.drawable.auth_bg));
         setContentView(R.layout.activity_auth);
         ButterKnife.bind(this);
         versionTV.setText(BuildConfig.VERSION_NAME);
-        if (FirebaseAuth.getInstance().getCurrentUser() != null) {
-            final Intent intent = new Intent(this, MainActivity.class);
-            startActivity(intent);
-            finish();
-        }
+
+        pd = ProgressDialog.show(this, "Google sign in", "Signing in to ARD");
+        pd.cancel();
+
         googleApiClient = setupGoogleApiClient();
-        googleApiClient.registerConnectionCallbacks(this);
         mHelper = new AuthHelperForGoogle(this, FirebaseAuth.getInstance());
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (!googleApiClient.isConnected()) googleApiClient.connect();
-    }
-
-
-    @Override
-    protected void onStop() {
-        if (googleApiClient.isConnected()) googleApiClient.disconnect();
-        super.onStop();
     }
 
     /**
@@ -106,26 +105,26 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      * @return GoogleApiClient object for login.
      */
     private GoogleApiClient setupGoogleApiClient() {
-        final GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        final GoogleSignInOptions gso
+                = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.firebase_web_client_id))
                 .requestEmail()
                 .requestProfile()
                 .build();
         return new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
     }
 
     @Override
-    protected void onActivityResult(final int requestCode, final int resultCode, final Intent data) {
+    protected void onActivityResult(final int requestCode, final int resultCode,
+                                    final Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //if (requestCode == AuthActivityKeys.RC_GOOGLE_SIGN_IN) {}
         if (resultCode == Activity.RESULT_CANCELED) {
-            googleSignInButton.setClickable(true);
-            if (pd != null)
-                pd.cancel();
-            showToast("Sign in cancelled");
+            handleGoogleSignInFailure("Sign in cancelled");
             return;
         }
         mHelper.handleGoogleSignIn(data);
@@ -136,61 +135,58 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      * Later we can prompt user to use Guest mode if sign in fails
      */
     public void handleGoogleSignInFailure() {
-        showToast(getString(R.string.error_google_sign_in_failed));
+        handleGoogleSignInFailure(getString(R.string.error_google_sign_in_failed));
+    }
+
+    /**
+     * Default response that user will get if anything in google sign in fails.
+     * Later we can prompt user to use Guest mode if sign in fails
+     *
+     * @param message Message to show.
+     */
+    public void handleGoogleSignInFailure(final String message) {
+        pd.cancel();
+        showToast(message);
         googleSignInButton.setClickable(true);
-        if (pd != null)
-            pd.cancel();
     }
 
     @Override
     public void onClick(final View v) {
         //no need to verify id of view as only google sign in currently supported.
+        //disable button clicking
         v.setClickable(false);
-        launchGoogleSignIn(Auth.GoogleSignInApi.getSignInIntent(googleApiClient));
-    }
 
-    @Override
-    public void onConnectionFailed(@NonNull final ConnectionResult connectionResult) {
-        Log.e(TAG, "Connection Failure " + connectionResult);
-        handleGoogleSignInFailure();
-        if (pd != null)
-            pd.cancel();
-    }
-
-    /**
-     * Launch Google Sign screen.
-     *
-     * @param intent Intent generated from GoogleSignInApi.
-     */
-    public void launchGoogleSignIn(@NonNull final Intent intent) {
+        final Intent intent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
         startActivityForResult(intent, AuthActivityKeys.RC_GOOGLE_SIGN_IN);
-        pd = ProgressDialog.show(this, "Google sign in", "Signing in to ARD");
         pd.show();
     }
 
     @Override
     public void onComplete(@NonNull final Task<AuthResult> task) {
-        onComplete(task, FirebaseAuth.getInstance());
-    }
-
-    /**
-     * Extension of {@link #onComplete(Task)} which accepts a {@link FirebaseAuth} object.
-     * This also helps in simplifying unit testing.
-     *
-     * @param task         Task object from interface.
-     * @param firebaseAuth Auth object to use.
-     */
-    public void onComplete(final Task<AuthResult> task, final FirebaseAuth firebaseAuth) {
         if (!task.isSuccessful()) {
             handleGoogleSignInFailure();
             return;
         }
-        updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
-        if (pd != null)
+        final FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+
+        //Check if email is a subset of BITS email ids
+        if (!firebaseAuth.getCurrentUser()
+                .getEmail()
+                .matches(getString(R.string.regex_allowed_emails))) {
+            handleGoogleSignInFailure("Please use institute email address for signing in");
+
+            //Sign out currently logged in user
+            FirebaseAuth.getInstance().signOut();
+            Auth.GoogleSignInApi
+                    .signOut(googleApiClient)
+                    .setResultCallback(status -> googleSignInButton.setClickable(true));
+        } else {
+            updateUserInfo(firebaseAuth, getRootReference().child(AHC.FDR_USERS));
             pd.cancel();
-        final Intent intent = new Intent(this, MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+            final Intent intent = new Intent(this, MainActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 
     /**
@@ -198,14 +194,10 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
      *
      * @param firebaseAuth Firebase auth object to use.
      * @param parentRef    Reference to add/update child into.
-     * @return boolean true if result was updated successfully, false otherwise.
      */
-    public boolean updateUserInfo(@NonNull final FirebaseAuth firebaseAuth,
-                                  @NonNull final DatabaseReference parentRef) {
+    public void updateUserInfo(@NonNull final FirebaseAuth firebaseAuth,
+                               @NonNull final DatabaseReference parentRef) {
         final FirebaseUser firebaseUser = firebaseAuth.getCurrentUser();
-        if (firebaseUser == null) {
-            return false;
-        }
         final String uid = firebaseUser.getUid();
         final String name = firebaseUser.getDisplayName();
         final String email = firebaseUser.getEmail();
@@ -222,28 +214,40 @@ public class AuthActivity extends BaseActivity implements View.OnClickListener,
         userDb.child(UserItemKeys.EMAIL).setValue(email);
         userDb.child(UserItemKeys.PHOTO_URL).setValue(photoUrl);
         userDb.child(UserItemKeys.PHONE_NUMBER).setValue(phoneNumber);
-        return true;
     }
 
     /**
      * Connect to GoogleApiClient -> SignOut from Google account if Signed in -> enable onClick
      * GoogleApiClient connected.
+     *
      * @param bundle ignored.
      */
     @Override
-    public void onConnected(@Nullable Bundle bundle) {
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(status -> googleSignInButton.setOnClickListener(this));
+    public void onConnected(@Nullable final Bundle bundle) {
+        Auth.GoogleSignInApi
+                .signOut(googleApiClient)
+                .setResultCallback(status -> googleSignInButton.setOnClickListener(this));
     }
 
     /**
      * {@link GoogleApiClient#connect()} failed.
-     * @param i the cause of failure. One of {@link com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks#CAUSE_NETWORK_LOST}
-     *          or {@link com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks#CAUSE_SERVICE_DISCONNECTED}.
+     *
+     * @param i the cause of failure. One of
+     *          {@link GoogleApiClient.ConnectionCallbacks#CAUSE_NETWORK_LOST} or
+     *          {@link GoogleApiClient.ConnectionCallbacks#CAUSE_SERVICE_DISCONNECTED}.
      */
     @Override
-    public void onConnectionSuspended(int i) {
-        if (i == CAUSE_NETWORK_LOST) {
-            AuthActivity.this.showToast(getString(R.string.network_lost));
+    public void onConnectionSuspended(final int i) {
+        if (i == GoogleApiClient.ConnectionCallbacks.CAUSE_NETWORK_LOST) {
+            showToast(getString(R.string.network_lost));
+        } else {
+            showToast("Service disconnected. Try again");
         }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull final ConnectionResult connectionResult) {
+        Log.e(TAG, "Connection Failure " + connectionResult);
+        handleGoogleSignInFailure("Connection failed to Google APIs");
     }
 }

@@ -176,30 +176,6 @@ public class DetailsFragment extends BaseFragment {
 
     @OnClick(R.id.tv_vh_details_sign_out)
     public void signOut() {
-        //Delete sp
-        getDefaultSharedPref().edit().clear().apply();
-
-        //Stop all intent services if they are running
-        getContext().stopService(new Intent(getContext(), ForumService.class));
-        //getContext().stopService(new Intent(getContext(), SendService.class));
-        //getContext().stopService(new Intent(getContext(), SendDocumentService.class));
-        //getContext().stopService(new Intent(getContext(), NotifyService.class));
-        //Cancel all job intents
-        AHC.getJobDispatcher(getContext()).cancelAll();
-        //After services are stopped, log out user
-        FirebaseAuth.getInstance().signOut();
-        //Reset Realm database
-        database.executeTransaction(r -> {
-            try {
-                r.deleteAll();
-            } catch (RealmException e) {
-                AHC.logd(TAG, e.getMessage());
-            }
-        });
-
-        //Start Auth activity
-        final Intent intent = new Intent(getContext(), AuthActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        AHC.signOutApp(this);
     }
 }

@@ -1,5 +1,6 @@
 package com.macbitsgoa.ard.activities;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -15,7 +16,7 @@ import com.firebase.jobdispatcher.Lifetime;
 import com.firebase.jobdispatcher.Trigger;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.messaging.FirebaseMessaging;
 import com.macbitsgoa.ard.BuildConfig;
@@ -24,6 +25,7 @@ import com.macbitsgoa.ard.fragments.BaseFragment;
 import com.macbitsgoa.ard.fragments.DetailsFragment;
 import com.macbitsgoa.ard.fragments.ForumFragment;
 import com.macbitsgoa.ard.fragments.HomeFragment;
+import com.macbitsgoa.ard.keys.MainActivityKeys;
 import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.services.HomeService;
 import com.macbitsgoa.ard.services.MaintenanceService;
@@ -80,8 +82,6 @@ public class MainActivity extends BaseActivity
      */
     private FirebaseJobDispatcher bgServicesDispatcher;
 
-    private static final String KEY_GPS_AVAILABLE = "MainActivityGPSAvailable";
-
     /**
      * ChatFragment object.
      */
@@ -89,17 +89,24 @@ public class MainActivity extends BaseActivity
     @Override
     protected void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sp = getDefaultSharedPref();
-        if (!sp.getBoolean(KEY_GPS_AVAILABLE, false)) {
-            GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
-            int serviceStatus = googleApiAvailability.isGooglePlayServicesAvailable(this);
+        final SharedPreferences sp = getDefaultSharedPref();
+        if (!sp.getBoolean(MainActivityKeys.GPS_AVAILABLE, false)) {
+            final GoogleApiAvailability googleApiAvailability = GoogleApiAvailability.getInstance();
+            final int serviceStatus = googleApiAvailability
+                    .isGooglePlayServicesAvailable(this);
             if (serviceStatus == ConnectionResult.SUCCESS) {
-               sp.edit().putBoolean(KEY_GPS_AVAILABLE, true).apply();
-               AHC.logd(TAG, "GPS available");
+                sp.edit().putBoolean(MainActivityKeys.GPS_AVAILABLE, true).apply();
+                AHC.logd(TAG, "GPS available");
             } else {
-                googleApiAvailability.makeGooglePlayServicesAvailable(this).addOnSuccessListener(aVoid -> sp.edit().putBoolean(KEY_GPS_AVAILABLE, true).apply());
+                googleApiAvailability
+                        .makeGooglePlayServicesAvailable(this)
+                        .addOnSuccessListener(aVoid -> sp
+                                .edit()
+                                .putBoolean(MainActivityKeys.GPS_AVAILABLE, true)
+                                .apply());
             }
         }
+
         //Check if authorised
         if (getUser() == null) {
             AHC.logd(TAG, "Current user null");
@@ -120,6 +127,8 @@ public class MainActivity extends BaseActivity
             AHC.startService(this, HomeService.class, HomeService.TAG);
             startBgServices();
 
+            showEmailWarning();
+
             bottomNavigationView.setOnNavigationItemSelectedListener(this);
         }
     }
@@ -138,6 +147,20 @@ public class MainActivity extends BaseActivity
         launchFragment();
 
         bottomNavigationView.setSelectedItemId(R.id.bottom_nav_home);
+    }
+
+    private void showEmailWarning() {
+        if (!FirebaseAuth.getInstance()
+                .getCurrentUser()
+                .getEmail()
+                .matches(getStringRes(R.string.regex_allowed_emails))) {
+            new AlertDialog.Builder(this)
+                    .setTitle("Switch to BITS email")
+                    .setMessage("To help us improve this app, please switch to your BITS email account.")
+                    .setCancelable(false)
+                    .setPositiveButton("Ok",
+                            (d, w) -> AHC.signOutApp(MainActivity.this)).show();
+        }
     }
 
     @Override
