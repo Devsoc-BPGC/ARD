@@ -96,7 +96,6 @@ public class AuthActivity extends BaseActivity implements
         pd.cancel();
 
         googleApiClient = setupGoogleApiClient();
-        googleApiClient.registerConnectionCallbacks(this);
         mHelper = new AuthHelperForGoogle(this, FirebaseAuth.getInstance());
     }
 
