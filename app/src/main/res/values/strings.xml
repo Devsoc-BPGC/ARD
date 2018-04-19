@@ -61,5 +61,7 @@
     <string name="about_ard">About ARD</string>
     <string name="about_app">About app</string>
     <string name="sign_out">Sign out</string>
+
     <string name="regex_allowed_emails">.+@(pilani|goa|hyderabad|dubai)\\.bits-pilani\\.ac\\.in</string>
+
 </resources>
