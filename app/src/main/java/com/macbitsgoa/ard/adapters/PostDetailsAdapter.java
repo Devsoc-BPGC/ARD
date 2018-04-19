@@ -6,8 +6,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
-import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,14 +13,10 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import com.macbitsgoa.ard.R;
-import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.models.home.PhotoItem;
 import com.macbitsgoa.ard.models.home.TextItem;
 import com.macbitsgoa.ard.types.HomeType;
-import com.macbitsgoa.ard.types.PostType;
-import com.macbitsgoa.ard.utils.AHC;
-import com.macbitsgoa.ard.viewholders.AnnViewHolder;
 import com.macbitsgoa.ard.viewholders.ImageViewHolder;
 import com.macbitsgoa.ard.viewholders.TextViewHolder;
 

@@ -35,20 +35,95 @@ public class HomeService extends BaseJobService {
      * TAG for class.
      */
     public static final String TAG = HomeService.class.getSimpleName();
-
-    private boolean completedHome = false;
-    private boolean completedAnn = false;
-    private boolean completedSlideshow = false;
-
-    private JobParameters job;
-
     DatabaseReference homeRef;
     DatabaseReference annRef;
     DatabaseReference imageSlideshowRef;
-
     ValueEventListener homeRefVEL;
     ValueEventListener annRefVEL;
     ValueEventListener imageRefVEL;
+    private boolean completedHome = false;
+    private boolean completedAnn = false;
+    private boolean completedSlideshow = false;
+    private JobParameters job;
+
+    @SuppressWarnings("OverlyLongMethod")
+    private static void saveHomeSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
+        if (dataSnapshot == null) return;
+        final Realm database = Realm.getDefaultInstance();
+        for (DataSnapshot child : dataSnapshot.getChildren()) {
+            final String key = child.getKey();
+            final String author = child.child(HomeItemKeys.AUTHOR).getValue(String.class);
+            final Date date = child.child(HomeItemKeys.DATE).getValue(Date.class);
+            if (date == null || !child.hasChild(HomeItemKeys.SUB_SECTIONS)) continue;
+            database.executeTransaction(r -> {
+                HomeItem hi = r
+                        .where(HomeItem.class)
+                        .equalTo(HomeItemKeys.KEY, key)
+                        .findFirst();
+                if (hi == null) {
+                    hi = r.createObject(HomeItem.class, key);
+                    AHC.logd(TAG, "Creating new home item");
+                } else if (hi.getDate().getTime() == date.getTime()) {
+                    return;
+                }
+                hi.setAuthor(author);
+                hi.setDate(date);
+                final RealmList<PhotoItem> images = new RealmList<>();
+                final RealmList<TextItem> texts = new RealmList<>();
+                for (final DataSnapshot subSectionDS
+                        : child.child(HomeItemKeys.SUB_SECTIONS).getChildren()) {
+                    final int type = subSectionDS.child(HomeItemKeys.TYPE).getValue(Integer.class);
+                    final String data = subSectionDS.child(HomeItemKeys.DATA).getValue(String.class);
+                    switch (type) {
+                        case HomeType.FDR_PHOTO_ITEM:
+                            final PhotoItem pi = r.createObject(PhotoItem.class);
+                            pi.setPhotoUrl(data);
+                            pi.setPriority(subSectionDS.getKey());
+                            images.add(pi);
+                            break;
+                        case HomeType.FDR_TEXT_ITEM:
+                            final TextItem ti = r.createObject(TextItem.class);
+                            ti.setData(data);
+                            ti.setPriority(subSectionDS.getKey());
+                            texts.add(ti);
+                            break;
+                    }
+                }
+                hi.setImages(images);
+                hi.setTexts(texts);
+            });
+        }
+        database.close();
+    }
+
+    public static void saveAnnSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
+        if (dataSnapshot == null) return;
+        final Realm database = Realm.getDefaultInstance();
+        for (final DataSnapshot child : dataSnapshot.getChildren()) {
+            final String key = child.getKey();
+            final String data = child.child(AnnItemKeys.DATA).getValue(String.class);
+            final Date date = child.child(AnnItemKeys.DATE).getValue(Date.class);
+            final String author = child.child(AnnItemKeys.AUTHOR).getValue(String.class);
+            if (data == null || date == null || data.length() == 0) {
+                continue;
+            }
+            database.executeTransaction(r -> {
+                AnnItem annItem = r.where(AnnItem.class)
+                        .equalTo(AnnItemKeys.KEY, key)
+                        .findFirst();
+                if (annItem == null) {
+                    annItem = r.createObject(AnnItem.class, key);
+                } else {
+                    if (annItem.getDate().getTime() == date.getTime())
+                        return;
+                }
+                annItem.setAuthor(author);
+                annItem.setDate(date);
+                annItem.setData(data);
+            });
+        }
+        database.close();
+    }
 
     @Override
     public boolean onStartJob(JobParameters job) {
@@ -154,85 +229,6 @@ public class HomeService extends BaseJobService {
                 ssi.setPhotoTagColor(cs.child(SlideshowItemKeys.PHOTO_TAG_COLOR).getValue(String.class));
                 ssi.setPhotoTagTextColor(cs.child(SlideshowItemKeys.PHOTO_TAG_TEXT_COLOR).getValue(String.class));
                 r.insertOrUpdate(ssi);
-            });
-        }
-        database.close();
-    }
-
-    @SuppressWarnings("OverlyLongMethod")
-    private static void saveHomeSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
-        if (dataSnapshot == null) return;
-        final Realm database = Realm.getDefaultInstance();
-        for (DataSnapshot child : dataSnapshot.getChildren()) {
-            final String key = child.getKey();
-            final String author = child.child(HomeItemKeys.AUTHOR).getValue(String.class);
-            final Date date = child.child(HomeItemKeys.DATE).getValue(Date.class);
-            if (date == null || !child.hasChild(HomeItemKeys.SUB_SECTIONS)) continue;
-            database.executeTransaction(r -> {
-                HomeItem hi = r
-                        .where(HomeItem.class)
-                        .equalTo(HomeItemKeys.KEY, key)
-                        .findFirst();
-                if (hi == null) {
-                    hi = r.createObject(HomeItem.class, key);
-                    AHC.logd(TAG, "Creating new home item");
-                } else if (hi.getDate().getTime() == date.getTime()) {
-                    return;
-                }
-                hi.setAuthor(author);
-                hi.setDate(date);
-                final RealmList<PhotoItem> images = new RealmList<>();
-                final RealmList<TextItem> texts = new RealmList<>();
-                for (final DataSnapshot subSectionDS
-                        : child.child(HomeItemKeys.SUB_SECTIONS).getChildren()) {
-                    final int type = subSectionDS.child(HomeItemKeys.TYPE).getValue(Integer.class);
-                    final String data = subSectionDS.child(HomeItemKeys.DATA).getValue(String.class);
-                    switch (type) {
-                        case HomeType.FDR_PHOTO_ITEM:
-                            final PhotoItem pi = r.createObject(PhotoItem.class);
-                            pi.setPhotoUrl(data);
-                            pi.setPriority(subSectionDS.getKey());
-                            images.add(pi);
-                            break;
-                        case HomeType.FDR_TEXT_ITEM:
-                            final TextItem ti = r.createObject(TextItem.class);
-                            ti.setData(data);
-                            ti.setPriority(subSectionDS.getKey());
-                            texts.add(ti);
-                            break;
-                    }
-                }
-                hi.setImages(images);
-                hi.setTexts(texts);
-            });
-        }
-        database.close();
-    }
-
-    public static void saveAnnSnapshotToRealm(@Nullable final DataSnapshot dataSnapshot) {
-        if (dataSnapshot == null) return;
-        final Realm database = Realm.getDefaultInstance();
-        for (final DataSnapshot child : dataSnapshot.getChildren()) {
-            final String key = child.getKey();
-            final String data = child.child(AnnItemKeys.DATA).getValue(String.class);
-            final Date date = child.child(AnnItemKeys.DATE).getValue(Date.class);
-            final String author = child.child(AnnItemKeys.AUTHOR).getValue(String.class);
-            if (data == null || date == null || data.length() == 0) {
-                continue;
-            }
-            database.executeTransaction(r -> {
-                AnnItem annItem = r.where(AnnItem.class)
-                        .equalTo(AnnItemKeys.KEY, key)
-                        .findFirst();
-                if (annItem == null) {
-                    annItem = r.createObject(AnnItem.class, key);
-                } else {
-                    if (annItem.getDate().getTime() == date.getTime())
-                        return;
-                }
-                annItem.setAuthor(author);
-                annItem.setDate(date);
-                annItem.setData(data);
             });
         }
         database.close();

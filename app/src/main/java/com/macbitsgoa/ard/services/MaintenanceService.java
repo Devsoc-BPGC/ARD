@@ -28,14 +28,12 @@ public class MaintenanceService extends BaseJobService {
      * Tag for this class.
      */
     public static final String TAG = MaintenanceService.class.getSimpleName();
-
+    DatabaseReference deleteRef;
+    ValueEventListener deleteRefVEL;
     /**
      * Current job parameters.
      */
     private JobParameters jobParameters;
-
-    DatabaseReference deleteRef;
-    ValueEventListener deleteRefVEL;
 
     @Override
     public boolean onStartJob(final JobParameters job) {

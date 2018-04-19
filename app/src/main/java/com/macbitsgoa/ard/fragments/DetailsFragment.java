@@ -13,16 +13,13 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
 import com.bumptech.glide.request.RequestOptions;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.activities.AboutMacActivity;
-import com.macbitsgoa.ard.activities.AuthActivity;
 import com.macbitsgoa.ard.keys.UserItemKeys;
-import com.macbitsgoa.ard.services.ForumService;
 import com.macbitsgoa.ard.utils.AHC;
 import com.macbitsgoa.ard.utils.Browser;
 
@@ -30,7 +27,6 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import butterknife.Unbinder;
-import io.realm.exceptions.RealmException;
 
 /**
  * A simple {@link Fragment} subclass.

@@ -27,22 +27,19 @@ import butterknife.OnLongClick;
  */
 public class FaqViewHolder extends RecyclerView.ViewHolder {
 
+    private final SparseBooleanArray sba;
     /**
      * TextView to display question data.
      */
     @BindView(R.id.tv_vh_fg_forum_general_question)
     TextView questionTV;
-
     /**
      * Expandable text view to display answer data.
      */
     @BindView(R.id.tv_vh_fg_forum_general_answer)
     TextView answerTV;
-
     @BindView(R.id.tv_vh_fg_forum_general_sub_section)
     TextView subSectionTV;
-
-    private final SparseBooleanArray sba;
 
     /**
      * Default constructor.

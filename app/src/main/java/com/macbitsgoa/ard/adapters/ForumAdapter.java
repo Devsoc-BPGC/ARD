@@ -29,16 +29,13 @@ import io.realm.Sort;
 public class ForumAdapter extends BaseAdapter<FaqViewHolder>
         implements OrderedRealmCollectionChangeListener<RealmResults<FaqItem>> {
 
+    private final String section;
+    private final AdapterNotificationListener anl;
     /**
      * Item list to use as data source.
      */
     private RealmResults<FaqItem> faqItems;
-
-    private final String section;
-
     private Sort defaultSort;
-
-    private final AdapterNotificationListener anl;
     /**
      * Maintains expanded text info.
      */

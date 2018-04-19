@@ -34,7 +34,7 @@ public class AboutMacAdapter extends RecyclerView.Adapter<DeveloperViewHolder> i
 
     private Activity activity;
 
-    public AboutMacAdapter( BaseActivity activity) {
+    public AboutMacAdapter(BaseActivity activity) {
         this.activity = activity;
         DatabaseReference devRef = activity.getRootReference()
                 .child(AHC.FDR_ABOUT_MAC)

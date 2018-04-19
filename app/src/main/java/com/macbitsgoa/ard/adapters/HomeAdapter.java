@@ -39,21 +39,18 @@ public class HomeAdapter extends BaseAdapter<HomeItemViewHolder> implements
      * TAG for class.
      */
     public static final String TAG = HomeAdapter.class.getSimpleName();
-
-    /**
-     * List to hold all data.
-     */
-    private RealmResults<HomeItem> homeItems;
-
     /**
      * Context for use with glide.
      */
     private final Context context;
-
     /**
      * Notification listener.
      */
     private final AdapterNotificationListener anl;
+    /**
+     * List to hold all data.
+     */
+    private RealmResults<HomeItem> homeItems;
 
     /**
      * Constructor that populates recyclerView.

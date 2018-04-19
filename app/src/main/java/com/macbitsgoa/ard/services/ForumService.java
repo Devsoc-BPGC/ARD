@@ -28,12 +28,11 @@ public class ForumService extends BaseIntentService {
      * Tag for this class.
      */
     public static final String TAG = ForumService.class.getSimpleName();
+    DatabaseReference forumRef;
 
     public ForumService() {
         super(TAG);
     }
-
-    DatabaseReference forumRef;
 
     @Override
     protected void onHandleIntent(@Nullable final Intent intent) {

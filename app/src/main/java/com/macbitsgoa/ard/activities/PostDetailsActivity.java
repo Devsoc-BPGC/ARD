@@ -5,20 +5,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.FrameLayout;
-import android.widget.Toast;
 
 import com.macbitsgoa.ard.R;
 import com.macbitsgoa.ard.adapters.PostDetailsAdapter;
-import com.macbitsgoa.ard.keys.AnnItemKeys;
 import com.macbitsgoa.ard.keys.HomeItemKeys;
-import com.macbitsgoa.ard.models.AnnItem;
 import com.macbitsgoa.ard.models.TypeItem;
 import com.macbitsgoa.ard.models.home.HomeItem;
 import com.macbitsgoa.ard.models.home.PhotoItem;
 import com.macbitsgoa.ard.models.home.TextItem;
 import com.macbitsgoa.ard.types.HomeType;
-import com.macbitsgoa.ard.types.PostType;
 
 import java.util.ArrayList;
 import java.util.List;

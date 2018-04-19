@@ -36,33 +36,27 @@ public class AnnActivity extends BaseActivity implements AdapterNotificationList
      * TAG for class.
      */
     public static final String TAG = AnnActivity.class.getSimpleName();
-
+    /**
+     * Static boolean variable to prevent notification service to show when activity is visible.
+     */
+    public static boolean inForeground = false;
     /**
      * Toolbar for this activity.
      */
     @BindView(R.id.toolbar_activity_ann)
     Toolbar toolbar;
-
     /**
      * Recyclerview for displaying announcements.
      */
     @BindView(R.id.rv_activity_ann)
     RecyclerView annRV;
-
     /**
      * TextView to display info message when recyclerview is empty.
      */
     @BindView(R.id.tv_activity_ann_empty)
     TextView emptyListTV;
-
     private DatabaseReference annRef = getRootReference().child(AHC.FDR_ANN);
-
     private ValueEventListener annRefVEL;
-
-    /**
-     * Static boolean variable to prevent notification service to show when activity is visible.
-     */
-    public static boolean inForeground = false;
 
     @Override
     protected void onCreate(final Bundle savedInstanceState) {

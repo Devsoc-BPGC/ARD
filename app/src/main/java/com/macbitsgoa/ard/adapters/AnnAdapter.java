@@ -34,16 +34,14 @@ public class AnnAdapter extends BaseAdapter<AnnViewHolder>
      * TAG for class.
      */
     public static final String TAG = AnnAdapter.class.getSimpleName();
-
-    /**
-     * List to hold all annItems.
-     */
-    private RealmResults<AnnItem> annItems;
-
     /**
      * Listener object for item changes.
      */
     private final AdapterNotificationListener anl;
+    /**
+     * List to hold all annItems.
+     */
+    private RealmResults<AnnItem> annItems;
 
     /**
      * Constructor to set listener as well.

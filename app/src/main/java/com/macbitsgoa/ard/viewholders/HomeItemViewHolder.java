@@ -28,36 +28,29 @@ import butterknife.ButterKnife;
  * @author Vikramaditya Kukreja
  */
 public class HomeItemViewHolder extends RecyclerView.ViewHolder {
+    private final Context context;
     @BindView(R.id.imgView_home_item)
     ImageView imageView;
-
     @BindView(R.id.tv_vh_home_item_1)
     TextView textView1;
-
     @BindView(R.id.tv_vh_home_item_2)
     TextView textView2;
-
     /**
      * Status bar that contains useful info. Use this view for visibility work only.
      */
     @BindView(R.id.ll_vh_home_status)
     LinearLayout statusBar;
-
     /**
      * Textview that handles # of images in the news.
      */
     @BindView(R.id.tv_vh_home_item_image_count)
     TextView imageCount;
-
     /**
      * Textview that handles # of comments.
      */
     @BindView(R.id.tv_vh_home_item_comment_count)
     TextView commentCount;
-
     private HomeItem hi;
-
-    private final Context context;
 
     /**
      * Constructor taking item view as param

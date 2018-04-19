@@ -15,7 +15,7 @@ import android.support.v4.content.ContextCompat;
 
 /**
  * Drawable decorator which draws the target drawable similarly to an ImageView with scaleType=centerCrop.
- *
+ * <p>
  * <p>Example usage:
  * final Drawable bg = getResources().getDrawable(R.drawable.screen);
  * getWindow().setBackgroundDrawable(new CenterCropDrawable(bg));
